@@ -1,4 +1,4 @@
-# OpenMath
+# HorizonMath
 
 Research project for evaluating LLMs on open mathematical problems.
 
@@ -31,7 +31,7 @@ GEMINI_API_KEY=AIza...
 ## Project Structure
 
 ```
-OpenMath/
+HorizonMath/
 ├── data/                   # JSON data files
 │   ├── problems_full.json  # Problem definitions, prompts, and numeric values
 │   └── baselines.json      # State-of-the-art baseline values for benchmark problems
