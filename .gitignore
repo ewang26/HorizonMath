@@ -1,0 +1,18 @@
+# Environment
+.env
+.venv/
+__pycache__/
+*.pyc
+
+# IDE
+.claude/
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+results/
+
+
+# Lock files (optional - remove if you want to track)
+# uv.lock

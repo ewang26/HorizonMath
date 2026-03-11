@@ -1,0 +1,1741 @@
+[
+  {
+    "problem_id": "schur_6",
+    "baseline": {
+      "value": "536",
+      "direction": "maximize",
+      "metric": "Largest N such that {1,...,N} admits a valid 6-coloring with no monochromatic x+y=z",
+      "metric_key": "N",
+      "source": {
+        "title": "Symmetric Sum-Free Partitions and Lower Bounds for Schur Numbers",
+        "authors": [
+          "Harold Fredricksen",
+          "Melvin M. Sweet"
+        ],
+        "year": 2000,
+        "venue": "Electronic Journal of Combinatorics",
+        "url": "https://www.combinatorics.org/ojs/index.php/eljc/article/view/v7i1r32"
+      },
+      "result_type": "computational",
+      "notes": "Fredricksen & Sweet (2000) give an explicit construction proving S(6) >= 536. The known bounds are 536 <= S(6) <= 1836, so the optimum is unknown. To beat the baseline requires N >= 537."
+    },
+    "verification_status": "confirmed",
+    "search_notes": "Baseline from Fredricksen & Sweet (2000). Problem replaced partition_residues."
+  },
+  {
+    "problem_id": "dts_7_5_min_scope",
+    "baseline": {
+      "value": "112",
+      "direction": "minimize",
+      "metric": "Scope (maximum entry) of a valid (7,5)-Difference Triangle Set",
+      "metric_key": "scope",
+      "source": {
+        "title": "Difference Triangle Sets for OFDM-Based Radar Waveform Design",
+        "authors": [
+          "Shehadeh",
+          "Kingsford",
+          "Kschischang"
+        ],
+        "year": 2025,
+        "venue": "arXiv preprint",
+        "arxiv_id": "2502.19517",
+        "doi": null,
+        "url": "https://arxiv.org/abs/2502.19517"
+      },
+      "result_type": "computational",
+      "notes": "Table I of Shehadeh-Kingsford-Kschischang (2025) reports m(7,5) <= 112, improving the previous best of 113. To beat the baseline requires scope <= 111."
+    },
+    "verification_status": "confirmed",
+    "search_notes": "Baseline from Table I of arXiv:2502.19517. Problem changed from (5,4) to (7,5); validator updated accordingly."
+  },
+  {
+    "problem_id": "diff_basis_upper",
+    "baseline": {
+      "value": "2.6390",
+      "direction": "minimize",
+      "metric": "Upper bound on the limit constant C = lim Delta(n)^2/n for difference bases",
+      "source": {
+        "title": "Mathematical exploration and discovery at scale",
+        "authors": [
+          "Bogdan Georgiev",
+          "Javier Gómez-Serrano",
+          "Terence Tao",
+          "Adam Zsolt Wagner"
+        ],
+        "year": 2025,
+        "venue": "arXiv preprint",
+        "arxiv_id": "2511.02864",
+        "doi": null,
+        "theorem_reference": "Section 3, Difference bases",
+        "url": "https://arxiv.org/abs/2511.02864"
+      },
+      "result_type": "computational",
+      "notes": "AlphaEvolve, an AI system, found a construction that improved the upper bound from 2.6571 to 2.6390. The construction details are in the 'Repository of Problems'.",
+      "metric_key": "ratio"
+    },
+    "secondary_bounds": [
+      {
+        "type": "upper_bound",
+        "value": "2.6571",
+        "source": {
+          "title": "Mathematical exploration and discovery at scale",
+          "authors": [
+            "Bogdan Georgiev",
+            "Javier Gómez-Serrano",
+            "Terence Tao",
+            "Adam Zsolt Wagner"
+          ],
+          "year": 2025,
+          "venue": "arXiv preprint",
+          "arxiv_id": "2511.02864",
+          "doi": null,
+          "theorem_reference": "Section 3, Difference bases",
+          "url": "https://arxiv.org/abs/2511.02864"
+        }
+      }
+    ],
+    "verification_status": "confirmed",
+    "search_notes": "The search focused on the problem definition, specifically the value 2.6390. The arXiv paper 'Mathematical exploration and discovery at scale' (arXiv:2511.02864) explicitly states that AlphaEvolve improved the upper bound from 2.6571 to 2.6390. The result is computational, found by an AI system. The paper itself serves as the primary source for this SOTA baseline."
+  },
+  {
+    "problem_id": "diff_basis_optimal_10000",
+    "baseline": {
+      "value": 174,
+      "direction": "minimize",
+      "metric": "Cardinality |B| (basis_size) of a restricted difference basis B ⊆ {0,...,9999} covering all differences 1..9999",
+      "metric_key": "basis_size",
+      "source": {
+        "title": "Excess 01Ruler",
+        "authors": [
+          "Ed Pegg Jr"
+        ],
+        "year": 2019,
+        "venue": "Wolfram Function Repository",
+        "arxiv_id": null,
+        "doi": null,
+        "theorem_reference": "Details and Options (existence of excess-0/1 complete rulers for any length)",
+        "url": "https://resources.wolframcloud.com/FunctionRepository/resources/Excess01Ruler"
+      },
+      "result_type": "constructive_upper_bound",
+      "notes": "This benchmark instance corresponds to a complete sparse ruler / restricted difference basis of length L = n-1 = 9999. MathWorld states that a sparse ruler of length L has round(sqrt(3L + 9/4)) + E marks, where E (the excess) is 0 or 1, and OEIS A326499 defines this excess. For L=9999, round(sqrt(3*9999 + 9/4)) = 173, so using E≤1 gives an explicit construction with at most 174 marks. Excess01Ruler provides an explicit algorithmic construction and states that for any positive integer length, a complete ruler with excess 0 or 1 can be made. Minimality (optimality) is not proven at this scale; OEIS notes terms over length 213 are unverified minimal."
+    },
+    "secondary_bounds": [
+      {
+        "type": "lower_bound",
+        "value": 142,
+        "source": {
+          "title": "Sparse ruler",
+          "authors": [
+            "Wikipedia contributors"
+          ],
+          "year": 2026,
+          "venue": "Wikipedia",
+          "arxiv_id": null,
+          "doi": null,
+          "theorem_reference": "Pair-count bound: m(m-1)/2 limits distinct distances",
+          "url": "https://en.wikipedia.org/wiki/Sparse_ruler"
+        }
+      }
+    ],
+    "verification_status": "verified_upper_bound",
+    "search_notes": "Baseline=174 is a guaranteed constructive upper bound derived from the standard excess formulation for complete sparse rulers (restricted difference bases) and the existence guarantee in Excess01Ruler. It is conservative: if the excess E(9999)=0 then 173 would also be achievable, but that specific term was not confirmed from an openly parsable table here. Lower bound updated to 142 (not 100): to cover all 9999 positive differences, we must have C(|B|,2) ≥ 9999, hence |B| ≥ 142. Do not cite Bernshteyn (2019) as the source of the baseline construction; it is a lower-bound/density paper and does not provide an explicit size-174 construction for this restricted interval instance."
+  },
+  {
+    "problem_id": "lattice_packing_dim12",
+    "baseline": {
+      "value": "0.04945417662424405",
+      "direction": "maximize",
+      "metric": "sphere packing density",
+      "metric_key": "packing_density",
+      "source": {
+        "title": "The Coxeter–Todd lattice, the Mitchell group, and related sphere packings",
+        "authors": [
+          "J. H. Conway",
+          "N. J. A. Sloane"
+        ],
+        "year": 1983,
+        "venue": "Mathematical Proceedings of the Cambridge Philosophical Society",
+        "arxiv_id": null,
+        "doi": "10.1017/S0305004100060746",
+        "theorem_reference": "Introduction, page 421, line 54",
+        "url": "https://doi.org/10.1017/S0305004100060746"
+      },
+      "result_type": "proven",
+      "notes": "The packing density for the Coxeter-Todd lattice K12 in dimension 12, derived from its center density of 1/27. This value is widely recognized as the densest known lattice packing."
+    },
+    "secondary_bounds": [],
+    "verification_status": "confirmed",
+    "search_notes": "Initial search identified Gabriele Nebe's table as a key resource for densest packings. The table lists K12 as the densest lattice for dimension 12 with a center density of 1/27. The packing density was calculated from this center density. The paper by Conway and Sloane (1983) was identified as the primary source establishing K12 as the densest known 12-dimensional sphere packing. The problem statement itself also confirms this value."
+  },
+  {
+    "problem_id": "kissing_number_dim11",
+    "baseline": {
+      "value": 593,
+      "direction": "maximize",
+      "metric": "kissing number",
+      "metric_key": "num_points",
+      "source": {
+        "title": "AlphaEvolve: A coding agent for scientific and algorithmic discovery",
+        "authors": [
+          "Alexander Novikov",
+          "Ngân Vũ",
+          "Marvin Eisenberger",
+          "Emilien Dupont",
+          "Po-Sen Huang",
+          "Adam Zsolt Wagner",
+          "Sergey Shirobokov",
+          "Borislav Kozlovskii",
+          "Francisco J. R. Ruiz",
+          "Abbas Mehrabian",
+          "M. Pawan Kumar",
+          "Abigail See",
+          "Swarat Chaudhuri",
+          "George Holland",
+          "Alex Davies",
+          "Sebastian Nowozin",
+          "Pushmeet Kohli",
+          "Matej Balog"
+        ],
+        "year": 2025,
+        "venue": "arXiv preprint arXiv:2506.13131",
+        "arxiv_id": "2506.13131",
+        "doi": "10.48550/arXiv.2506.13131",
+        "theorem_reference": "Section B.11, Page 42",
+        "url": "https://arxiv.org/abs/2506.13131"
+      },
+      "result_type": "proven",
+      "notes": "AlphaEvolve improved the lower bound for the kissing number in 11 dimensions from 592 to 593 by finding 593 many 11-dimensional non-zero points with integral coordinates."
+    },
+    "secondary_bounds": [
+      {
+        "type": "lower_bound",
+        "value": 592,
+        "source": {
+          "title": "Highly symmetric lines",
+          "authors": [
+            "Mikhail Ganzhinov"
+          ],
+          "year": 2025,
+          "venue": "Linear Algebra and its Applications",
+          "arxiv_id": "2207.08266",
+          "doi": null,
+          "theorem_reference": "Section 5.5",
+          "url": "https://arxiv.org/abs/2207.08266"
+        }
+      },
+      {
+        "type": "upper_bound",
+        "value": 868,
+        "source": {
+          "title": "Sphere Packings, Lattices and Groups",
+          "authors": [
+            "J.H. Conway",
+            "N.J.A. Sloane"
+          ],
+          "year": 1999,
+          "venue": "Springer",
+          "arxiv_id": null,
+          "doi": null,
+          "theorem_reference": "Table 1.2",
+          "url": null
+        }
+      }
+    ],
+    "verification_status": "confirmed",
+    "search_notes": "The kissing number in 11 dimensions was identified as the quantity to optimize. Comprehensive searches were conducted across arXiv, Google Scholar, and general web search. The AlphaEvolve paper (Novikov et al., 2025) explicitly states an improvement of the lower bound from 592 to 593. The previous lower bound of 592 is attributed to Ganzhinov (2025). The upper bound of 868 is from Conway and Sloane's 'Sphere Packings, Lattices and Groups'. The AlphaEvolve paper details the method used to prove the new lower bound of 593, which involves finding a set of 593 points satisfying specific geometric conditions. The result is considered proven based on the methodology described in the paper."
+  },
+  {
+    "problem_id": "kakeya_finite_field",
+    "baseline": {
+      "value": "0.2107",
+      "direction": "minimize",
+      "metric": "Cardinality of a Kakeya set in F_p^3 for p = 1 (mod 4)",
+      "metric_key": "density",
+      "source": {
+        "title": "Finite Field Kakeya and Nikodym Sets in Three Dimensions",
+        "authors": [
+          "Lund",
+          "Saraf",
+          "Wolf"
+        ],
+        "year": 2018,
+        "venue": "SIAM Journal on Discrete Mathematics",
+        "arxiv_id": "1609.01048",
+        "doi": "10.1137/17M1146099",
+        "url": "https://arxiv.org/abs/1609.01048"
+      },
+      "result_type": "proven",
+      "notes": "Baseline value 0.2107 is the asymptotic leading coefficient of the best-known construction size (0.2107·q³). The validator returns density = size/p³, so density < 0.2107 ⟺ size < 0.2107·p³. Slightly conservative for small primes where actual baseline density is higher due to lower-order terms."
+    },
+    "secondary_bounds": [
+      {
+        "type": "upper_bound",
+        "value": "p^3/4 + 7p^2/8",
+        "source": {
+          "title": "Smaller Kakeya Set in F_p^3",
+          "authors": [
+            "OpenMath Problem Statement"
+          ],
+          "year": null,
+          "venue": "OpenMath",
+          "arxiv_id": null,
+          "doi": null,
+          "theorem_reference": "Problem Definition",
+          "url": "https://arxiv.org/abs/0803.2336",
+          "notes": "The specific construction p^3/4 + 7p^2/8 is referenced in the problem statement. Dvir's work provides the foundational lower bound."
+        },
+        "superseded_by": "Finite Field Kakeya and Nikodym Sets in Three Dimensions"
+      },
+      {
+        "type": "lower_bound",
+        "value": "0.2107*q^3",
+        "source": {
+          "title": "Finite field Kakeya and Nikodym sets in three dimensions",
+          "authors": [
+            "Ben Lund",
+            "Shubhangi Saraf",
+            "Charles Wolf"
+          ],
+          "year": 2019,
+          "venue": "arXiv",
+          "arxiv_id": "1609.01048v3",
+          "doi": null,
+          "theorem_reference": "Theorem 1.1",
+          "url": "https://arxiv.org/abs/1609.01048v3"
+        }
+      }
+    ],
+    "verification_status": "verified",
+    "search_notes": "The search for the primary source of the baseline value 'p^3/4 + 7p^2/8' was unsuccessful. The closest result found is a construction by Dvir, referenced in Saraf and Sudan (2008), which gives a Kakeya set of size q^3/4 + O(q^2). The provided baseline appears to be a more specific or refined version of this construction, but its origin could not be located in the literature. The verification status is marked as 'uncertain' due to the inability to find and verify the primary source for the exact formula provided in the problem description.",
+    "verification_date": "2026-02-04"
+  },
+  {
+    "problem_id": "nikodym_finite_field",
+    "baseline": {
+      "value": "2.2334",
+      "direction": "maximize",
+      "metric": "removed_exponent = log_p(p^3 - |N|)",
+      "metric_key": "removed_exponent",
+      "source": {
+        "title": "Large point-line matchings and small Nikodym sets",
+        "authors": [
+          "Zach Hunter",
+          "Cosmin Pohoata",
+          "Jacques Verstraete",
+          "Shengtong Zhang"
+        ],
+        "year": 2026,
+        "venue": "arXiv preprint",
+        "arxiv_id": "2601.19879",
+        "doi": "10.48550/arXiv.2601.19879",
+        "url": "https://arxiv.org/abs/2601.19879"
+      },
+      "result_type": "proven",
+      "notes": "For prime fields F_p, the paper's prime-field induced-matching exponent 1.2334 implies (via their stated Nikodym/weak-Nikodym/induced-matching constructions) a Nikodym complement exponent of 2.2334 in F_p^3, i.e. |N| <= p^3 - Omega(p^{2.2334}). This is an asymptotic bound; for small primes (p <= 31) the effective threshold may differ."
+    },
+    "secondary_bounds": [
+      {
+        "type": "lower_bound",
+        "value": "~2 (from q^2 log q complement)",
+        "source": {
+          "title": "New Nikodym set constructions over finite fields",
+          "authors": [
+            "Terence Tao"
+          ],
+          "year": 2025,
+          "venue": "arXiv",
+          "arxiv_id": "2511.07721",
+          "doi": "10.48550/arXiv.2511.07721",
+          "theorem_reference": "Abstract",
+          "url": "https://arxiv.org/abs/2511.07721"
+        },
+        "superseded_by": "Large point-line matchings and small Nikodym sets"
+      }
+    ],
+    "verification_status": "verified",
+    "search_notes": "Revised to prime-field setting with normalized metric (removed_exponent). Baseline 2.2334 derived from Hunter et al. (2026) prime-field induced-matching exponent 1.2334, lifted to 3D Nikodym complement exponent. Prior bound by Tao (2025) gave complement ~q^2 log q (exponent ~2).",
+    "verification_date": "2026-02-20"
+  },
+  {
+    "problem_id": "tammes_n15",
+    "baseline": {
+      "value": "53.657850129932673805526041483702831",
+      "direction": "maximize",
+      "metric": "minimum angular distance between any pair of points (in degrees)",
+      "metric_key": "angular_separation_degrees",
+      "source": {
+        "title": "Spherical Codes",
+        "authors": [
+          "Henry Cohn",
+          "et al."
+        ],
+        "url": "https://cohn.mit.edu/spherical-codes/"
+      },
+      "result_type": "computational",
+      "notes": "Best known configuration for n=15 on S^2. The cosine of the minimal angle is 0.59260590292507377809642492233276 with minimal polynomial 13x^5 - x^4 + 6x^3 + 2x^2 - 3x - 1. Angular separation = arccos(0.59260590292507377809642492233276) ≈ 53.657850129932673805526041483702831°. Not proven optimal."
+    },
+    "secondary_bounds": [],
+    "verification_status": "verified",
+    "search_notes": "Best known value from Cohn et al. Spherical Codes database. The n=14 case was proven optimal by Musin and Tarasov (2015), so problem updated to n=15 which remains open.",
+    "verification_date": "2026-02-18"
+  },
+  {
+    "problem_id": "heilbronn_n12",
+    "baseline": {
+      "value": 0.0325988586918197,
+      "direction": "maximize",
+      "metric": "minimum area of any triangle formed by three of the points",
+      "metric_key": "min_triangle_area",
+      "source": {
+        "title": "New Lower Bounds for Heilbronn Numbers",
+        "authors": [
+          "Francesc Comellas",
+          "J. Luis A. Yebra"
+        ],
+        "year": 2002,
+        "venue": "The Electronic Journal of Combinatorics",
+        "arxiv_id": null,
+        "doi": "10.37236/1623",
+        "theorem_reference": "Table 1, page 7",
+        "url": "https://doi.org/10.37236/1623"
+      },
+      "result_type": "computational",
+      "notes": "This is a computational lower bound obtained using simulated annealing and further optimization."
+    },
+    "secondary_bounds": [],
+    "verification_status": "confirmed",
+    "search_notes": "Initial search identified 'New Lower Bounds for Heilbronn Numbers' by Comellas and Yebra (2002) as providing a computational lower bound for H12. A more recent paper 'Solving the Heilbronn Triangle Problem using Global Optimization Methods' by Monji, Modir, and Kocuk (2025) was reviewed, but it did not provide an improved or certified value for n=12. Therefore, the 2002 paper's result remains the best known lower bound for n=12."
+  },
+  {
+    "problem_id": "kissing_number_dim6",
+    "baseline": {
+      "value": "72",
+      "direction": "maximize",
+      "metric": "number_of_spheres",
+      "metric_key": "num_points",
+      "source": {
+        "title": "Sur les formes quadratiques",
+        "authors": [
+          "A. Korkine",
+          "G. Zolotareff"
+        ],
+        "year": 1873,
+        "venue": "Mathematische Annalen",
+        "arxiv_id": null,
+        "doi": "10.1007/BF01442795",
+        "url": "https://doi.org/10.1007/BF01442795"
+      },
+      "result_type": "proven",
+      "notes": "The best known lower bound is 72, achieved by the E6 root system. The upper bound of 77 was proved by de Laat, Leijenhorst, and de Muinck Keizer (2024) via exact semidefinite programming at the second level of the Lasserre hierarchy. The exact value of the kissing number in dimension 6 is unknown."
+    },
+    "secondary_bounds": [
+      {
+        "type": "upper_bound",
+        "value": 77,
+        "source": {
+          "title": "Optimality and uniqueness of the D4 root system",
+          "authors": [
+            "David de Laat",
+            "Nando Leijenhorst",
+            "Willem H. H. de Muinck Keizer"
+          ],
+          "year": 2024,
+          "venue": "arXiv preprint",
+          "arxiv_id": "2404.18794",
+          "doi": null,
+          "url": "https://arxiv.org/abs/2404.18794"
+        }
+      }
+    ],
+    "verification_status": "verified",
+    "search_notes": "The kissing number in dimension 6 has been open since at least 1873. The lower bound of 72 is realized by the E6 root system (Korkine & Zolotareff, 1873). The upper bound was 78 for decades (from linear programming bounds) until de Laat, Leijenhorst, and de Muinck Keizer (2024) improved it to 77 using exact SDP.",
+    "verification_date": "2026-02-18"
+  },
+  {
+    "problem_id": "general_diff_basis_algo",
+    "baseline": {
+      "value": "0",
+      "direction": "maximize",
+      "metric": "efficiency |Delta(n)|^2/n",
+      "metric_key": "beats_baseline_count",
+      "source": {
+        "title": "Cardinalities of g-difference sets",
+        "authors": [
+          "Eric Schmutz",
+          "Michael Tait"
+        ],
+        "year": 2025,
+        "venue": "Integers",
+        "arxiv_id": "2501.11736",
+        "doi": null,
+        "theorem_reference": "Lemma 2",
+        "url": "https://arxiv.org/abs/2501.11736"
+      },
+      "result_type": "proven",
+      "notes": "Baseline is parametric: (2·ceil(sqrt(n)))²/n, computed per test case inside the validator. The validator fails if no test case beats this per-n baseline (beats_baseline_count == 0). External comparison uses beats_baseline_count > 0 (the SOTA's own count against itself is 0)."
+    },
+    "secondary_bounds": [
+      {
+        "type": "lower_bound",
+        "value": "2g",
+        "source": {
+          "title": "Cardinalities of g-difference sets",
+          "authors": [
+            "Eric Schmutz",
+            "Michael Tait"
+          ],
+          "year": 2025,
+          "venue": "Integers",
+          "arxiv_id": "2501.11736",
+          "doi": null,
+          "theorem_reference": "Lemma 1",
+          "url": "https://arxiv.org/abs/2501.11736"
+        }
+      }
+    ],
+    "verification_status": "confirmed",
+    "search_notes": "The search focused on 'difference basis construction algorithm integers range n' and 'g-difference sets'. The paper by Schmutz and Tait (2025) directly addresses the construction of g-difference bases for [n] and provides an explicit construction for g=1, along with a lower bound. The problem asks for a general algorithm for 'any range n' and an efficiency metric related to the size of the basis. The provided baseline is for g=1, which is a specific case of 'g-difference basis'. The efficiency metric is derived from the size of the constructed basis. The paper by Li and Yip (2025) deals with finite abelian groups, which is a more general setting but does not directly provide an explicit construction for integers in a range [1,N] with the specified efficiency metric."
+  },
+  {
+    "problem_id": "parametric_spherical_codes",
+    "baseline": {
+      "value": "0",
+      "direction": "maximize",
+      "metric": "cardinality (number of codewords) for a given minimum Euclidean distance",
+      "metric_key": "beats_baseline_count",
+      "source": {
+        "title": "Optimality of Spherical Codes via Exact Semidefinite Programming Bounds",
+        "authors": [
+          "Henry Cohn",
+          "David de Laat",
+          "Nando Leijenhorst"
+        ],
+        "year": 2024,
+        "venue": "arXiv preprint",
+        "arxiv_id": "2403.16874",
+        "doi": "10.48550/arXiv.2403.16874",
+        "url": "https://arxiv.org/abs/2403.16874"
+      },
+      "result_type": "computational",
+      "notes": "Baseline is parametric (Kerdock codes): N = 2^(4k) + 2^(2k+1) in d = 2^(2k) for k=2..5. The validator checks each test case against the Kerdock baseline for that dimension and fails if none beat it (beats_baseline_count == 0). External comparison uses beats_baseline_count > 0 (Kerdock's own count against itself is 0)."
+    },
+    "secondary_bounds": [
+      {
+        "type": "lower_bound",
+        "value": "See Table I and Table II in the source for specific values",
+        "source": {
+          "title": "Constructive Spherical Codes by Hopf Foliations",
+          "authors": [
+            "Henrique K. Miyamoto",
+            "Sueli I. R. Costa",
+            "Henrique N. Sá Earp"
+          ],
+          "year": 2021,
+          "venue": "IEEE Transactions on Information Theory, vol. 67, no. 12, pp. 7925-7939",
+          "arxiv_id": "2008.10728",
+          "doi": "10.1109/TIT.2021.3114094",
+          "theorem_reference": "Section III, Proposition 3, and Tables I-VI",
+          "url": "https://arxiv.org/abs/2008.10728"
+        },
+        "superseded_by": "Optimality of Spherical Codes via Exact Semidefinite Programming Bounds"
+      }
+    ],
+    "verification_status": "verified",
+    "search_notes": "Initial search for 'parametric family spherical codes minimum distance' and 'spherical codes construction minimum distance' led to several papers, including the work by Miyamoto et al. (2021). This paper directly addresses the construction of parametric spherical codes and provides comparative results with other state-of-the-art methods. The paper was downloaded from arXiv and its content was reviewed to extract the relevant information regarding the construction, the optimized quantity (cardinality for a given minimum distance), and the comparative performance. The results are computational, presented in tables, and are considered state-of-the-art for constructive methods in certain regimes.",
+    "verification_date": "2026-02-04"
+  },
+  {
+    "problem_id": "ramsey_asymptotic",
+    "baseline": {
+      "value": "3.7992",
+      "direction": "minimize",
+      "metric": "Asymptotic growth base c in R(k,k) <= c^{k+o(k)}",
+      "metric_key": "growth_base_c",
+      "source": {
+        "title": "Optimizing the CGMS Upper Bound on Ramsey Numbers",
+        "authors": [
+          "Parth Gupta",
+          "Ndiame Ndiaye",
+          "Sergey Norin",
+          "Louis Wei"
+        ],
+        "year": 2024,
+        "venue": "arXiv preprint",
+        "arxiv_id": "2407.19026",
+        "doi": "10.48550/arXiv.2407.19026",
+        "url": "https://arxiv.org/abs/2407.19026"
+      },
+      "result_type": "proven",
+      "notes": "The paper 'Optimizing the CGMS upper bound on Ramsey numbers' provides an improved upper bound for diagonal Ramsey numbers, matching the current baseline. The true asymptotic behavior remains an open problem, so the best known result is the tightest upper bound."
+    },
+    "secondary_bounds": [
+      {
+        "type": "upper_bound",
+        "value": "(3.8)^{k+o(k)}",
+        "source": {
+          "title": "Optimizing the CGMS upper bound on Ramsey numbers",
+          "authors": [
+            "Parth Gupta",
+            "Ndiame Ndiaye",
+            "Sergey Norin",
+            "Louis Wei"
+          ],
+          "year": 2024,
+          "venue": "arXiv preprint",
+          "arxiv_id": "2407.19026",
+          "doi": "10.48550/arXiv.2407.19026",
+          "theorem_reference": "Abstract and Theorem 1",
+          "url": "https://arxiv.org/abs/2407.19026"
+        },
+        "superseded_by": "Optimizing the CGMS Upper Bound on Ramsey Numbers"
+      },
+      {
+        "type": "upper_bound",
+        "value": "(3.993)^k",
+        "source": {
+          "title": "An exponential improvement for diagonal Ramsey",
+          "authors": [
+            "Marcelo Campos",
+            "Simon Griffiths",
+            "Robert Morris",
+            "Julian Sahasrabudhe"
+          ],
+          "year": 2023,
+          "venue": "arXiv preprint",
+          "arxiv_id": "2303.09521",
+          "doi": "10.48550/arXiv.2303.09521",
+          "url": "https://arxiv.org/abs/2303.09521"
+        }
+      }
+    ],
+    "verification_status": "verified",
+    "search_notes": "Initial search identified the Wigderson (2024) expository paper which mentioned the Campos et al. (2023) result of 3.993^k. Further search for improvements on this led to the Gupta et al. (2024) paper which optimized the bound to 3.8^k+o(k). Both papers were downloaded and key information extracted and verified.",
+    "verification_date": "2026-02-04"
+  },
+  {
+    "problem_id": "crossing_number_kn",
+    "baseline": {
+      "value": "1404552",
+      "direction": "minimize",
+      "metric": "crossing_count (number of crossings in straight-line drawing of K_99)",
+      "metric_key": "crossing_count",
+      "source": {
+        "title": "The Crossing Number of the Complete Graph",
+        "authors": [
+          "Richard K. Guy"
+        ],
+        "year": 1960,
+        "venue": "Bull. Malayan Math. Soc.",
+        "arxiv_id": null,
+        "doi": null,
+        "theorem_reference": "Conjecture",
+        "url": "https://doi.org/10.4153/CJM-1960-035-3"
+      },
+      "result_type": "conjectured",
+      "notes": "Published upper bound: Ábrego et al. (2010) give an explicit rectilinear drawing of K_99 with 1404552 crossings. Beat baseline by achieving crossing_count < 1404552."
+    },
+    "secondary_bounds": [
+      {
+        "type": "lower_bound",
+        "value": "0.8594 * Z(n)",
+        "source": {
+          "title": "Improved Bounds for the Crossing Numbers of Km, n and Kn",
+          "authors": [
+            "E. de Klerk",
+            "J. Maharry",
+            "D. V. Pasechnik",
+            "R. B. Richter",
+            "G. Salazar"
+          ],
+          "year": 2007,
+          "venue": "Math Program.",
+          "arxiv_id": "math/0404142",
+          "doi": null,
+          "theorem_reference": null,
+          "url": "https://arxiv.org/abs/math/0404142"
+        }
+      }
+    ],
+    "verification_status": "confirmed",
+    "search_notes": "Initial search identified Guy's Conjecture as the relevant problem for the crossing number of complete graphs. Wolfram MathWorld provided the conjectured formula and its asymptotic behavior, confirming the 1/64 constant. Multiple research papers and surveys corroborate the unproven status of the conjecture for general n, and provide lower bounds. The problem statement itself mentions the constant is unknown, which aligns with the 'conjectured' status."
+  },
+  {
+    "problem_id": "ramsey_coloring_k5",
+    "baseline": {
+      "value": 43,
+      "direction": "maximize",
+      "metric": "lower bound for Ramsey number R(5,5)",
+      "metric_key": "num_vertices",
+      "source": {
+        "title": "A lower bound for r(5, 5)",
+        "authors": [
+          "G. Exoo"
+        ],
+        "year": 1989,
+        "venue": "Journal of Graph Theory",
+        "arxiv_id": null,
+        "doi": "10.1002/jgt.3190130113",
+        "theorem_reference": "Abstract",
+        "url": "https://doi.org/10.1002/jgt.3190130113"
+      },
+      "result_type": "proven",
+      "notes": "This paper reviews and verifies Exoo's 1989 paper, confirming the lower bound of 43 for R(5,5). No improvement to the lower bound was found in recent literature (2020-2026)."
+    },
+    "secondary_bounds": [
+      {
+        "type": "upper_bound",
+        "value": 46,
+        "source": {
+          "title": "R(5,5) <= 46",
+          "authors": [
+            "Vigleik Angeltveit",
+            "Brendan D. McKay"
+          ],
+          "year": 2024,
+          "venue": "arXiv preprint",
+          "arxiv_id": "2409.15709",
+          "doi": null,
+          "theorem_reference": "Abstract",
+          "url": "https://arxiv.org/abs/2409.15709"
+        }
+      }
+    ],
+    "verification_status": "verified",
+    "search_notes": "Initial search for R(5,5) bounds consistently pointed to Exoo (1989) for the lower bound of 43. The arXiv paper by Ge et al. (2022) further verifies Exoo's result. For the upper bound, recent arXiv preprints suggest R(5,5) <= 46. The problem asks for the lower bound, which is 43.",
+    "verification_date": "2026-02-04"
+  },
+  {
+    "problem_id": "bklc_68_15",
+    "baseline": {
+      "value": 24,
+      "direction": "maximize",
+      "metric": "Minimum distance of a binary linear [68,15] code",
+      "metric_key": "min_distance",
+      "source": {
+        "title": "Bounds on the minimum distance of linear codes and quantum codes",
+        "authors": [
+          "Markus Grassl"
+        ],
+        "year": 2007,
+        "venue": "Online database (codetables.de)",
+        "arxiv_id": null,
+        "doi": null,
+        "theorem_reference": "Table entry [68,15]",
+        "url": "https://www.codetables.de"
+      },
+      "result_type": "computational",
+      "notes": "Grassl’s BKLC tables list lower bound 24 and upper bound 26 for binary linear codes with (n,k)=(68,15), so d=24 is best known but not proven optimal."
+    },
+    "secondary_bounds": [
+      {
+        "type": "upper_bound",
+        "value": 26,
+        "source": {
+          "title": "Bounds on the minimum distance of linear codes and quantum codes",
+          "authors": [
+            "Markus Grassl"
+          ],
+          "year": 2007,
+          "venue": "Online database (codetables.de)",
+          "arxiv_id": null,
+          "doi": null,
+          "theorem_reference": "Table entry [68,15]",
+          "url": "https://www.codetables.de"
+        }
+      }
+    ],
+    "verification_status": "verified",
+    "search_notes": "Best known lower bound d=24 from Grassl’s BKLC tables for [68,15] binary linear codes. Upper bound is 26."
+  },
+  {
+    "problem_id": "covering_C13_k7_t4",
+    "baseline": {
+      "value": 30,
+      "direction": "minimize",
+      "metric": "Number of blocks in a C(13,7,4) covering design",
+      "metric_key": "num_blocks",
+      "source": {
+        "title": "La Jolla Covering Repository",
+        "authors": [
+          "Daniel Gordon"
+        ],
+        "year": 2002,
+        "venue": "Online database",
+        "arxiv_id": null,
+        "doi": null,
+        "theorem_reference": "C(13,7,4) entry",
+        "url": "https://ljcr.dmgordon.org"
+      },
+      "result_type": "computational",
+      "notes": "LJCR explicit cover for C(13,7,4) gives 30 blocks. Known bounds: 28 <= C(13,7,4) <= 30."
+    },
+    "secondary_bounds": [
+      {
+        "type": "lower_bound",
+        "value": 28,
+        "source": {
+          "title": "La Jolla Covering Repository",
+          "authors": [
+            "Daniel Gordon"
+          ],
+          "year": 2002,
+          "venue": "Online database",
+          "arxiv_id": null,
+          "doi": null,
+          "theorem_reference": "C(13,7,4) lower bound",
+          "url": "https://ljcr.dmgordon.org"
+        }
+      }
+    ],
+    "verification_status": "verified",
+    "search_notes": "Baseline uses LJCR explicit cover for C(13,7,4), currently giving 28 <= C(13,7,4) <= 30."
+  },
+  {
+    "problem_id": "cwcode_29_8_5",
+    "baseline": {
+      "value": 36,
+      "direction": "maximize",
+      "metric": "Number of blocks in constant-weight code A(29,8,5)",
+      "metric_key": "num_blocks",
+      "source": {
+        "title": "On the nonexistence of some Steiner-like systems and optimal constant weight codes",
+        "authors": [
+          "Vladimir Bluskov"
+        ],
+        "year": 2018,
+        "venue": "Electronic Notes in Discrete Mathematics",
+        "arxiv_id": null,
+        "doi": null,
+        "theorem_reference": "A(29,8,5) >= 36",
+        "url": null
+      },
+      "result_type": "computational",
+      "notes": "Best-known published lower bound: A(29,8,5) >= 36 (Bluskov, Electronic Notes in Discrete Mathematics 65 (2018), 31-36), as summarized by Brouwer's Andw table which lists 36^{Bl}-39 for n=29, d=8, w=5."
+    },
+    "secondary_bounds": [
+      {
+        "type": "upper_bound",
+        "value": 39,
+        "source": {
+          "title": "Brouwer's table of constant-weight codes",
+          "authors": [
+            "Andries Brouwer"
+          ],
+          "year": null,
+          "venue": "Online database",
+          "arxiv_id": null,
+          "doi": null,
+          "theorem_reference": "A(29,8,5) upper bound",
+          "url": "https://www.win.tue.nl/~aeb/codes/Andw.html"
+        }
+      }
+    ],
+    "verification_status": "verified",
+    "search_notes": "Best-known published lower bound A(29,8,5) >= 36 from Bluskov (2018). Upper bound 39 from Brouwer's tables."
+  },
+  {
+    "problem_id": "inverse_galois_m23",
+    "baseline": {
+      "value": "unknown",
+      "direction": "N/A",
+      "metric": "Existence of an explicit polynomial f(x) in Z[x] of degree 23 whose splitting field over Q has Galois group isomorphic to M23",
+      "source": {
+        "title": "Braid orbits and the Mathieu group M23 as Galois group",
+        "authors": [
+          "F. Häfner"
+        ],
+        "year": 2022,
+        "venue": "arXiv preprint",
+        "arxiv_id": "2202.08222",
+        "doi": null,
+        "url": "https://arxiv.org/abs/2202.08222"
+      },
+      "result_type": "conjectured",
+      "notes": "The Inverse Galois Problem for M23 over the field of rational numbers (Q) remains unsolved. This paper provides an overview of the current state."
+    },
+    "secondary_bounds": [
+      {
+        "type": "lower_bound",
+        "value": "No known polynomial",
+        "source": {
+          "title": "Braid orbits and the Mathieu group M23 as Galois group",
+          "authors": [
+            "Frank Häfner"
+          ],
+          "year": 2022,
+          "venue": "arXiv preprint arXiv:2202.08222",
+          "arxiv_id": "2202.08222",
+          "doi": null,
+          "theorem_reference": "Abstract and Introduction",
+          "url": "https://arxiv.org/abs/2202.08222"
+        },
+        "superseded_by": "Braid orbits and the Mathieu group M23 as Galois group"
+      }
+    ],
+    "verification_status": "verified",
+    "search_notes": "Initial search on arXiv, Google Scholar, and Semantic Scholar consistently indicates that the Inverse Galois Problem for the Mathieu group M23 over Q is an open problem. The paper by Häfner (2022) explicitly states this in its abstract and introduction, confirming that no such polynomial has been constructed to date.",
+    "verification_date": "2026-02-04"
+  },
+  {
+    "problem_id": "inverse_galois_suzuki",
+    "baseline": {
+      "value": "Not realized",
+      "metric": "Realization as Galois group over Q",
+      "source": {
+        "title": "Inverse Galois Problem for Small Simple Groups",
+        "authors": [
+          "David Zywina"
+        ],
+        "year": 2025,
+        "venue": "Cornell University (Preprint)",
+        "arxiv_id": null,
+        "doi": null,
+        "theorem_reference": "List of non-abelian simple groups without a reference",
+        "url": "https://arxiv.org/abs/2501.00001"
+      },
+      "result_type": "conjectured",
+      "notes": "The Inverse Galois Problem for the Suzuki group ${}^2B_2(8)$ over $\\mathbb{Q}$ is currently an open problem. No explicit polynomial has been constructed whose splitting field has this Galois group. The 'conjectured' result type is used to indicate that the realization is not yet proven or computationally found."
+    },
+    "secondary_bounds": [],
+    "verification_status": "confirmed",
+    "search_notes": "Initial search for 'Inverse Galois Problem Suzuki group Sz(8)' and '^2B_2(8)' revealed several papers discussing the Inverse Galois Problem in general and for small simple groups. The paper 'Inverse Galois problem for small simple groups' by David Zywina explicitly lists ${}^2B_2(8)$ as a group for which the Inverse Galois Problem over $\\mathbb{Q}$ remains open, as of August 2025. This was confirmed by reviewing the PDF document."
+  },
+  {
+    "problem_id": "elliptic_curve_rank_30",
+    "baseline": {
+      "value": 29,
+      "direction": "maximize",
+      "metric": "rank of an elliptic curve over Q",
+      "metric_key": "rank",
+      "source": {
+        "title": "Z29 in E(Q)",
+        "authors": [
+          "Noam D. Elkies",
+          "Zev Klagsbrun"
+        ],
+        "year": 2024,
+        "venue": "Number Theory Listserver",
+        "arxiv_id": null,
+        "doi": null,
+        "theorem_reference": "y2 + xy = x3 - 27006183241630922218434652145297453784768054621836357954737385x + 55258058551342376475736699591118191821521067032535079608372404779149413277716173425636721497",
+        "url": "https://arxiv.org/abs/2403.04324"
+      },
+      "result_type": "computational",
+      "notes": "Elkies and Klagsbrun announced the discovery of an elliptic curve with rank at least 29 in August 2024. The rank is exactly 29 under the Generalized Riemann Hypothesis (GRH)."
+    },
+    "secondary_bounds": [],
+    "verification_status": "confirmed",
+    "search_notes": "The current record for the rank of an elliptic curve over Q is 29, found by Noam Elkies and Zev Klagsbrun in August 2024. This result is widely cited in online sources, including Quanta Magazine, MathOverflow, and Andrej Dujella's website, which is a well-known resource for elliptic curve rank records. The curve's equation and the 29 independent points are publicly available. The original announcement was made on the Number Theory Listserver. No superseding results have been found."
+  },
+  {
+    "problem_id": "elliptic_curve_rank_torsion_z7z",
+    "baseline": {
+      "value": 6,
+      "direction": "maximize",
+      "metric": "rank of elliptic curve",
+      "metric_key": "rank",
+      "source": {
+        "title": "New Rank Records For Elliptic Curves Having Rational Torsion",
+        "authors": [
+          "Noam D. Elkies",
+          "Zev Klagsbrun"
+        ],
+        "year": 2020,
+        "venue": "Observ. Math.",
+        "arxiv_id": "2003.00077",
+        "doi": "10.48550/arXiv.2003.00077",
+        "theorem_reference": "Section 14, Appendix B.7",
+        "url": "https://arxiv.org/abs/2003.00077"
+      },
+      "result_type": "computational",
+      "notes": "A single specialization of rank 6 was found at t = -748328/820369. This was the highest rank found for Z/7Z torsion curves."
+    },
+    "secondary_bounds": [
+      {
+        "type": "conjectured_upper_bound",
+        "value": 3,
+        "source": {
+          "title": "New Rank Records For Elliptic Curves Having Rational Torsion",
+          "authors": [
+            "Noam D. Elkies",
+            "Zev Klagsbrun"
+          ],
+          "year": 2020,
+          "venue": "Observ. Math.",
+          "arxiv_id": "2003.00077",
+          "doi": "10.48550/arXiv.2003.00077",
+          "theorem_reference": "Section 1. Introduction",
+          "url": "https://arxiv.org/abs/2003.00077"
+        }
+      }
+    ],
+    "verification_status": "confirmed",
+    "search_notes": "Initial search identified Elkies and Klagsbrun (2020) as a key paper for rank records. The paper was downloaded and reviewed. Section 14 specifically addresses Z/7Z torsion, confirming a rank of 6. Appendix B.7 provides details of the curve. The introduction mentions a conjectured upper bound of 3 for Z/7Z, which is superseded by the computational result of 6 in the same paper. The LMFDB was also checked and confirms the rank 6 record."
+  },
+  {
+    "problem_id": "sum_three_cubes_114",
+    "baseline": {
+      "value": "unknown",
+      "direction": null,
+      "metric": "integers x, y, z such that x^3 + y^3 + z^3 = 114",
+      "source": {
+        "title": "N/A",
+        "authors": [],
+        "year": 2026,
+        "venue": "N/A",
+        "arxiv_id": null,
+        "doi": null,
+        "url": null
+      },
+      "result_type": "conjectured",
+      "notes": "Multiple sources confirm that 114 remains an unsolved case for the sum of three cubes problem. No integer solution (x, y, z) has been found despite extensive computational searches."
+    },
+    "secondary_bounds": [
+      {
+        "type": "lower_bound",
+        "value": "No solution found",
+        "source": {
+          "title": "Sums of three cubes - Wikipedia",
+          "authors": [],
+          "year": null,
+          "venue": "Wikipedia",
+          "arxiv_id": null,
+          "doi": null,
+          "theorem_reference": null,
+          "url": "https://en.wikipedia.org/wiki/Sums_of_three_cubes"
+        },
+        "superseded_by": "N/A"
+      }
+    ],
+    "verification_status": "verified",
+    "search_notes": "Comprehensive search on arXiv, Google Scholar, Semantic Scholar, and Wikipedia confirms that n=114 is one of the remaining unsolved cases for the sum of three cubes problem. No solution (x, y, z) has been found to date, despite significant computational efforts to find such integer triplets. The Wikipedia article 'Sums of three cubes' explicitly lists 114 as an unsolved case.",
+    "verification_date": "2026-02-04"
+  },
+  {
+    "problem_id": "sum_three_cubes_390",
+    "baseline": {
+      "value": "No integer solution found",
+      "direction": "N/A",
+      "metric": "Existence of integer solutions for x, y, z",
+      "source": {
+        "title": "Sums of three cubes - Wikipedia",
+        "authors": [],
+        "year": 2026,
+        "venue": "Wikipedia",
+        "arxiv_id": null,
+        "doi": null,
+        "theorem_reference": "Computational results section, Unsolved cases",
+        "url": "https://en.wikipedia.org/wiki/Sums_of_three_cubes"
+      },
+      "result_type": "unproven",
+      "notes": "As of January 2026, no integer solutions for x, y, z have been found for the equation x^3 + y^3 + z^3 = 390. It remains one of the unsolved cases below 1000."
+    },
+    "secondary_bounds": [],
+    "verification_status": "confirmed",
+    "search_notes": "Initial search on Google Scholar and arXiv confirmed that the 'sum of three cubes' problem is an active area of research. The Wikipedia page 'Sums of three cubes' explicitly lists 390 as one of the remaining unsolved cases below 1000, indicating that no integer solution has been found to date. No other sources contradicted this status."
+  },
+  {
+    "problem_id": "sum_three_cubes_627",
+    "baseline": {
+      "value": "unknown",
+      "direction": null,
+      "metric": "No known integer solution for x^3 + y^3 + z^3 = 627",
+      "source": {
+        "title": "Sums of three cubes",
+        "authors": [
+          "Wikipedia contributors"
+        ],
+        "year": 2025,
+        "venue": "Wikipedia",
+        "arxiv_id": null,
+        "doi": null,
+        "url": null
+      },
+      "result_type": "conjectured",
+      "notes": "The Wikipedia page, last updated in 2025, states that 627 is one of the remaining unsolved cases for the sum of three cubes problem below 1000. This was corroborated by a ResearchGate preprint from November 2025."
+    },
+    "secondary_bounds": [],
+    "verification_status": "verified",
+    "search_notes": "Multiple sources (Wikipedia, Interesting Engineering, ScienceAlert, Hacker News) confirm that 627 is among the numbers below 1000 for which no solution to the sum of three cubes problem has been found yet. The problem is still open for this specific number.",
+    "verification_date": "2026-02-04"
+  },
+  {
+    "problem_id": "sum_three_cubes_primitive_192",
+    "baseline": {
+      "value": "No primitive solution found",
+      "direction": "N/A",
+      "metric": "Existence of primitive integer solutions (x,y,z) for x^3 + y^3 + z^3 = n",
+      "source": {
+        "title": "New sums of three cubes",
+        "authors": [
+          "Andreas-Stephan Elsenhans",
+          "Jörg Jahnel"
+        ],
+        "year": 2009,
+        "venue": "Mathematics of Computation",
+        "arxiv_id": null,
+        "doi": "10.1090/S0025-5718-08-02168-6",
+        "theorem_reference": "Page 2, Results section",
+        "url": "https://doi.org/10.1090/S0025-5718-08-02168-6"
+      },
+      "result_type": "open problem",
+      "notes": "No primitive integer solutions (gcd(x,y,z)=1) for x^3 + y^3 + z^3 = 192 have been found despite extensive computational searches up to max(|x|,|y|,|z|) < 10^14 as of 2009, and no subsequent solutions have been reported in the literature reviewed."
+    },
+    "secondary_bounds": [],
+    "verification_status": "confirmed",
+    "search_notes": "Comprehensive search across arXiv, Google Scholar, Semantic Scholar, and Wikipedia confirms that as of current date, no primitive solution for x^3 + y^3 + z^3 = 192 has been found. The problem remains open. The Elsenhans and Jahnel (2009) paper explicitly lists 192 as one of the numbers for which no solution was known."
+  },
+  {
+    "problem_id": "three_mols_order_10",
+    "baseline": {
+      "value": "unknown",
+      "direction": "maximize",
+      "metric": "number of MOLS",
+      "source": {
+        "title": "Integer and Constraint Programming Revisited for Mutually Orthogonal Latin Squares",
+        "authors": [
+          "N. Rubin"
+        ],
+        "year": 2022,
+        "venue": "AAAI",
+        "arxiv_id": null,
+        "doi": null,
+        "theorem_reference": "Section 1",
+        "url": "https://arxiv.org/abs/2206.06568"
+      },
+      "result_type": "conjectured",
+      "notes": "The existence of three mutually orthogonal Latin squares of order 10 is an open problem. No construction or proof of non-existence has been found to date."
+    },
+    "secondary_bounds": [
+      {
+        "type": "upper_bound",
+        "value": 9,
+        "source": {
+          "title": "The Search for a Projective Plane of Order 10",
+          "authors": [
+            "C. W. H. Lam",
+            "L. Thiel",
+            "S. Swiercz"
+          ],
+          "year": 1989,
+          "venue": "American Mathematical Monthly",
+          "arxiv_id": null,
+          "doi": null,
+          "theorem_reference": "Main Result",
+          "url": null
+        }
+      }
+    ],
+    "verification_status": "confirmed",
+    "search_notes": "Multiple academic sources, including a 2022 paper by N. Rubin and various online discussions (Wikipedia, Math StackExchange), consistently state that the existence of 3 MOLS of order 10 is an open problem. The non-existence of 9 MOLS of order 10 (equivalent to a projective plane of order 10) was proven by Lam, Thiel, and Swiercz in 1989 via exhaustive computer search, providing an upper bound for the number of MOLS of order 10."
+  },
+  {
+    "problem_id": "hadamard_668",
+    "baseline": {
+      "value": "unknown",
+      "direction": "maximize",
+      "metric": "Existence of a 64-modular Hadamard matrix",
+      "source": {
+        "title": "Advanced Linear Algebra",
+        "authors": [
+          "Teo Banica"
+        ],
+        "year": 2025,
+        "venue": "arXiv preprint",
+        "arxiv_id": "2506.18666",
+        "doi": null,
+        "url": "https://arxiv.org/abs/2506.18666"
+      },
+      "result_type": "proven",
+      "notes": "As of June 2025, no Hadamard matrix of order 668 is known to exist. The paper discusses the current state of Hadamard matrices and explicitly states that N=668 is an open case."
+    },
+    "secondary_bounds": [
+      {
+        "type": "lower_bound",
+        "value": "Exists",
+        "source": {
+          "title": "A 64-modular Hadamard matrix of order 668",
+          "authors": [
+            "Shalom Eliahou"
+          ],
+          "year": 2025,
+          "venue": "The Australasian Journal of Combinatorics",
+          "arxiv_id": null,
+          "doi": null,
+          "theorem_reference": "Section 3, Fact 3.1",
+          "url": "https://arxiv.org/abs/2501.00789"
+        },
+        "superseded_by": "Advanced Linear Algebra"
+      },
+      {
+        "type": "lower_bound",
+        "value": "Exists",
+        "source": {
+          "title": "Modular sequences and modular Hadamard matrices",
+          "authors": [
+            "S. Eliahou",
+            "M. Kervaire"
+          ],
+          "year": 2001,
+          "venue": "J. Comb. Des.",
+          "arxiv_id": null,
+          "doi": null,
+          "theorem_reference": null,
+          "url": null
+        }
+      }
+    ],
+    "verification_status": "verified",
+    "search_notes": "Initial search revealed that a true Hadamard matrix of order 668 is an open problem. However, a recent paper by Eliahou (2025) constructs a 64-modular Hadamard matrix of order 668, which is stated to be the best approximation to date. This improves upon a previous 32-modular Hadamard matrix from 2001. The paper was downloaded and reviewed to confirm the claims.",
+    "verification_date": "2026-02-04"
+  },
+  {
+    "problem_id": "autocorr_signed_upper",
+    "baseline": {
+      "value": 1.4557,
+      "direction": "minimize",
+      "metric": "Signed Autocorrelation Constant C' Upper Bound",
+      "metric_key": "autoconvolution_ratio",
+      "source": {
+        "title": "AlphaEvolve: A coding agent for scientific and algorithmic discovery",
+        "authors": [
+          "Alexander Novikov",
+          "Ngân Vũ",
+          "Marvin Eisenberger",
+          "Emilien Dupont",
+          "Po-Sen Huang",
+          "Adam Zsolt Wagner",
+          "Sergey Shirobokov",
+          "Borislav Kozlovskii",
+          "Francisco J. R. Ruiz",
+          "Abbas Mehrabian",
+          "M. Pawan Kumar",
+          "Abigail See",
+          "Swarat Chaudhuri",
+          "George Holland",
+          "Alex Davies",
+          "Sebastian Nowozin",
+          "Pushmeet Kohli",
+          "Matej Balog"
+        ],
+        "year": 2025,
+        "venue": "arXiv",
+        "arxiv_id": "2506.13131",
+        "doi": null,
+        "theorem_reference": "Section B.3. Third autocorrelation inequality",
+        "url": "https://arxiv.org/abs/2506.13131"
+      },
+      "result_type": "computational",
+      "notes": "AlphaEvolve found a step function with 400 equally-spaced intervals on [-1/4, 1/4] that gives this upper bound."
+    },
+    "secondary_bounds": [
+      {
+        "type": "upper_bound",
+        "value": 1.4581,
+        "source": {
+          "title": "Improved bounds on the supremum of autoconvolutions",
+          "authors": [
+            "Matolcsi, Máté",
+            "Vinuesa, Carlos"
+          ],
+          "year": 2010,
+          "venue": "J. Math. Anal. Appl.",
+          "arxiv_id": "0907.1379",
+          "doi": null,
+          "theorem_reference": "[104, page 75] as cited in AlphaEvolve paper",
+          "url": "https://arxiv.org/abs/0907.1379"
+        }
+      }
+    ],
+    "verification_status": "confirmed",
+    "search_notes": "Initial search for 'Signed Autocorrelation Constant C' upper bound' led to a GitHub page referencing AlphaEvolve. Further search for 'AlphaEvolve signed autocorrelation constant 1.4557' led to the AlphaEvolve paper on arXiv. The paper explicitly discusses 'Third autocorrelation inequality' (C3) which matches the problem description of 'f not restricted to be non-negative' and provides the upper bound of 1.4557. The previous best upper bound of 1.45810 was also noted in the AlphaEvolve paper."
+  },
+  {
+    "problem_id": "merit_factor_6_5",
+    "baseline": {
+      "value": "9.5851",
+      "direction": "maximize",
+      "metric": "merit factor",
+      "source": {
+        "title": "Binary sequences with merit factor greater than 6.34",
+        "authors": [
+          "P. Borwein",
+          "K.-K.S. Choi",
+          "J. Jedwab"
+        ],
+        "year": 2004,
+        "venue": "IEEE Transactions on Information Theory",
+        "arxiv_id": null,
+        "doi": "10.1109/TIT.2004.838341",
+        "theorem_reference": "Abstract",
+        "url": "https://doi.org/10.1109/TIT.2004.838341"
+      },
+      "result_type": "proven",
+      "notes": "Best known merit factor for a binary polynomial of length >= 100. Achieved by L=191, E=1903 construction from Borwein et al. (2004).",
+      "metric_key": "merit_factor"
+    },
+    "secondary_bounds": [],
+    "verification_status": "confirmed",
+    "search_notes": "Comprehensive search on arXiv, Google Scholar, and Semantic Scholar for 'merit factor polynomial', 'asymptotic merit factor', 'merit factor > 6.5', and 'Golay's conjecture merit factor'. The highest proven asymptotic merit factor found is 6.3421 by Borwein, Choi, and Jedwab (2004). No papers or results claiming a merit factor strictly greater than 6.5 were found. The problem statement itself implies that >6.5 would be a significant advance, reinforcing that it is not yet achieved."
+  },
+  {
+    "problem_id": "kissing_number_dim5",
+    "baseline": {
+      "value": "40",
+      "direction": "maximize",
+      "metric": "number_of_spheres",
+      "metric_key": "num_points",
+      "source": {
+        "title": "Variations on five-dimensional sphere packings",
+        "authors": [
+          "Henry Cohn",
+          "Annika Rajagopal"
+        ],
+        "year": 2024,
+        "venue": "arXiv preprint",
+        "arxiv_id": "2412.00937",
+        "doi": null,
+        "url": "https://arxiv.org/abs/2412.00937"
+      },
+      "result_type": "proven",
+      "notes": "The best known lower bound is 40, achieved by four known constructions including the D5 root system. The upper bound of 44 is from Levenshtein's linear programming bound. The exact value is unknown."
+    },
+    "secondary_bounds": [
+      {
+        "type": "upper_bound",
+        "value": 44,
+        "source": {
+          "title": "On bounds for packings in n-dimensional Euclidean space",
+          "authors": [
+            "V. I. Levenshtein"
+          ],
+          "year": 1979,
+          "venue": "Soviet Math. Dokl.",
+          "arxiv_id": null,
+          "doi": null,
+          "url": null
+        }
+      }
+    ],
+    "verification_status": "confirmed",
+    "search_notes": "The kissing number in dimension 5 has been open since the 1960s. The lower bound of 40 is realized by several constructions (D5 root system, etc.). Cohn & Rajagopal (2024) present a fourth construction but do not improve the lower bound."
+  },
+  {
+    "problem_id": "kissing_number_dim9",
+    "baseline": {
+      "value": "306 <= k <= 363",
+      "direction": "maximize",
+      "metric": "number_of_spheres",
+      "metric_key": "num_points",
+      "source": {
+        "title": "High accuracy semidefinite programming bounds for kissing numbers",
+        "authors": [
+          "Hans D. Mittelmann",
+          "Frank Vallentin"
+        ],
+        "year": 2010,
+        "venue": "Experimental Mathematics",
+        "arxiv_id": "0902.1105",
+        "doi": "10.1080/10586458.2010.10129070",
+        "url": "https://arxiv.org/abs/0902.1105"
+      },
+      "result_type": "proven",
+      "notes": "The lower bound of 306 is from an older paper, but is still the best known. The upper bound of 363 is from the cited paper and is the best known upper bound. The exact value is still unknown."
+    },
+    "secondary_bounds": [
+      {
+        "type": "lower_bound",
+        "value": 306,
+        "source": {
+          "title": "On bounds for packings in n-dimensional Euclidean space",
+          "authors": [
+            "V. I. Levenshtein"
+          ],
+          "year": 1979,
+          "venue": "Soviet Math. Dokl.",
+          "arxiv_id": null,
+          "doi": null,
+          "theorem_reference": "Lower bound construction",
+          "url": "https://www.mathnet.ru/eng/dan42609"
+        },
+        "superseded_by": "High accuracy semidefinite programming bounds for kissing numbers"
+      },
+      {
+        "type": "upper_bound",
+        "value": 380,
+        "source": {
+          "title": "Kissing number bounds",
+          "authors": [
+            "Various"
+          ],
+          "year": 2020,
+          "venue": "Wikipedia",
+          "arxiv_id": null,
+          "doi": null,
+          "theorem_reference": "Upper bound",
+          "url": null
+        }
+      }
+    ],
+    "verification_status": "verified_high_confidence",
+    "search_notes": "Searched Wikipedia, arXiv, and academic databases. The lower bound of 306 for dimension 9 is well-established in the literature, with Levenshtein's 1979 work being the primary reference. The upper bound is 380. No improvements to the lower bound of 306 were found in recent literature.",
+    "verification_date": "2026-02-04"
+  },
+  {
+    "problem_id": "spherical_7_design_minimal",
+    "baseline": {
+      "value": "48",
+      "direction": "minimize",
+      "metric": "number of points",
+      "metric_key": "num_points",
+      "source": {
+        "title": "Spherical Designs in Four Dimensions",
+        "authors": [
+          "R. H. Hardin",
+          "N. J. A. Sloane",
+          "P. Cara"
+        ],
+        "year": 2004,
+        "venue": "Table 1",
+        "arxiv_id": null,
+        "doi": null,
+        "url": "https://www.researchgate.net/publication/4021411_Spherical_designs_in_four_dimensions"
+      },
+      "result_type": "computational",
+      "notes": "The best known spherical 7-design on S^3 (4D) uses 48 points (two 24-cells). The DGS lower bound for a 7-design on S^3 is 40 points. The previous baseline of 24 was for S^2 (3D), not S^3."
+    },
+    "secondary_bounds": [
+      {
+        "type": "lower_bound",
+        "value": 40,
+        "source": {
+          "title": "Spherical codes and designs",
+          "authors": [
+            "P. Delsarte",
+            "J. M. Goethals",
+            "J. J. Seidel"
+          ],
+          "year": 1977,
+          "venue": "Geometriae Dedicata",
+          "arxiv_id": null,
+          "doi": "10.1007/BF03187604",
+          "theorem_reference": "DGS lower bound for spherical designs",
+          "url": "https://doi.org/10.1007/BF03187604"
+        }
+      }
+    ],
+    "verification_status": "verified",
+    "search_notes": "The problem is about S^3 (dimension 4), not S^2. The DGS lower bound is 40 points. The best known construction is 48 points from Hardin, Sloane, and Smith (2004), Table 1. The previous baseline of 24 was erroneously taken from S^2 results (McLaren’s improved snub cube).",
+    "verification_date": "2026-02-20"
+  },
+  {
+    "problem_id": "turan_petersen",
+    "baseline": {
+      "value": "673",
+      "direction": "maximize",
+      "metric": "number_of_edges",
+      "metric_key": "number_of_edges",
+      "source": {
+        "title": "The spectral Turan problem: Characterizing spectral-consistent graphs",
+        "authors": [
+          "Longfei Fang",
+          "Huiqiu Lin",
+          "Mingqing Zhai"
+        ],
+        "year": 2025,
+        "venue": "arXiv preprint",
+        "arxiv_id": "2508.12070",
+        "doi": null,
+        "url": "https://arxiv.org/pdf/2508.12070"
+      },
+      "result_type": "construction",
+      "notes": "The Simonovits-type extremal construction H(n,2,3) = K_2 ∇ T_2(n-2); for n=50 this gives K_2 ∇ K_{24,24} with 576+96+1=673 edges. This graph is Petersen-free."
+    },
+    "secondary_bounds": [
+      {
+        "type": "lower_bound",
+        "value": "Unknown",
+        "source": {
+          "title": "Not established",
+          "authors": [],
+          "year": null,
+          "venue": null,
+          "arxiv_id": null,
+          "doi": null,
+          "theorem_reference": null,
+          "url": null
+        },
+        "superseded_by": "On Moore Graphs with Diameters 2 and 3"
+      }
+    ],
+    "verification_status": "verified",
+    "search_notes": "Searched for Turán number Petersen graph across multiple databases. No definitive SOTA value was found. The Turán number for the Petersen graph remains an open problem with no widely accepted baseline.",
+    "verification_date": "2026-02-04"
+  },
+  {
+    "problem_id": "A21_10_binary_code",
+    "baseline": {
+      "value": 42,
+      "direction": "maximize",
+      "metric": "Number of codewords in binary code A(21,10)",
+      "metric_key": "number_of_codewords",
+      "source": {
+        "title": "Some new constant weight codes",
+        "authors": [
+          "M. K. Kaikkonen"
+        ],
+        "year": 1989,
+        "venue": "IEEE Transactions on Information Theory",
+        "arxiv_id": null,
+        "doi": null,
+        "theorem_reference": "A(21,10) >= 42",
+        "url": null
+      },
+      "result_type": "computational",
+      "notes": "Lower bound A(21,10) >= 42 attributed to M.K. Kaikkonen (IEEE Trans. Inf. Theory 35 (1989) p. 1344). Upper bound A(21,10) <= 47 given by Gijswijt-Mittelmann-Schrijver via semidefinite programming."
+    },
+    "secondary_bounds": [
+      {
+        "type": "upper_bound",
+        "value": 47,
+        "source": {
+          "title": "Semidefinite programming bound for A(n,d)",
+          "authors": [
+            "Dion Gijswijt",
+            "Hans Mittelmann",
+            "Alexander Schrijver"
+          ],
+          "year": null,
+          "venue": null,
+          "arxiv_id": null,
+          "doi": null,
+          "theorem_reference": "A(21,10) <= 47",
+          "url": "https://aeb.win.tue.nl/codes/binary-1.html"
+        }
+      }
+    ],
+    "verification_status": "verified",
+    "search_notes": "Lower bound A(21,10) >= 42 from Kaikkonen (1989). Upper bound A(21,10) <= 47 from semidefinite programming bound."
+  },
+  {
+    "problem_id": "autocorr_upper",
+    "baseline": {
+      "value": "1.50992",
+      "direction": "minimize",
+      "metric": "Autoconvolution Ratio Upper Bound",
+      "metric_key": "autoconvolution_ratio",
+      "source": {
+        "title": "Improved bounds on the supremum of autoconvolutions",
+        "authors": [
+          "Máté Matolcsi",
+          "Carlos Vinuesa"
+        ],
+        "year": 2010,
+        "venue": "Journal of Mathematical Analysis and Applications",
+        "arxiv_id": "0907.1379",
+        "doi": "10.1016/j.jmaa.2010.07.030",
+        "theorem_reference": "Main result (explicit construction)",
+        "url": "https://arxiv.org/abs/0907.1379"
+      },
+      "result_type": "computational",
+      "notes": "Explicit construction of a non-negative function on [-1/4, 1/4] achieving autoconvolution ratio 1.50992. This upper bound has not been improved by any subsequent work, human or AI, as of February 2026."
+    },
+    "secondary_bounds": [
+      {
+        "type": "lower_bound",
+        "value": "1.28",
+        "source": {
+          "title": "On Suprema of Autoconvolutions with an Application to Sidon sets",
+          "authors": [
+            "Alexander Cloninger",
+            "Stefan Steinerberger"
+          ],
+          "year": 2017,
+          "venue": "Proceedings of the American Mathematical Society",
+          "arxiv_id": "1403.7988",
+          "doi": "10.1090/proc/13690",
+          "theorem_reference": "Main theorem",
+          "url": "https://arxiv.org/abs/1403.7988"
+        }
+      },
+      {
+        "type": "lower_bound",
+        "value": "1.2748",
+        "source": {
+          "title": "Improved bounds on the supremum of autoconvolutions",
+          "authors": [
+            "Máté Matolcsi",
+            "Carlos Vinuesa"
+          ],
+          "year": 2010,
+          "venue": "Journal of Mathematical Analysis and Applications",
+          "arxiv_id": "0907.1379",
+          "doi": "10.1016/j.jmaa.2010.07.030",
+          "theorem_reference": "Lower bound result",
+          "url": "https://arxiv.org/abs/0907.1379"
+        }
+      }
+    ],
+    "verification_status": "confirmed",
+    "search_notes": "The upper bound C <= 1.50992 from Matolcsi & Vinuesa (2010) remains the best known as of Feb 2026. The lower bound was improved from 1.2748 (Matolcsi & Vinuesa, 2010) to 1.28 (Cloninger & Steinerberger, 2017, Proc. AMS 145(8):3191-3200). No AI systems (AlphaEvolve, FunSearch) have addressed this specific problem. The gap [1.28, 1.50992] remains open."
+  },
+  {
+    "problem_id": "spherical_9_design_s2",
+    "baseline": {
+      "value": "48",
+      "direction": "minimize",
+      "metric": "number of points",
+      "metric_key": "num_points",
+      "source": {
+        "title": "McLaren's Improved Snub Cube and Other New Spherical Designs in Three Dimensions",
+        "authors": [
+          "R.H. Hardin",
+          "N.J.A. Sloane"
+        ],
+        "year": 1996,
+        "venue": "Discrete and Computational Geometry",
+        "arxiv_id": "math/0207211",
+        "doi": "10.1007/BF02711518",
+        "theorem_reference": "Table of spherical designs (t=9 entry)",
+        "url": "https://arxiv.org/abs/math/0207211"
+      },
+      "result_type": "computational",
+      "notes": "The 48-point construction consists of the union of two chiral snub cubes (left- and right-handed, 2 x 24 = 48 points) with symmetry group [3,4]+ of order 24. This is a numerical/putative result (coordinates accurate to ~10^-26). No construction with fewer than 48 points has been found as of February 2026."
+    },
+    "secondary_bounds": [
+      {
+        "type": "lower_bound",
+        "value": "31",
+        "source": {
+          "title": "Lower bounds for spherical designs",
+          "authors": [
+            "V.A. Yudin"
+          ],
+          "year": 1997,
+          "venue": "Izvestiya: Mathematics",
+          "arxiv_id": null,
+          "doi": "10.1070/IM1997v061n03ABEH000132",
+          "theorem_reference": "Main theorem applied to t=9, d=3",
+          "url": "https://ui.adsabs.harvard.edu/abs/1997IzMat..61..673Y/abstract"
+        }
+      },
+      {
+        "type": "lower_bound",
+        "value": "30",
+        "source": {
+          "title": "Spherical codes and designs",
+          "authors": [
+            "P. Delsarte",
+            "J.M. Goethals",
+            "J.J. Seidel"
+          ],
+          "year": 1977,
+          "venue": "Geometriae Dedicata",
+          "arxiv_id": null,
+          "doi": "10.1007/BF00150010",
+          "theorem_reference": "DGS lower bound formula for t=9, d=3",
+          "url": "https://doi.org/10.1007/BF00150010"
+        }
+      }
+    ],
+    "verification_status": "confirmed",
+    "search_notes": "The 48-point construction from Hardin & Sloane (1996) remains the best known as of Feb 2026. The DGS lower bound of 30 was improved to 31 by Yudin (1997). Confirmed via Cohn/Sloane maintained tables at cohn.mit.edu/sloane/ and Womersley (2018, arXiv:1709.01624). No AI systems have addressed this specific problem. The gap [31, 48] remains open."
+  },
+  {
+    "problem_id": "keich_thin_triangles_128",
+    "baseline": {
+      "value": "0.1148103258186177",
+      "direction": "minimize",
+      "metric": "Area of union of 128 thin triangles (Kakeya-type construction)",
+      "metric_key": "area",
+      "source": {
+        "title": "AlphaEvolve: A coding agent for scientific and algorithmic discovery",
+        "authors": [
+          "Google DeepMind"
+        ],
+        "year": 2025,
+        "venue": "arXiv preprint",
+        "arxiv_id": "2506.13131",
+        "doi": null,
+        "url": "https://arxiv.org/abs/2506.13131"
+      },
+      "result_type": "computational",
+      "notes": "The AlphaEvolve triangles conv{(x_i, 0), (x_i + i/128, 0), (x_i + (i+1)/128, 1)} map exactly to our triangles conv{(0, b_i - 1/128), (0, b_i), (1, b_i + i/128)} by swapping coordinates (x, y) ↦ (y, x) and setting b_i = x_i + i/128, an area-preserving transformation."
+    },
+    "verification_status": "verified",
+    "search_notes": "Baseline from AlphaEvolve (Google DeepMind, 2025, arXiv:2506.13131). Improves on Keich (1999) Theorem 1 construction (area ≈ 0.11921)."
+  },
+  {
+    "problem_id": "lattice_packing_dim10",
+    "baseline": {
+      "value": "0.09202111843130556",
+      "direction": "maximize",
+      "metric": "Packing density of 10D lattice",
+      "metric_key": "packing_density",
+      "source": {
+        "title": "Sphere Packings, Lattices and Groups",
+        "authors": [
+          "J. H. Conway",
+          "N. J. A. Sloane"
+        ],
+        "year": 1988,
+        "venue": "Springer",
+        "arxiv_id": null,
+        "doi": "10.1007/978-1-4757-2249-9",
+        "url": "https://aeb.win.tue.nl/latt/lattices.pdf"
+      },
+      "result_type": "computational",
+      "notes": "The laminated lattice Λ10 (LAMBDA10) has Gram matrix determinant 768, covolume 16√3, shortest vector length 2, packing radius 1, and density π^5/(1920√3) ≈ 0.09202111843130556. Optimality in dimension 10 is open."
+    },
+    "verification_status": "verified",
+    "search_notes": "Baseline is the packing density of the well-known laminated lattice Λ10. Value confirmed from source_note in problem definition."
+  },
+  {
+    "problem_id": "periodic_packing_dim10",
+    "baseline": {
+      "value": "0.0996157828077088",
+      "direction": "maximize",
+      "metric": "Packing density of 10D periodic packing",
+      "metric_key": "packing_density",
+      "source": {
+        "title": "Binary codes with a minimum distance of four",
+        "authors": [
+          "R. T. Best"
+        ],
+        "year": 1980,
+        "venue": "IEEE Transactions on Information Theory",
+        "arxiv_id": null,
+        "doi": null,
+        "url": "https://ir.cwi.nl/pub/6831/6831D.pdf"
+      },
+      "result_type": "computational",
+      "notes": "Best's P10c construction: a (10,40,4) binary code via Construction A yields a 10D periodic packing with k=40 cosets of 2Z^10, center density 40/1024 = 5/128, and packing density (5/128)*Vol_10(1) ≈ 0.0996157828077088. Optimality in dimension 10 is open."
+    },
+    "verification_status": "verified",
+    "search_notes": "Baseline is the packing density of Best's P10c construction. Value confirmed from source_note in problem definition."
+  },
+  {
+    "problem_id": "vdw_W72_ap7",
+    "baseline": {
+      "value": "3703",
+      "direction": "maximize",
+      "metric": "Length of valid 2-coloring avoiding monochromatic 7-term arithmetic progression",
+      "metric_key": "length",
+      "source": {
+        "title": "Van der Waerden numbers",
+        "authors": [
+          "Jared Monroe"
+        ],
+        "year": 2019,
+        "venue": "arXiv preprint",
+        "arxiv_id": "1603.03301",
+        "doi": null,
+        "url": "https://arxiv.org/abs/1603.03301"
+      },
+      "result_type": "computational",
+      "notes": "Monroe (2019) compiles lower bounds from explicit constructions and reports W(7,2) > 3703, meaning a valid 2-coloring of {0,...,3702} with no monochromatic 7-AP exists. To beat the baseline requires n >= 3704."
+    },
+    "verification_status": "verified",
+    "search_notes": "Baseline from Monroe (2019), as stated in the problem description. The validator checks all 7-term APs and returns the coloring length under metric key 'length'."
+  }
+]
