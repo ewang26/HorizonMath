@@ -41,17 +41,13 @@ HorizonMath/
 │   └── *.py                # Problem-specific validators (one per problem)
 ├── scripts/                # Utility scripts
 │   ├── run_benchmark.py    # Generate LLM responses (Phase 1)
-│   ├── run_benchmark_batch.py  # Generate via OpenAI Batch API (Phase 1)
 │   ├── evaluate_responses.py   # Evaluate saved responses (Phase 2)
 │   ├── tmux_run.sh         # Run both phases in a tmux session
 │   ├── evaluate.py         # Core evaluation logic (numeric + benchmark modes)
 │   ├── validator_registry.py   # Auto-discovers validators
 │   ├── baseline_comparator.py  # Compares results against baselines
 │   ├── aggregate_results.py    # Aggregate evaluations across split runs
-│   ├── convert_problems.py # Convert problems.tex → data/problems.json
 │   └── run_numerics.py     # Execute all numeric scripts
-├── writeup.tex             # LaTeX writeup document
-├── summary.tex             # LaTeX summary document
 └── pyproject.toml          # Python dependencies
 ```
 
@@ -105,12 +101,6 @@ Level 0 problems have known solutions and serve to verify that the evaluation pi
 | integrals | 11 |
 | coding_theory | 9 |
 | mathematical_constants | 9 |
-
-### Convert problems from LaTeX to JSON
-
-```bash
-uv run python scripts/convert_problems.py
-```
 
 ### Run numerical computations
 
@@ -209,53 +199,6 @@ uv run scripts/run_benchmark.py --parallel 10
 # Resume an interrupted run
 uv run scripts/run_benchmark.py --resume results/openrouter_openai-gpt-5.2_20260205_143022/
 ```
-
-**Multi-process runs with streaming (OpenAI pro models):**
-
-When `--parallel 1` and `--provider openai` with a pro model, responses are streamed to stdout with `[HH:MM:SS]`-prefixed lines so you can monitor progress and detect hangs. Run separate processes on disjoint ranges — each in its own tmux window — instead of using a single multi-threaded process:
-
-```bash
-# Window 1
-uv run scripts/run_benchmark.py --provider openai --parallel 1 --range 0-24
-
-# Window 2
-uv run scripts/run_benchmark.py --provider openai --parallel 1 --range 25-49
-
-# Window 3
-uv run scripts/run_benchmark.py --provider openai --parallel 1 --range 50-74
-
-# Window 4
-uv run scripts/run_benchmark.py --provider openai --parallel 1 --range 75-100
-```
-
-Each window streams reasoning summary lines and the final answer as they arrive, making it easy to spot which process has stalled.
-
-**Batch API (recommended for pro models):**
-
-For models like `gpt-5.4-pro` that frequently hit connection/timeout errors with the standard API, use the Batch API via `run_benchmark_batch.py`. OpenAI handles all retries internally, and you get a 50% cost discount.
-
-```bash
-# Submit all problems as a batch (defaults to gpt-5.4-pro)
-uv run scripts/run_benchmark_batch.py submit
-
-# Submit a subset of problems
-uv run scripts/run_benchmark_batch.py submit --range 0-4
-uv run scripts/run_benchmark_batch.py submit --problem diff_basis_upper
-
-# Submit and auto-download when complete (polls every 60s)
-uv run scripts/run_benchmark_batch.py submit --wait
-
-# Check batch status
-uv run scripts/run_benchmark_batch.py status results/batch_gpt-5.4-pro_.../
-
-# Download results when batch is complete
-uv run scripts/run_benchmark_batch.py download results/batch_gpt-5.4-pro_.../
-
-# Then evaluate as usual
-uv run scripts/evaluate_responses.py results/batch_gpt-5.4-pro_.../
-```
-
-Batches complete within 24 hours. The output is the same `responses.jsonl` format, so `evaluate_responses.py` works unchanged.
 
 **Phase 2 — Evaluate responses:**
 
@@ -397,27 +340,41 @@ Each validator documents its expected input format in its docstring. Common form
 - Points: `{"points": [[x, y, z], ...]}`
 - Matrices: `{"matrix": [[...], ...]}`
 
-## Adding Numerical Solutions
+## Contributing Problems
 
-1. Create a script in `numerics/` (e.g., `numerics/my_problem.py`)
-2. The script should print the computed value when run:
-   ```python
-   from mpmath import mp
-   mp.dps = 110  # Set precision
+We welcome new problem contributions! To propose a problem, open a GitHub issue with the following:
 
-   def compute():
-       # Your computation here
-       return result
+1. **Problem description** — a clear mathematical statement, including the source (paper, Math Stack Exchange, etc.)
+2. **Classification** — the proposed `output_type`, `domain`, `evaluation_mode`, and `solvability` level (see [Problem Taxonomy](#problem-taxonomy))
+3. **Full implementation** — depending on the evaluation mode, include:
 
-   if __name__ == "__main__":
-       print(str(compute()))
-   ```
-3. Name the script to match the problem ID exactly. For example, for problem `my_problem`, create `numerics/my_problem.py`.
+| Evaluation Mode | What to provide |
+|---|---|
+| `ground_truth_computable` | A numerics script that computes the answer to at least 50 digits of precision, or a reliable academic source providing a pre-computed numerical value |
+| `benchmark_best_known` | A validator script **and** a baseline value with source citation |
+| `new_construction` | A validator script |
 
-## Adding Validators for Benchmark and Construction Problems
+You must also provide a justification of the numerics or validator script that you provide below, explaining the method(s) used.
 
-1. Create a validator in `validators/` named `{problem_id}.py`
-2. Implement a `validate(solution)` function that returns a `ValidationResult`:
+### Numerics scripts
+
+A numerics script computes the ground-truth value to high precision. It should be a standalone Python file:
+
+```python
+from mpmath import mp
+mp.dps = 110  # at least 100 digits of precision
+
+def compute():
+    # Your computation here
+    return result
+
+if __name__ == "__main__":
+    print(str(compute()))
+```
+
+### Validators
+
+A validator checks whether a proposed construction is mathematically valid and returns metrics. It should export a single `validate(solution)` function:
 
 ```python
 from . import ValidationResult, success, failure
@@ -425,17 +382,34 @@ from . import ValidationResult, success, failure
 def validate(solution):
     """
     Expected input format:
-        {"key": value, ...}
+        {"basis": [b0, b1, b2, ...]}
     """
-    # Validate the solution
-    if not valid:
-        return failure("Error message", **metrics)
+    # 1. Parse the input
+    if isinstance(solution, dict) and 'basis' in solution:
+        basis = solution['basis']
+    else:
+        return failure("Expected dict with 'basis' key")
 
-    return success("Success message", metric1=value1, metric2=value2)
+    # 2. Check mathematical validity
+    if not all_differences_covered(basis):
+        return failure("Not all differences covered", basis_size=len(basis))
+
+    # 3. Return success with metrics
+    return success(
+        f"Valid basis of size {len(basis)}",
+        basis_size=len(basis),
+        ratio=len(basis)**2 / n
+    )
 ```
 
-3. The validator is auto-discovered by `validator_registry.py`
-4. For `benchmark_best_known` problems, add baseline data to `data/baselines.json` with the problem's state-of-the-art value (not needed for `new_construction` problems, which are binary pass/fail):
+- `success(message, **metrics)` and `failure(message, **metrics)` are the only return types needed.
+- Document the expected input format in the docstring.
+- For benchmark problems, return **metrics** as keyword arguments — one of these is compared against the baseline.
+- Helper utilities available from the `validators` package: `parse_integer`, `parse_rational`, `load_solution`, `run_sage_script`.
+
+### Baselines (benchmark problems only)
+
+For `benchmark_best_known` problems, provide a baseline entry for `data/baselines.json`:
 
 ```json
 {
@@ -443,7 +417,12 @@ def validate(solution):
   "baseline": {
     "value": "2.6390",
     "direction": "minimize",
-    "metric": "description of what's being optimized"
+    "metric": "ratio |B|^2/n for a difference basis of [1, n-1]",
+    "metric_key": "ratio"
   }
 }
 ```
+
+- `direction`: `"minimize"` or `"maximize"` — whether lower or higher values are better.
+- `metric_key`: which key from the validator's returned metrics to compare against the baseline.
+- Include a source citation for the baseline value.
