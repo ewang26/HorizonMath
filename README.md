@@ -1,6 +1,24 @@
-# HorizonMath
+<h1 align="center">HorizonMath</h1>
 
-Research project for evaluating LLMs on open mathematical problems.
+<h3 align="center">Measuring AI Progress Toward Mathematical Discovery with Automatic Verification</h3>
+
+<p align="center">
+  <a href="https://arxiv.org/abs/2603.15617"><img src="https://img.shields.io/badge/arXiv-2603.15617-b31b1b.svg" alt="arXiv"></a>
+  <a href="https://ewang26.github.io/HorizonMath/"><img src="https://img.shields.io/badge/Project-Page-blue.svg" alt="Project Page"></a>
+</p>
+
+<p align="center">
+  Erik Y. Wang*, Sumeet Motwani, James V. Roggeveen, Eliot Hodges, Dulhan Jayalath,<br>
+  Charles London, Kalyan Ramakrishnan, Flaviu Cipcigan, Philip Torr, Alessandro Abate
+</p>
+
+<p align="center">
+  University of Oxford · Benchmark · Harvard University · Princeton University · Ellison Institute of Technology
+</p>
+
+<p align="center">
+  *Correspondence: <a href="mailto:erik.wang@dtc.ox.ac.uk">erik.wang@dtc.ox.ac.uk</a>
+</p>
 
 ## Setup
 
