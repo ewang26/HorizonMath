@@ -1,0 +1,451 @@
+/* ===== Reset & Base ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --mono: 'Source Code Pro', ui-monospace, monospace;
+  --bg: #ffffff;
+  --fg: #111;
+  --fg-2: #444;
+  --fg-3: #888;
+  --border: #e5e5e5;
+  --accent: #c2185b;
+  --code-bg: #1a1a1a;
+  --code-fg: #e0e0e0;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font);
+  color: var(--fg);
+  background: var(--bg);
+  line-height: 1.7;
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ===== Layout ===== */
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+.section {
+  padding: 3rem 0;
+  border-top: 1px solid var(--border);
+}
+
+h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  letter-spacing: -0.01em;
+  text-align: center;
+}
+
+h3 {
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--fg-3);
+  margin-bottom: 0.5rem;
+}
+
+p {
+  margin-bottom: 1rem;
+  color: var(--fg-2);
+}
+
+a { color: var(--fg); text-decoration: underline; text-decoration-color: var(--border); text-underline-offset: 2px; }
+a:hover { text-decoration-color: var(--fg); }
+
+.mono {
+  font-family: var(--mono);
+  font-size: 0.92em;
+}
+
+/* ===== Hero ===== */
+.hero {
+  text-align: center;
+  padding: 5rem 2rem 2rem;
+}
+
+.hero .title {
+  font-size: 3rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  margin-bottom: 0.5rem;
+}
+
+.hero .subtitle {
+  font-size: 1.55rem;
+  font-weight: 400;
+  color: var(--fg);
+  margin-bottom: 2rem;
+  line-height: 1.6;
+}
+
+.hero .authors {
+  font-size: 0.98rem;
+  margin-bottom: 0.5rem;
+  line-height: 2;
+  color: var(--fg);
+}
+
+.hero .authors span { white-space: nowrap; }
+.hero .authors span:not(:last-child)::after { content: ', '; }
+.hero .authors a { color: var(--fg); text-decoration: none; }
+.hero .authors a:hover { color: var(--accent); }
+.hero .authors sup { font-size: 0.65em; color: var(--fg-3); }
+
+.hero .affiliations {
+  font-size: 0.82rem;
+  color: #555;
+  margin-bottom: 0.2rem;
+}
+
+.hero .note {
+  font-size: 0.78rem;
+  color: #555;
+  margin-bottom: 1.75rem;
+}
+
+.links {
+  display: flex;
+  justify-content: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.btn {
+  display: inline-block;
+  padding: 0.45rem 1.4rem;
+  border: 1.5px solid var(--fg);
+  border-radius: 4px;
+  color: var(--fg);
+  font-weight: 500;
+  font-size: 0.88rem;
+  text-decoration: none;
+  transition: all 0.15s;
+}
+
+.btn:hover {
+  background: var(--fg);
+  color: #fff;
+}
+
+/* ===== Alternating section backgrounds ===== */
+.hero, #benchmark, #examples, #citation {
+  background: #fafafa;
+}
+
+/* ===== Key Results ===== */
+
+.key-results-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0 2rem;
+  font-size: 0.92rem;
+}
+
+.key-results-table thead th {
+  font-weight: 600;
+  text-align: left;
+  padding: 0.7rem 1rem;
+  border-bottom: 2px solid var(--fg);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.key-results-table thead th:not(:first-child) { text-align: center; }
+
+.key-results-table tbody td {
+  padding: 0.65rem 1rem;
+  border-bottom: 1px solid var(--border);
+  color: var(--fg-2);
+}
+
+.key-results-table tbody td:not(:first-child) { text-align: center; }
+
+.key-results-table .highlight-row td {
+  background: #fff7ed;
+  color: var(--fg);
+  font-weight: 500;
+}
+
+/* Discoveries */
+.discoveries {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+}
+
+@media (max-width: 640px) {
+  .discoveries { grid-template-columns: 1fr; }
+}
+
+.discovery {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 1.5rem;
+  background: #fff;
+  position: relative;
+}
+
+.discovery-badge {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: 3px;
+  padding: 0.15rem 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.discovery h3 {
+  text-transform: none;
+  letter-spacing: -0.01em;
+  font-size: 1rem;
+  color: var(--fg);
+  margin-bottom: 0.5rem;
+}
+
+.discovery p {
+  font-size: 0.9rem;
+  line-height: 1.6;
+  margin-bottom: 0;
+}
+
+/* ===== Abstract ===== */
+.abstract-text {
+  font-size: 1rem;
+  line-height: 1.85;
+  color: var(--fg-2);
+  text-align: justify;
+}
+
+/* ===== Example Problems ===== */
+.example {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: 1.25rem;
+}
+
+.example-header {
+  padding: 1.25rem 1.5rem 1rem;
+  border-bottom: 1px solid var(--border);
+  background: #fafafa;
+}
+
+.example-meta {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.6rem;
+}
+
+.tag {
+  font-size: 0.7rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--fg-3);
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 0.15rem 0.5rem;
+}
+
+.example-header h3 {
+  text-transform: none;
+  letter-spacing: -0.01em;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--fg);
+  margin-bottom: 0.25rem;
+}
+
+.example-source {
+  font-size: 0.82rem;
+  color: var(--fg-3);
+  margin-bottom: 0;
+}
+
+.example-body {
+  padding: 1.25rem 1.5rem;
+}
+
+.example-body p {
+  font-size: 0.92rem;
+  line-height: 1.7;
+}
+
+.math-block {
+  text-align: center;
+  padding: 1rem 0.5rem;
+  margin: 1rem 0;
+  overflow-x: auto;
+  color: var(--fg);
+}
+
+details {
+  margin-top: 0.75rem;
+}
+
+details summary {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--fg-2);
+  cursor: pointer;
+  user-select: none;
+  padding: 0.3rem 0;
+}
+
+details summary:hover {
+  color: var(--fg);
+}
+
+details summary::marker {
+  color: var(--fg-3);
+}
+
+details pre {
+  margin-top: 0.5rem;
+}
+
+pre {
+  background: var(--code-bg);
+  color: var(--code-fg);
+  border-radius: 6px;
+  padding: 1rem 1.25rem;
+  overflow-x: auto;
+  font-size: 0.82rem;
+  line-height: 1.65;
+}
+
+pre code {
+  background: none;
+  padding: 0;
+  color: inherit;
+  font-size: inherit;
+  font-family: var(--mono);
+}
+
+/* ===== Stats Row ===== */
+.stats-row {
+  display: flex;
+  justify-content: center;
+  gap: 4rem;
+  margin: 2.5rem 0;
+  flex-wrap: wrap;
+}
+
+.stat { text-align: center; }
+
+.stat-number {
+  display: block;
+  font-size: 2.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--fg);
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  color: var(--fg-3);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* ===== Two Column ===== */
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2.5rem;
+}
+
+@media (max-width: 640px) {
+  .two-col { grid-template-columns: 1fr; }
+}
+
+/* ===== Tables ===== */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+thead th {
+  font-weight: 600;
+  text-align: left;
+  padding: 0.55rem 0.75rem;
+  border-bottom: 2px solid var(--fg);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--fg);
+}
+
+tbody td {
+  padding: 0.45rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+  color: var(--fg-2);
+}
+
+.table-wrapper { overflow-x: auto; }
+
+.comparison-table { min-width: 480px; }
+
+.comparison-table td:nth-child(n+3),
+.comparison-table th:nth-child(n+3) {
+  text-align: center;
+}
+
+.ours-row td {
+  background: #f0fdf4;
+}
+
+/* ===== BibTeX ===== */
+.bibtex {
+  background: var(--code-bg);
+  color: var(--code-fg);
+  border-radius: 6px;
+  padding: 1.25rem 1.5rem;
+  overflow-x: auto;
+  font-size: 0.82rem;
+  line-height: 1.65;
+}
+
+/* ===== Footer ===== */
+footer {
+  border-top: 1px solid var(--border);
+  text-align: center;
+  padding: 2rem;
+}
+
+footer p {
+  color: var(--fg-3);
+  font-size: 0.82rem;
+}
+
+footer a { color: var(--fg-3); }
+footer a:hover { color: var(--fg); }
+
+/* ===== Responsive ===== */
+@media (max-width: 640px) {
+  .hero { padding: 3.5rem 1.25rem 2.5rem; }
+  .hero .title { font-size: 2rem; }
+  .hero .subtitle { font-size: 1rem; }
+  .container { padding: 0 1.25rem; }
+  .section { padding: 3rem 0; }
+  .stats-row { gap: 2rem; }
+  .stat-number { font-size: 2rem; }
+}

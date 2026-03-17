@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HorizonMath: Measuring AI Progress Toward Mathematical Discovery</title>
+  <meta name="description" content="HorizonMath is a benchmark of 100+ unsolved mathematical problems with automated verification for measuring AI progress toward mathematical discovery.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <link rel="stylesheet" href="static/style.css">
+</head>
+<body>
+
+<!-- Header -->
+<header class="hero">
+  <div class="container">
+    <h1 class="title">HorizonMath</h1>
+    <p class="subtitle">Measuring AI Progress Toward Mathematical Discovery with Automatic Verification</p>
+    <div class="authors">
+      <span><a href="https://erikyw.com/">Erik Y. Wang</a><sup>1,2,*</sup></span>
+      <span><a href="https://sumeetmotwani.com/">Sumeet Motwani</a><sup>1,*</sup></span>
+      <span><a href="https://www.jamesroggeveen.com/">James V. Roggeveen</a><sup>3</sup></span>
+      <span><a href="https://www.eliothodges.com/">Eliot Hodges</a><sup>4</sup></span>
+      <span><a href="https://dulhanjayalath.com/">Dulhan Jayalath</a><sup>1</sup></span>
+      <span><a href="https://le-big-mac.github.io/">Charles London</a><sup>1</sup></span>
+      <span><a href="#">Kalyan Ramakrishnan</a><sup>1</sup></span>
+      <span><a href="#">Flaviu Cipcigan</a><sup>5</sup></span>
+      <span><a href="https://torrvision.com/">Philip Torr</a><sup>1</sup></span>
+      <span><a href="https://www.cs.ox.ac.uk/people/alessandro.abate/home.html">Alessandro Abate</a><sup>1</sup></span>
+    </div>
+    <p class="affiliations">
+      <sup>1</sup>University of Oxford &nbsp;
+      <sup>2</sup>Benchmark &nbsp;
+      <sup>3</sup>Harvard University &nbsp;
+      <sup>4</sup>Princeton University &nbsp;
+      <sup>5</sup>Ellison Institute of Technology
+    </p>
+    <p class="note"><sup>*</sup>Corresponding authors</p>
+    <div class="links">
+      <a href="https://arxiv.org/abs/2603.15617" class="btn">Paper</a>
+      <a href="https://github.com/ewang26/HorizonMath" class="btn">Code</a>
+    </div>
+  </div>
+</header>
+
+<!-- Abstract -->
+<section id="abstract" class="section">
+  <div class="container">
+    <h2>Abstract</h2>
+    <p class="abstract-text">
+      Can AI make progress on important, unsolved mathematical problems? Large language models are now capable of sophisticated mathematical and scientific reasoning, but whether they can perform novel research is still widely debated and underexplored. We introduce <strong>HorizonMath</strong>, a benchmark of over 100 problems spanning 8 domains from computational and applied mathematics research that are predominantly unsolved, paired with an open-source evaluation framework for automated verification. Our benchmark targets a class of problems where discovery is hard, requiring meaningful mathematical insight, but verification is computationally efficient and simple. Because these solutions are unknown, HorizonMath is <strong>immune to data contamination</strong>, and state-of-the-art models score near 0%. With this platform, we find two problems for which GPT 5.4 Pro proposes novel solutions that potentially improve on the best-known baseline results published in the literature. We release this benchmark as an <strong>open challenge</strong> where solutions to even a single problem would constitute a novel result in the mathematical literature.
+    </p>
+  </div>
+</section>
+
+<!-- Benchmark Overview -->
+<section id="benchmark" class="section">
+  <div class="container">
+    <h2>Benchmark Overview</h2>
+    <p>101 problems across 8 mathematical domains. Problems without known solutions cannot exist in any training corpus&mdash;any correct solution signals true reasoning and autonomous discovery.</p>
+
+    <div class="stats-row">
+      <div class="stat">
+        <span class="stat-number">101</span>
+        <span class="stat-label">Problems</span>
+      </div>
+      <div class="stat">
+        <span class="stat-number">8</span>
+        <span class="stat-label">Domains</span>
+      </div>
+      <div class="stat">
+        <span class="stat-number">91</span>
+        <span class="stat-label">Unsolved</span>
+      </div>
+      <div class="stat">
+        <span class="stat-number">3</span>
+        <span class="stat-label">Eval Modes</span>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div>
+        <h3>Solvability Levels</h3>
+        <table>
+          <thead><tr><th>Level</th><th>Description</th><th>Count</th></tr></thead>
+          <tbody>
+            <tr><td>0</td><td>Calibration (solved)</td><td>10</td></tr>
+            <tr><td>1</td><td>Likely solvable</td><td>23</td></tr>
+            <tr><td>2</td><td>Challenging</td><td>60</td></tr>
+            <tr><td>3</td><td>Likely unsolvable</td><td>8</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <h3>Mathematical Domains</h3>
+        <table>
+          <thead><tr><th>Domain</th><th>Count</th></tr></thead>
+          <tbody>
+            <tr><td>Number Theory</td><td>17</td></tr>
+            <tr><td>Discrete Geometry</td><td>15</td></tr>
+            <tr><td>Lattice Models</td><td>15</td></tr>
+            <tr><td>Continuum Physics</td><td>13</td></tr>
+            <tr><td>Combinatorics</td><td>12</td></tr>
+            <tr><td>Integrals</td><td>11</td></tr>
+            <tr><td>Coding Theory</td><td>9</td></tr>
+            <tr><td>Mathematical Constants</td><td>9</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Key Results -->
+<section id="key-results" class="section">
+  <div class="container">
+    <h2>Key Results</h2>
+    <p>We evaluate three frontier models on 101 research-level math problems. State-of-the-art models score near 0%, but <strong>GPT 5.4 Pro produces 2 potentially novel mathematical results</strong> that improve on published baselines.</p>
+
+    <table class="key-results-table">
+      <thead>
+        <tr>
+          <th>Model</th>
+          <th>Full Dataset</th>
+          <th>Level 0 (Calibration)</th>
+          <th>Novel Solutions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="highlight-row">
+          <td>GPT 5.4 Pro</td>
+          <td>7%</td>
+          <td>50%</td>
+          <td><strong>2</strong></td>
+        </tr>
+        <tr>
+          <td>Claude Opus 4.6</td>
+          <td>3%</td>
+          <td>30%</td>
+          <td>0</td>
+        </tr>
+        <tr>
+          <td>Gemini 3.1 Pro</td>
+          <td>3%</td>
+          <td>30%</td>
+          <td>0</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="discoveries">
+      <div class="discovery">
+        <div class="discovery-badge">Novel Result</div>
+        <h3>Asymptotic Upper Bound for Diagonal Ramsey Numbers</h3>
+        <p>GPT 5.4 Pro achieved <span class="math">c \approx 3.7296</span>, improving on the best-known <span class="math">c \approx 3.7992</span> in <span class="math">R(k,k) \le c^{k+o(k)}</span> by tuning the correction polynomial and piecewise-constant functions within the Gupta&ndash;Ndiaye&ndash;Norin&ndash;Wei framework.</p>
+      </div>
+      <div class="discovery">
+        <div class="discovery-badge">Novel Result</div>
+        <h3>Thin-Triangle Kakeya (128 slopes)</h3>
+        <p>Reduced the union area by approximately <strong>8.44%</strong> over the Keich baseline using a Haar-style overlap pattern with locally optimized block coefficients.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Example Problems -->
+<section id="examples" class="section">
+  <div class="container">
+    <h2>Example Problems</h2>
+    <p>HorizonMath targets problems where discovery is hard but verification is efficient. Here are three representative problems illustrating the range of domains and evaluation modes.</p>
+
+    <div class="example">
+      <div class="example-header">
+        <div class="example-meta">
+          <span class="tag">Constant Discovery</span>
+          <span class="tag">Solvability 2</span>
+          <span class="tag">ground_truth_computable</span>
+        </div>
+        <h3>Fifth Moment of the Airy Function (<span class="math">a_5</span>)</h3>
+        <p class="example-source">Laurenzi, B. J. (1993). <em>Moment integrals of powers of Airy functions.</em> Z. angew. Math. Phys., 44, 891&ndash;908.</p>
+      </div>
+      <div class="example-body">
+        <p>The Airy power moments are defined by:</p>
+        <div class="math-block math-display">a_n = \int_0^\infty \mathrm{Ai}(x)^n \, dx</div>
+        <p>Closed forms are known for small <span class="math">n</span>, but the fifth moment <span class="math">a_5 \approx 0.001349358983\dots</span> lacks a known symbolic expression. The model must find a closed-form expression that matches the ground truth to at least 20 decimal digits.</p>
+        <details>
+          <summary>Show expected output format</summary>
+          <pre><code>def proposed_solution():
+    from mpmath import mp
+    mp.dps = 100
+    # Use only mpmath constants and special functions
+    result = ...  # symbolic closed-form expression
+    return result</code></pre>
+        </details>
+      </div>
+    </div>
+
+    <div class="example">
+      <div class="example-header">
+        <div class="example-meta">
+          <span class="tag">Function Discovery</span>
+          <span class="tag">Solvability 2</span>
+          <span class="tag">ground_truth_computable</span>
+        </div>
+        <h3>Angular Prolate Spheroidal Eigenvalues (order <span class="math">m = 0</span>)</h3>
+        <p class="example-source">Falloon, P. E., Abbott, P. C., &amp; Wang, J. B. (2003). <em>Theory and computation of spheroidal wavefunctions.</em> J. Phys. A, 36(20), 5477&ndash;5495.</p>
+      </div>
+      <div class="example-body">
+        <p>Let <span class="math">c \ge 0</span> be a real parameter. Consider the Sturm&ndash;Liouville eigenvalue problem on <span class="math">(-1,1)</span>:</p>
+        <div class="math-block math-display">-\frac{d}{dx}\left((1-x^2)\frac{dy}{dx}\right) + c^2 x^2 \, y(x) = \lambda \, y(x), \qquad -1 < x < 1</div>
+        <p>with the boundary condition that <span class="math">y(x)</span> remains bounded as <span class="math">x \to \pm 1</span>. The spectrum is discrete and real:</p>
+        <div class="math-block math-display">0 \le \lambda_0(c) < \lambda_1(c) < \lambda_2(c) < \cdots</div>
+        <p>and <span class="math">\lambda_n(0) = n(n+1)</span>. General symbolic closed forms remain undiscovered. <strong>Task:</strong> Find a symbolic closed-form expression for <span class="math">\lambda_n(c)</span> valid for general integer <span class="math">n \ge 0</span> and real <span class="math">c \ge 0</span>.</p>
+        <details>
+          <summary>Show expected output format</summary>
+          <pre><code>def proposed_solution(n, c):
+    from mpmath import mp
+    mp.dps = 100
+    result = ...  # closed-form for lambda_n(c)
+    return result</code></pre>
+        </details>
+      </div>
+    </div>
+
+    <div class="example">
+      <div class="example-header">
+        <div class="example-meta">
+          <span class="tag">Construction</span>
+          <span class="tag">Solvability 1</span>
+          <span class="tag">benchmark_best_known</span>
+        </div>
+        <h3>Minimum-Scope Difference Triangle Set <span class="math">(7,5)</span></h3>
+        <p class="example-source">Shehadeh, M., Kingsford, W., &amp; Kschischang, F. R. (2026). <em>New Difference Triangle Sets by an FPGA-Based Search Technique.</em> J. Combin. Des., 34(1).</p>
+      </div>
+      <div class="example-body">
+        <p>An <span class="math">(n,k)</span>-DTS is an <span class="math">n \times (k+1)</span> array <span class="math">A</span> with entries <span class="math">a_{i,j}</span> such that each row is strictly increasing and normalized:</p>
+        <div class="math-block math-display">0 = a_{i,0} < a_{i,1} < \cdots < a_{i,k}</div>
+        <p>Define the set of positive within-row differences:</p>
+        <div class="math-block math-display">D = \{ a_{i,j} - a_{i,j'} : \text{for all } i, \text{ and } 0 \le j' < j \le k \}</div>
+        <p>All elements of <span class="math">D</span> must be distinct. The scope is <span class="math">m(A) = \max_{i,j} a_{i,j}</span>. <strong>Task:</strong> Find a valid <span class="math">(7,5)</span>-DTS with scope strictly less than the current best-known upper bound <span class="math">m(7,5) \le 112</span>.</p>
+        <details>
+          <summary>Show expected output format</summary>
+          <pre><code>def proposed_solution():
+    return {
+        "n": 7, "k": 5,
+        "rows": [
+            [0, a01, a02, a03, a04, a05],
+            ...  # 7 rows total
+        ]
+    }</code></pre>
+        </details>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Comparison Table -->
+<section id="comparison" class="section">
+  <div class="container">
+    <h2>Comparison with Existing Benchmarks</h2>
+    <div class="table-wrapper">
+      <table class="comparison-table">
+        <thead>
+          <tr>
+            <th>Dataset</th>
+            <th>Problems</th>
+            <th>Unsolved</th>
+            <th>Open Eval</th>
+            <th>Auto-Verify</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>FrontierMath: Open Problems</td><td>14</td><td>&check;</td><td>&cross;</td><td>&check;</td></tr>
+          <tr><td>IMProofBench</td><td>39</td><td>&cross;</td><td>&cross;</td><td>&cross;</td></tr>
+          <tr><td>First Proof</td><td>10</td><td>&cross;</td><td>&cross;</td><td>&cross;</td></tr>
+          <tr><td>Erd&#337;s Problems</td><td>1,000+</td><td>&check;</td><td>&cross;</td><td>&cross;</td></tr>
+          <tr><td>IMO-AnswerBench</td><td>400</td><td>&cross;</td><td>&check;</td><td>&check;</td></tr>
+          <tr><td>Optimization Constants</td><td>96</td><td>&check;</td><td>&cross;</td><td>&check;</td></tr>
+          <tr class="ours-row"><td><strong>HorizonMath</strong></td><td><strong>101</strong></td><td><strong>&check;</strong></td><td><strong>&check;</strong></td><td><strong>&check;</strong></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- Citation -->
+<section id="citation" class="section">
+  <div class="container">
+    <h2>BibTeX</h2>
+    <pre class="bibtex"><code>@article{wang2026horizonmathmeasuringaiprogress,
+      title={HorizonMath: Measuring AI Progress Toward Mathematical Discovery with Automatic Verification},
+      author={Erik Y. Wang and Sumeet Motwani and James V. Roggeveen and Eliot Hodges and Dulhan Jayalath and Charles London and Kalyan Ramakrishnan and Flaviu Cipcigan and Philip Torr and Alessandro Abate},
+      year={2026},
+      eprint={2603.15617},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG},
+      url={https://arxiv.org/abs/2603.15617},
+}</code></pre>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer>
+  <div class="container">
+    <p>HorizonMath &copy; 2026 &middot; <a href="https://github.com/ewang26/HorizonMath">GitHub</a></p>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  // Render inline math: <span class="math">...</span>
+  document.querySelectorAll('.math').forEach(function(el) {
+    katex.render(el.textContent, el, { throwOnError: false });
+  });
+  // Render display math: <div class="math-display">...</div>
+  document.querySelectorAll('.math-display').forEach(function(el) {
+    katex.render(el.textContent, el, { displayMode: true, throwOnError: false });
+  });
+});
+</script>
+</body>
+</html>
