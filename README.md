@@ -426,3 +426,18 @@ For `benchmark_best_known` problems, provide a baseline entry for `data/baseline
 - `direction`: `"minimize"` or `"maximize"` — whether lower or higher values are better.
 - `metric_key`: which key from the validator's returned metrics to compare against the baseline.
 - Include a source citation for the baseline value.
+
+## Citation
+
+```bibtex
+@article{wang2026horizonmath,
+  title     = {HorizonMath: Measuring AI Progress Toward Mathematical
+               Discovery with Automatic Verification},
+  author    = {Wang, Erik Y. and Motwani, Sumeet and Roggeveen, James V.
+               and Hodges, Eliot and Jayalath, Dulhan and London, Charles
+               and Ramakrishnan, Kalyan and Cipcigan, Flaviu
+               and Torr, Philip and Abate, Alessandro},
+  year      = {2026},
+  note      = {Working Draft}
+}
+```
