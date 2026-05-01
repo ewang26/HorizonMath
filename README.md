@@ -38,11 +38,11 @@ GEMINI_API_KEY=AIza...
 
 ## Problem Taxonomy
 
-The benchmark contains **101 problems** across 8 domains, classified by three fields in `data/problems_full.json`:
+The benchmark contains **113 problems** across 11 domains, classified by three fields in `data/problems_full.json`:
 
-- **`solvability`** (difficulty level): 0 (calibration, 10), 1 (likely solvable, 23), 2 (challenging, 60), 3 (possibly unsolvable, 8)
-- **`output_type`** (artifact type): constant (54), function (5), formula_discovery (3), construction (39)
-- **`evaluation_mode`** (how answers are checked): ground_truth_computable (59), benchmark_best_known (33), new_construction (9)
+- **`solvability`** (difficulty level): 0 (calibration, 10), 1 (likely solvable, 31), 2 (challenging, 64), 3 (possibly unsolvable, 8)
+- **`output_type`** (artifact type): constant (56), function (15), formula_discovery (3), construction (39)
+- **`evaluation_mode`** (how answers are checked): ground_truth_computable (71), benchmark_best_known (33), new_construction (9)
 
 Solvability 0 problems have known solutions and serve as a verification step for the evaluation pipeline and a calibration for models.
 
@@ -123,7 +123,7 @@ You can split a benchmark across parallel jobs using `--range` (0-based inclusiv
 
 ```bash
 uv run scripts/run_benchmark.py --range 0-49 --provider openai --model gpt-5.2-pro
-uv run scripts/run_benchmark.py --range 50-100 --provider openai --model gpt-5.2-pro
+uv run scripts/run_benchmark.py --range 50-112 --provider openai --model gpt-5.2-pro
 ```
 
 Then merge the result directories into a single report:

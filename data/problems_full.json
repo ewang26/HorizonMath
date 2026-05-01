@@ -172,7 +172,7 @@
     "evaluation_mode": "benchmark_best_known",
     "solvability": 1,
     "source_url": "https://arxiv.org/abs/2601.16175",
-    "source_note": "Yuksekgonul et al. (2025) 'Learning to Discover at Test Time' (arXiv:2601.16175) - achieves C ≤ 1.50286 via a 30000-piece step function, and Cloninger & Steinerberger (2017) 'On Suprema of Autoconvolutions with an Application to Sidon sets' (Proc. AMS 145(8):3191-3200, arXiv:1403.7988)"
+    "source_note": "Yuksekgonul et al. (2025) 'Learning to Discover at Test Time' (arXiv:2601.16175) - achieves C \u2264 1.50286 via a 30000-piece step function, and Cloninger & Steinerberger (2017) 'On Suprema of Autoconvolutions with an Application to Sidon sets' (Proc. AMS 145(8):3191-3200, arXiv:1403.7988)"
   },
   {
     "id": "autocorr_signed_upper",
@@ -251,7 +251,7 @@
   },
   {
     "id": "spheroidal_eigenvalue_lambda_m0",
-    "prompt": "Consider the following open problem in spectral theory / special functions.\n\n**Angular Prolate Spheroidal Eigenvalues (order m = 0)**\n\nLet \\(c \\ge 0\\) be a real parameter. Consider the Sturm-Liouville eigenvalue problem on \\((-1,1)\\):\n\n\\[\n-\\frac{d}{dx}\\Big((1-x^2)\\,y'(x)\\Big) + c^2 x^2\\,y(x) = \\lambda\\,y(x),\\qquad -1<x<1,\n\\]\n\nwith the boundary condition that \\(y(x)\\) remains bounded as \\(x\\to\\pm 1\\).\n\nIt is known that the spectrum is discrete and real:\n\\(0\\le \\lambda_0(c) < \\lambda_1(c) < \\lambda_2(c) < \\cdots\\), and \\(\\lambda_n(0)=n(n+1)\\).\n\n**Task:** Find a symbolic closed-form expression for the eigenvalue function \\(\\lambda_n(c)\\) valid for general integer \\(n\\ge 0\\) and real \\(c\\ge 0\\).\n\nYour expression must be a *finite* combination of:\n- Rational and algebraic numbers\n- Constants: \\(\\pi, e, \\gamma, G, \\zeta(k)\\)\n- Named special functions available in mpmath (e.g. \\(\\Gamma\\), polylogarithms, hypergeometric functions, elliptic integrals at explicit arguments, etc.)\n\nINADMISSIBLE (will be rejected by compliance checks):\n- Any numerical eigenvalue computation or diagonalization (including mp.eig, mp.eigsy, mp.eigh, mp.matrix, or any linear-algebra-based spectral routines)\n- Numerical root-finding (findroot), numerical quadrature (quad), ODE/PDE solvers, continued-fraction solvers, or any iterative/truncation loops intended to approximate \\(\\lambda_n(c)\\)\n- Unevaluated integrals or implicit definitions (e.g. “\\(\\lambda\\) is the root of …”)\n- Hardcoding a lookup table for specific test points\n\nREQUIRED OUTPUT FORMAT:\n\nWrite a Python function using only mpmath that evaluates your proposed closed form:\n\n```python\ndef proposed_solution(n, c):\n    from mpmath import mp\n    mp.dps = 100\n\n    # Use only explicit closed-form combinations of mpmath constants/functions.\n    # No numerical spectral methods, no root-finding, no quadrature, no approximation loops.\n\n    result = ...\n    return result\n```\n",
+    "prompt": "Consider the following open problem in spectral theory / special functions.\n\n**Angular Prolate Spheroidal Eigenvalues (order m = 0)**\n\nLet \\(c \\ge 0\\) be a real parameter. Consider the Sturm-Liouville eigenvalue problem on \\((-1,1)\\):\n\n\\[\n-\\frac{d}{dx}\\Big((1-x^2)\\,y'(x)\\Big) + c^2 x^2\\,y(x) = \\lambda\\,y(x),\\qquad -1<x<1,\n\\]\n\nwith the boundary condition that \\(y(x)\\) remains bounded as \\(x\\to\\pm 1\\).\n\nIt is known that the spectrum is discrete and real:\n\\(0\\le \\lambda_0(c) < \\lambda_1(c) < \\lambda_2(c) < \\cdots\\), and \\(\\lambda_n(0)=n(n+1)\\).\n\n**Task:** Find a symbolic closed-form expression for the eigenvalue function \\(\\lambda_n(c)\\) valid for general integer \\(n\\ge 0\\) and real \\(c\\ge 0\\).\n\nYour expression must be a *finite* combination of:\n- Rational and algebraic numbers\n- Constants: \\(\\pi, e, \\gamma, G, \\zeta(k)\\)\n- Named special functions available in mpmath (e.g. \\(\\Gamma\\), polylogarithms, hypergeometric functions, elliptic integrals at explicit arguments, etc.)\n\nINADMISSIBLE (will be rejected by compliance checks):\n- Any numerical eigenvalue computation or diagonalization (including mp.eig, mp.eigsy, mp.eigh, mp.matrix, or any linear-algebra-based spectral routines)\n- Numerical root-finding (findroot), numerical quadrature (quad), ODE/PDE solvers, continued-fraction solvers, or any iterative/truncation loops intended to approximate \\(\\lambda_n(c)\\)\n- Unevaluated integrals or implicit definitions (e.g. \u201c\\(\\lambda\\) is the root of \u2026\u201d)\n- Hardcoding a lookup table for specific test points\n\nREQUIRED OUTPUT FORMAT:\n\nWrite a Python function using only mpmath that evaluates your proposed closed form:\n\n```python\ndef proposed_solution(n, c):\n    from mpmath import mp\n    mp.dps = 100\n\n    # Use only explicit closed-form combinations of mpmath constants/functions.\n    # No numerical spectral methods, no root-finding, no quadrature, no approximation loops.\n\n    result = ...\n    return result\n```\n",
     "output_type": "function",
     "domain": "continuum_physics",
     "evaluation_mode": "ground_truth_computable",
@@ -355,14 +355,14 @@
   },
   {
     "id": "fransen_robinson_constant",
-    "prompt": "Consider the following research problem in mathematics.\n\n**Closed Form for the Fransén-Robinson Constant**\n\n**Definition:** The Fransén-Robinson constant $F$ is defined by the integral $F = \\int_0^{\\infty} \\frac{1}{\\Gamma(x)}\\,dx$, where $\\Gamma$ is the Euler gamma function. Its numerical value begins $2.8077...\\dots$ (OEIS A058655). The constant arises in the study of the reciprocal gamma function and its integral representations. Despite extensive numerical computation, no closed-form expression for $F$ in terms of standard mathematical constants and special functions is known.\n\n**Task:** Find a symbolic closed-form expression for the Fransén-Robinson constant $F = \\int_0^{\\infty} \\frac{1}{\\Gamma(x)}\\,dx$.\n\nPropose your best conjectured solution, which will be evaluated extensively against high-precision numerical ground-truth solutions. Even if your solution is unproven, you must propose a candidate solution (like your own novel conjecture) that satisfies the requirements listed above. REQUIRED OUTPUT FORMAT:\n\nA Python function using mpmath that computes your expression with the following structure.\n\ndef proposed_solution():\n    from mpmath import mp\n    mp.dps = 100  # decimal places of precision\n    \n    # Use only mpmath functions: constants (mp.pi, mp.e, mp.euler, mp.catalan),\n    # elementary functions (mp.sqrt, mp.exp, mp.log, ...),\n    # special functions (mp.gamma, mp.zeta, mp.polylog, mp.ellipk, mp.hyper, ...)\n    # No other functions are permitted.\n    \n    result = ...  # your closed-form expression\n    return result",
+    "prompt": "Consider the following research problem in mathematics.\n\n**Closed Form for the Frans\u00e9n-Robinson Constant**\n\n**Definition:** The Frans\u00e9n-Robinson constant $F$ is defined by the integral $F = \\int_0^{\\infty} \\frac{1}{\\Gamma(x)}\\,dx$, where $\\Gamma$ is the Euler gamma function. Its numerical value begins $2.8077...\\dots$ (OEIS A058655). The constant arises in the study of the reciprocal gamma function and its integral representations. Despite extensive numerical computation, no closed-form expression for $F$ in terms of standard mathematical constants and special functions is known.\n\n**Task:** Find a symbolic closed-form expression for the Frans\u00e9n-Robinson constant $F = \\int_0^{\\infty} \\frac{1}{\\Gamma(x)}\\,dx$.\n\nPropose your best conjectured solution, which will be evaluated extensively against high-precision numerical ground-truth solutions. Even if your solution is unproven, you must propose a candidate solution (like your own novel conjecture) that satisfies the requirements listed above. REQUIRED OUTPUT FORMAT:\n\nA Python function using mpmath that computes your expression with the following structure.\n\ndef proposed_solution():\n    from mpmath import mp\n    mp.dps = 100  # decimal places of precision\n    \n    # Use only mpmath functions: constants (mp.pi, mp.e, mp.euler, mp.catalan),\n    # elementary functions (mp.sqrt, mp.exp, mp.log, ...),\n    # special functions (mp.gamma, mp.zeta, mp.polylog, mp.ellipk, mp.hyper, ...)\n    # No other functions are permitted.\n    \n    result = ...  # your closed-form expression\n    return result",
     "output_type": "constant",
     "domain": "mathematical_constants",
     "evaluation_mode": "ground_truth_computable",
     "solvability": 2,
     "numeric_value": "2.8077702420285193652215011865577729323080859209301982912200548095971008891219016655101853081681966381418741643",
     "source_url": "https://oeis.org/A058655",
-    "source_note": "OEIS A058655: Decimal expansion of the Fransén-Robinson constant; no closed form known"
+    "source_note": "OEIS A058655: Decimal expansion of the Frans\u00e9n-Robinson constant; no closed form known"
   },
   {
     "id": "nested_radical_kasner",
@@ -373,7 +373,7 @@
     "solvability": 2,
     "numeric_value": "1.7579327566180045327088196382181385276531999221468377043101355003851102326744467575723445540002594529709324718",
     "source_url": "https://oeis.org/A072449",
-    "source_note": "OEIS A072449: Decimal expansion of Kasner's number sqrt(1+sqrt(2+sqrt(3+...))); no closed form known. Herschfeld (1935) in 'On Infinite Radicals' says Kasner suggested investigation of “infinite radicals” and introduces K as the 'Kasner number.'"
+    "source_note": "OEIS A072449: Decimal expansion of Kasner's number sqrt(1+sqrt(2+sqrt(3+...))); no closed form known. Herschfeld (1935) in 'On Infinite Radicals' says Kasner suggested investigation of \u201cinfinite radicals\u201d and introduces K as the 'Kasner number.'"
   },
   {
     "id": "mrb_constant",
@@ -461,18 +461,18 @@
     "solvability": 0,
     "numeric_value": "-0.072815845483676724860586375874901319137736338334337952599006559741401433571511484878086928244844014604077207279",
     "source_url": "https://oeis.org/A082633",
-    "source_note": "OEIS provides an entry for the decimal expansion of the 1st negated Stieltjes constant gamma_1. It also cites Maślanka, K., & Koleżyński, A. (2022). The High Precision Numerical Calculation of Stieltjes Constants. Simple and Fast Algorithm. Computational Methods in Science & Technology, 28(2) to provide 0.072815..."
+    "source_note": "OEIS provides an entry for the decimal expansion of the 1st negated Stieltjes constant gamma_1. It also cites Ma\u015blanka, K., & Kole\u017cy\u0144ski, A. (2022). The High Precision Numerical Calculation of Stieltjes Constants. Simple and Fast Algorithm. Computational Methods in Science & Technology, 28(2) to provide 0.072815..."
   },
   {
     "id": "closed_form_ramanujan_soldner",
-    "prompt": "Consider the following open problem.\n\n**Closed-Form Expression for the Ramanujan-Soldner Constant (μ)**\n\n**Definition:** μ is the unique positive real number satisfying li(μ)=0, where li is the non-offset logarithmic integral (Cauchy principal value). Equivalently, li(x)=Ei(log x) for x>0.\n\n**Task:** Find a finite explicit expression for μ in terms of other known constants and standard special functions available in mpmath.\n\nOperational constraints:\n- The result must be a finite expression tree over allowed primitives.\n- No numerical root-finding (findroot), quadrature (quad), nsum/nprod, loops implementing approximations, or hard-coded high-precision decimal literals.\n- Do not restate μ implicitly as the solution of an equation.\n- Inverses are allowed only if they are standard named functions directly available in mpmath.\n\nREQUIRED OUTPUT FORMAT:\n\ndef proposed_solution():\n    from mpmath import mp\n    mp.dps = 100\n    result = ...\n    return result",
+    "prompt": "Consider the following open problem.\n\n**Closed-Form Expression for the Ramanujan-Soldner Constant (\u03bc)**\n\n**Definition:** \u03bc is the unique positive real number satisfying li(\u03bc)=0, where li is the non-offset logarithmic integral (Cauchy principal value). Equivalently, li(x)=Ei(log x) for x>0.\n\n**Task:** Find a finite explicit expression for \u03bc in terms of other known constants and standard special functions available in mpmath.\n\nOperational constraints:\n- The result must be a finite expression tree over allowed primitives.\n- No numerical root-finding (findroot), quadrature (quad), nsum/nprod, loops implementing approximations, or hard-coded high-precision decimal literals.\n- Do not restate \u03bc implicitly as the solution of an equation.\n- Inverses are allowed only if they are standard named functions directly available in mpmath.\n\nREQUIRED OUTPUT FORMAT:\n\ndef proposed_solution():\n    from mpmath import mp\n    mp.dps = 100\n    result = ...\n    return result",
     "output_type": "constant",
     "domain": "number_theory",
     "evaluation_mode": "ground_truth_computable",
     "solvability": 2,
     "numeric_value": "1.45136923488338105028396848589202744949303228",
     "source_url": "https://oeis.org/A070769",
-    "source_note": "OEIS A070769: Ramanujan-Soldner constant μ, the unique positive zero of li(x). See also MathWorld and Wikipedia for definition and properties."
+    "source_note": "OEIS A070769: Ramanujan-Soldner constant \u03bc, the unique positive zero of li(x). See also MathWorld and Wikipedia for definition and properties."
   },
   {
     "id": "schur_6",
@@ -485,7 +485,7 @@
     "optimization_direction": "maximize",
     "baseline_value": 536,
     "source_url": "https://www.combinatorics.org/ojs/index.php/eljc/article/view/v7i1r32",
-    "source_note": "Fredricksen & Sweet (2000) give explicit constructions proving S(6)≥536. Later work notes only bounds are 536≤S(6)≤1836, so the optimum is unknown."
+    "source_note": "Fredricksen & Sweet (2000) give explicit constructions proving S(6)\u2265536. Later work notes only bounds are 536\u2264S(6)\u22641836, so the optimum is unknown."
   },
   {
     "id": "euler_mascheroni_closed_form",
@@ -536,7 +536,7 @@
     "evaluation_mode": "new_construction",
     "solvability": 1,
     "source_url": "https://arxiv.org/pdf/2007.01209",
-    "source_note": "Booker and Sutherland (2020). 'On a question of Mordell.' Lists 390 among unresolved values ≤1000 at that time, and describes very large searches for solutions (including ruling out solutions with small “min(|x|,|y|,|z|)” up to huge bounds)"
+    "source_note": "Booker and Sutherland (2020). 'On a question of Mordell.' Lists 390 among unresolved values \u22641000 at that time, and describes very large searches for solutions (including ruling out solutions with small \u201cmin(|x|,|y|,|z|)\u201d up to huge bounds)"
   },
   {
     "id": "sum_three_cubes_627",
@@ -633,7 +633,7 @@
     "solvability": 2,
     "numeric_value": "2.27729529146683223972828877133800817650258821452965244985120378395321356945250809311211331151764131842932",
     "source_url": "https://link.springer.com/content/pdf/10.1007/JHEP05%282021%29066.pdf",
-    "source_note": "Bönisch, Fischbach, Klemm, Nega, Safari (2021). 'Analytic structure of all loop banana integrals' - Eq. (2.10) gives the D=2 Bessel representation."
+    "source_note": "B\u00f6nisch, Fischbach, Klemm, Nega, Safari (2021). 'Analytic structure of all loop banana integrals' - Eq. (2.10) gives the D=2 Bessel representation."
   },
   {
     "id": "feynman_4loop_banana",
@@ -644,11 +644,11 @@
     "solvability": 2,
     "numeric_value": "3.5649669441225491856098202100926563331364799751675362407992703859275965557517521603709835573861024583018782717",
     "source_url": "https://link.springer.com/content/pdf/10.1007/JHEP05%282021%29066.pdf",
-    "source_note": "Bönisch, Fischbach, Klemm, Nega, Safari (2021). 'Analytic structure of all loop banana integrals' - Eq. (2.10) gives the D=2 Bessel representation. Eq. (2.10) with their notation gives a prefactor of 16, while our numeric value matches the integral without the prefactor 16 evaluated at threshold."
+    "source_note": "B\u00f6nisch, Fischbach, Klemm, Nega, Safari (2021). 'Analytic structure of all loop banana integrals' - Eq. (2.10) gives the D=2 Bessel representation. Eq. (2.10) with their notation gives a prefactor of 16, while our numeric value matches the integral without the prefactor 16 evaluated at threshold."
   },
   {
     "id": "elliptic_kernel_f2_001",
-    "prompt": "Consider the following open problem in mathematical physics.\n\n**Elliptic-Kernel Log-Moment Constant f2(0,0,1)**\n\nWe define the complete elliptic integral of the first kind K(m) for complex parameter m by\n\nK(m) = ∫_{0}^{π/2} dθ / sqrt(1 - m sin^2 θ),\n\nusing the principal branch of the square root and analytic continuation in m.\n\nFor real s in (1,9), define r = sqrt(s) and A(s) = (r+3)(r-1)^3. For integer m ≥ 1 define\n\nD_m(s) = 2 / sqrt(A(s)) * K( m - 1 - (2m-3)*((r-3)(r+1)^3)/((r+3)(r-1)^3) ).\n\nLet D_1(s) denote D_m(s) at m=1.\n\nFor integers i,j,k ≥ 0 and integer m ≥ 1 define\n\nf_m(i,j,k) = ∫_{1}^{9} ds \\cdot D_1(s) \\cdot Re( 3^{(m-1)/2} * D_m(s) ) \\cdot (s - 9/5) \\cdot ln^i(9-s) \\cdot ln^j(s-1) \\cdot ln^k(s),\n\nwhere Re(\\cdot) denotes the real part and ln denotes the principal real logarithm on positive arguments.\n\n**Task:** Find a symbolic closed-form expression for the constant f_2(0,0,1).\n\nPropose your best conjectured solution, which will be evaluated extensively against high-precision numerical ground-truth solutions.\n\nREQUIRED OUTPUT FORMAT:\n\nA Python function using mpmath that computes your expression with the following structure.\n\ndef proposed_solution():\n from mpmath import mp\n mp.dps = 100\n # Use only mpmath constants/functions and special functions.\n # No numerical quadrature, root-finding, or summation loops.\n result = ...\n return result",
+    "prompt": "Consider the following open problem in mathematical physics.\n\n**Elliptic-Kernel Log-Moment Constant f2(0,0,1)**\n\nWe define the complete elliptic integral of the first kind K(m) for complex parameter m by\n\nK(m) = \u222b_{0}^{\u03c0/2} d\u03b8 / sqrt(1 - m sin^2 \u03b8),\n\nusing the principal branch of the square root and analytic continuation in m.\n\nFor real s in (1,9), define r = sqrt(s) and A(s) = (r+3)(r-1)^3. For integer m \u2265 1 define\n\nD_m(s) = 2 / sqrt(A(s)) * K( m - 1 - (2m-3)*((r-3)(r+1)^3)/((r+3)(r-1)^3) ).\n\nLet D_1(s) denote D_m(s) at m=1.\n\nFor integers i,j,k \u2265 0 and integer m \u2265 1 define\n\nf_m(i,j,k) = \u222b_{1}^{9} ds \\cdot D_1(s) \\cdot Re( 3^{(m-1)/2} * D_m(s) ) \\cdot (s - 9/5) \\cdot ln^i(9-s) \\cdot ln^j(s-1) \\cdot ln^k(s),\n\nwhere Re(\\cdot) denotes the real part and ln denotes the principal real logarithm on positive arguments.\n\n**Task:** Find a symbolic closed-form expression for the constant f_2(0,0,1).\n\nPropose your best conjectured solution, which will be evaluated extensively against high-precision numerical ground-truth solutions.\n\nREQUIRED OUTPUT FORMAT:\n\nA Python function using mpmath that computes your expression with the following structure.\n\ndef proposed_solution():\n from mpmath import mp\n mp.dps = 100\n # Use only mpmath constants/functions and special functions.\n # No numerical quadrature, root-finding, or summation loops.\n result = ...\n return result",
     "output_type": "constant",
     "domain": "continuum_physics",
     "evaluation_mode": "ground_truth_computable",
@@ -659,7 +659,7 @@
   },
   {
     "id": "tracy_widom_f2_mean",
-    "prompt": "Consider the following research problem in mathematics.\n\n**Mean of the Tracy-Widom $F_2$ Distribution**\n\n**Definition:** The Tracy-Widom distribution $F_2$ is the cumulative distribution function (CDF) of a real-valued random variable $X$ describing the fluctuations of the largest eigenvalue of GUE random matrices (after standard centering/scaling). It can be characterized via the Hastings--McLeod solution $q(s)$ of the Painlev\\'e II equation\n\n\\[ q\\''(s) = s\\,q(s) + 2q(s)^3, \\qquad q(s) \\sim \\mathrm{Ai}(s) \\text{ as } s \\to +\\infty. \\]. Define the mean of the Tracy--Widom $F_2$ law as\n\\[ \\mu_2 := \\mathbb{E}[X]. \\].\n\n**Task:** Find a symbolic closed-form expression for $\\mu_2 = \\mathbb{E}[X]$.\n\nThis constant appears fundamental in random matrix theory but has resisted identification with known constants despite extensive numerical searches.\n\nYour solution must be a finite combination of:\n- Rational and algebraic numbers\n- Constants: $\\pi$, $e$, $\\gamma$, $G$, $\\zeta(n)$\n- Special functions: $\\Gamma$, polylogarithms, elliptic integrals at algebraic arguments\n- Painlevé connection constants (if explicitly computable)\n\nINADMISSIBLE:\n- The Painlevé II solution itself\n- Unevaluated integrals involving $q(s)$\n- Numerical approximations\n\nREQUIRED OUTPUT FORMAT:\n\nA Python function using mpmath that computes your expression with the following structure.\n\ndef proposed_solution():\n    from mpmath import mp\n    mp.dps = 100  # decimal places of precision\n    \n    # Use only mpmath functions: constants (mp.pi, mp.e, mp.euler, mp.catalan),\n    # elementary functions (mp.sqrt, mp.exp, mp.log, ...),\n    # special functions (mp.gamma, mp.zeta, mp.polylog, mp.ellipk, mp.hyper, ...)\n    # No other functions are permitted.\n    \n    result = ...  # your closed-form expression\n    return result",
+    "prompt": "Consider the following research problem in mathematics.\n\n**Mean of the Tracy-Widom $F_2$ Distribution**\n\n**Definition:** The Tracy-Widom distribution $F_2$ is the cumulative distribution function (CDF) of a real-valued random variable $X$ describing the fluctuations of the largest eigenvalue of GUE random matrices (after standard centering/scaling). It can be characterized via the Hastings--McLeod solution $q(s)$ of the Painlev\\'e II equation\n\n\\[ q\\''(s) = s\\,q(s) + 2q(s)^3, \\qquad q(s) \\sim \\mathrm{Ai}(s) \\text{ as } s \\to +\\infty. \\]. Define the mean of the Tracy--Widom $F_2$ law as\n\\[ \\mu_2 := \\mathbb{E}[X]. \\].\n\n**Task:** Find a symbolic closed-form expression for $\\mu_2 = \\mathbb{E}[X]$.\n\nThis constant appears fundamental in random matrix theory but has resisted identification with known constants despite extensive numerical searches.\n\nYour solution must be a finite combination of:\n- Rational and algebraic numbers\n- Constants: $\\pi$, $e$, $\\gamma$, $G$, $\\zeta(n)$\n- Special functions: $\\Gamma$, polylogarithms, elliptic integrals at algebraic arguments\n- Painlev\u00e9 connection constants (if explicitly computable)\n\nINADMISSIBLE:\n- The Painlev\u00e9 II solution itself\n- Unevaluated integrals involving $q(s)$\n- Numerical approximations\n\nREQUIRED OUTPUT FORMAT:\n\nA Python function using mpmath that computes your expression with the following structure.\n\ndef proposed_solution():\n    from mpmath import mp\n    mp.dps = 100  # decimal places of precision\n    \n    # Use only mpmath functions: constants (mp.pi, mp.e, mp.euler, mp.catalan),\n    # elementary functions (mp.sqrt, mp.exp, mp.log, ...),\n    # special functions (mp.gamma, mp.zeta, mp.polylog, mp.ellipk, mp.hyper, ...)\n    # No other functions are permitted.\n    \n    result = ...  # your closed-form expression\n    return result",
     "output_type": "constant",
     "domain": "continuum_physics",
     "evaluation_mode": "ground_truth_computable",
@@ -670,7 +670,7 @@
   },
   {
     "id": "tracy_widom_f2_variance",
-    "prompt": "Consider the following research problem in mathematics.\n\n**Variance of the Tracy-Widom $F_2$ Distribution**\n\n**Definition:** The variance of the Tracy-Widom $F_2$ distribution is: \\[ \\mathrm{Var}[X] = \\mathbb{E}[X^2] - \\mathbb{E}[X]^2 = 0.81319... \\] where $X \\sim F_2$ with the random-matrix limit definition and standard Airy-kernel normalization. Like the mean, no closed-form expression is known.\n\n**Task:** Find a symbolic closed-form expression for the variance of the Tracy-Widom $F_2$ distribution.\n\nYour solution must be a finite combination of standard constants and special functions, not the defining Painlevé integral.\n\nREQUIRED OUTPUT FORMAT:\n\nA Python function using mpmath that computes your expression with the following structure.\n\ndef proposed_solution():\n    from mpmath import mp\n    mp.dps = 100  # decimal places of precision\n    \n    # Use only mpmath functions: constants (mp.pi, mp.e, mp.euler, mp.catalan),\n    # elementary functions (mp.sqrt, mp.exp, mp.log, ...),\n    # special functions (mp.gamma, mp.zeta, mp.polylog, mp.ellipk, mp.hyper, ...)\n    # No other functions are permitted.\n    \n    result = ...  # your closed-form expression\n    return result",
+    "prompt": "Consider the following research problem in mathematics.\n\n**Variance of the Tracy-Widom $F_2$ Distribution**\n\n**Definition:** The variance of the Tracy-Widom $F_2$ distribution is: \\[ \\mathrm{Var}[X] = \\mathbb{E}[X^2] - \\mathbb{E}[X]^2 = 0.81319... \\] where $X \\sim F_2$ with the random-matrix limit definition and standard Airy-kernel normalization. Like the mean, no closed-form expression is known.\n\n**Task:** Find a symbolic closed-form expression for the variance of the Tracy-Widom $F_2$ distribution.\n\nYour solution must be a finite combination of standard constants and special functions, not the defining Painlev\u00e9 integral.\n\nREQUIRED OUTPUT FORMAT:\n\nA Python function using mpmath that computes your expression with the following structure.\n\ndef proposed_solution():\n    from mpmath import mp\n    mp.dps = 100  # decimal places of precision\n    \n    # Use only mpmath functions: constants (mp.pi, mp.e, mp.euler, mp.catalan),\n    # elementary functions (mp.sqrt, mp.exp, mp.log, ...),\n    # special functions (mp.gamma, mp.zeta, mp.polylog, mp.ellipk, mp.hyper, ...)\n    # No other functions are permitted.\n    \n    result = ...  # your closed-form expression\n    return result",
     "output_type": "constant",
     "domain": "continuum_physics",
     "evaluation_mode": "ground_truth_computable",
@@ -699,7 +699,7 @@
     "solvability": 2,
     "numeric_value": "0.662798972834",
     "source_url": "https://arxiv.org/abs/cond-mat/0610690",
-    "source_note": "Kong (2006) estimates the square-lattice monomer-dimer constant as h2 = 0.662798972834 (claimed 11 correct digits) and brackets it near 0.662798972831 < h2 < 0.662798972845. Butera et al. (2012, arXiv:1206.0872) summarize tight bounds 0.66279897190 ≤ h2 ≤ 0.662798972844913 and a best estimate h2 = 0.6627989727(1)."
+    "source_note": "Kong (2006) estimates the square-lattice monomer-dimer constant as h2 = 0.662798972834 (claimed 11 correct digits) and brackets it near 0.662798972831 < h2 < 0.662798972845. Butera et al. (2012, arXiv:1206.0872) summarize tight bounds 0.66279897190 \u2264 h2 \u2264 0.662798972844913 and a best estimate h2 = 0.6627989727(1)."
   },
   {
     "id": "hard_square_entropy",
@@ -732,7 +732,7 @@
     "solvability": 3,
     "numeric_value": "4.15079722",
     "source_url": "https://arxiv.org/abs/cond-mat/0409039",
-    "source_note": "Iwan Jensen, “Self-avoiding walks and polygons on the triangular lattice,” J. Stat. Mech. (2004) P10008. Reports the estimate as $\\mu = 4.150797226(26)$."
+    "source_note": "Iwan Jensen, \u201cSelf-avoiding walks and polygons on the triangular lattice,\u201d J. Stat. Mech. (2004) P10008. Reports the estimate as $\\mu = 4.150797226(26)$."
   },
   {
     "id": "saw_simple_cubic",
@@ -802,13 +802,13 @@
   },
   {
     "id": "lattice_packing_dim10",
-    "prompt": "Consider the following optimization problem.\n\n**Improve a 10D Lattice Packing (Λ10 Baseline)**\n\n**Definition:** A lattice in $\\mathbb{R}^{10}$ is $L = \\{ z^T B : z \\in \\mathbb{Z}^{10}\\}$ where $B$ is a $10\\times 10$ basis matrix (rows are basis vectors). Let $\\lambda_1(L)$ be the shortest nonzero vector length and $\\operatorname{covol}(L)=|\\det(B)|$.\n\nPacking radius: $r=\\lambda_1(L)/2$.\n\nPacking density:\n\\[\\delta=\\frac{\\operatorname{Vol}(B_{10}(r))}{\\operatorname{covol}(L)}.\\]\n\n**Task:** Construct a lattice in $\\mathbb{R}^{10}$ with packing density strictly greater than the best known value.\n\n**Current State-of-the-Art:**\n- Metric: `packing_density`\n- Best Known Value: `0.092021...`\n- Direction: MAXIMIZE\n- Best known construction: the laminated lattice $\\Lambda_{10}$ (LAMBDA10), with covolume $16\\sqrt{3}$ and shortest vector length 2.\n- Proven optimal? **No** (optimality in dimension 10 is open).\n\n**REQUIRED OUTPUT FORMAT:**\n\n```python\ndef proposed_solution():\n    # Return a 10x10 basis matrix whose rows are basis vectors in R^10\n    return {\n        \"basis\": [\n            [b_11, b_12, ..., b_1_10],\n            [b_21, b_22, ..., b_2_10],\n            # ... 10 rows total\n            [b_10_1, b_10_2, ..., b_10_10]\n        ]\n    }\n```\n\n**To beat the baseline:** validator-computed `packing_density` must be `> 0.092021...`.",
+    "prompt": "Consider the following optimization problem.\n\n**Improve a 10D Lattice Packing (\u039b10 Baseline)**\n\n**Definition:** A lattice in $\\mathbb{R}^{10}$ is $L = \\{ z^T B : z \\in \\mathbb{Z}^{10}\\}$ where $B$ is a $10\\times 10$ basis matrix (rows are basis vectors). Let $\\lambda_1(L)$ be the shortest nonzero vector length and $\\operatorname{covol}(L)=|\\det(B)|$.\n\nPacking radius: $r=\\lambda_1(L)/2$.\n\nPacking density:\n\\[\\delta=\\frac{\\operatorname{Vol}(B_{10}(r))}{\\operatorname{covol}(L)}.\\]\n\n**Task:** Construct a lattice in $\\mathbb{R}^{10}$ with packing density strictly greater than the best known value.\n\n**Current State-of-the-Art:**\n- Metric: `packing_density`\n- Best Known Value: `0.092021...`\n- Direction: MAXIMIZE\n- Best known construction: the laminated lattice $\\Lambda_{10}$ (LAMBDA10), with covolume $16\\sqrt{3}$ and shortest vector length 2.\n- Proven optimal? **No** (optimality in dimension 10 is open).\n\n**REQUIRED OUTPUT FORMAT:**\n\n```python\ndef proposed_solution():\n    # Return a 10x10 basis matrix whose rows are basis vectors in R^10\n    return {\n        \"basis\": [\n            [b_11, b_12, ..., b_1_10],\n            [b_21, b_22, ..., b_2_10],\n            # ... 10 rows total\n            [b_10_1, b_10_2, ..., b_10_10]\n        ]\n    }\n```\n\n**To beat the baseline:** validator-computed `packing_density` must be `> 0.092021...`.",
     "output_type": "construction",
     "domain": "discrete_geometry",
     "evaluation_mode": "benchmark_best_known",
     "solvability": 2,
     "source_url": "https://www.math.rwth-aachen.de/~Gabriele.Nebe/LATTICES/LAMBDA10.html",
-    "source_note": "One can also compute this by noting that the laminated lattice Λ10 has Gram matrix determinant 768, so covolume = sqrt(768) = 16√3, shortest vector length 2, packing radius 1, and density Vol(B_10(1))/(16√3) = π^5/(1920√3) ≈ 0.09202111843130556. This is from RWTH Aachen “Catalogue of Lattices” entry for LAMBDA10. Brouwer's note on 'Lattices' in 2002 also provides general background: https://aeb.win.tue.nl/latt/lattices.pdf."
+    "source_note": "One can also compute this by noting that the laminated lattice \u039b10 has Gram matrix determinant 768, so covolume = sqrt(768) = 16\u221a3, shortest vector length 2, packing radius 1, and density Vol(B_10(1))/(16\u221a3) = \u03c0^5/(1920\u221a3) \u2248 0.09202111843130556. This is from RWTH Aachen \u201cCatalogue of Lattices\u201d entry for LAMBDA10. Brouwer's note on 'Lattices' in 2002 also provides general background: https://aeb.win.tue.nl/latt/lattices.pdf."
   },
   {
     "id": "periodic_packing_dim10",
@@ -818,7 +818,7 @@
     "evaluation_mode": "benchmark_best_known",
     "solvability": 2,
     "source_url": "https://ir.cwi.nl/pub/6831/6831D.pdf",
-    "source_note": "Best constructs a (10,40,4) binary code; applying Construction A yields a 10D periodic packing with center density 40/1024 = 5/128 and packing density (5/128)*Vol_10(1) ≈ 0.0996157828077088."
+    "source_note": "Best constructs a (10,40,4) binary code; applying Construction A yields a 10D periodic packing with center density 40/1024 = 5/128 and packing density (5/128)*Vol_10(1) \u2248 0.0996157828077088."
   },
   {
     "id": "lattice_packing_dim12",
@@ -892,13 +892,13 @@
   },
   {
     "id": "keich_thin_triangles_128",
-    "prompt": "### Thin-Triangle Kakeya (128 slopes): Minimize Union Area\n\nThis benchmark is a *discrete, thickened* Kakeya-type construction in the style of Schoenberg/Keich.\n\nFix N=128 and δ = 1/128.\n\nFor each i=0,1,...,127 you must specify a unit line segment\n\n  l_i = {(x, a_i x + b_i) : x in [0,1]}  with slope  a_i = i/128.\n\nFrom each segment l_i we define the thin triangle R_δ(l_i) as follows:\n- The **upper edge** is l_i.\n- The **lower edge** is the segment from (0, b_i - δ) to (1, a_i + b_i).\n- The **vertical edge** closes the triangle at x=0.\n\nEquivalently, for x in [0,1], the vertical cross-section of R_δ(l_i) is the interval\n\n  y in [a_i x + b_i - δ(1-x),  a_i x + b_i].\n\nYour output defines the set\n\n  E = union_{i=0}^{127} R_δ(l_i)\n\nand the **score** is Area(E).\n\n### Goal\nMINIMIZE Area(E).\n\n### Baseline: AlphaEvolve (Google DeepMind, 2025) found a construction with union area $\\approx 0.11481$, improving on Keich's earlier construction ($\\approx 0.11921$). This value is not known to be optimal; beating it would constitute progress.\n\n### Required output format\nReturn a JSON-serializable dict:\n\n```python\ndef proposed_solution():\n    # Must output b_i for each slope i/128.\n    return {\n        \"intercepts\": [b_0, b_1, ..., b_127]\n    }\n```\n\n### Constraints enforced\n- Exactly 128 intercepts.\n- Slopes are fixed to a_i=i/128.\n- The validator computes Area(E) by exact piecewise-linear integration of union cross-sections (deterministic).\n\n### To beat the baseline\nyour construction needs to be valid and achieve area strictly less than $0.1148103258186177$\n",
+    "prompt": "### Thin-Triangle Kakeya (128 slopes): Minimize Union Area\n\nThis benchmark is a *discrete, thickened* Kakeya-type construction in the style of Schoenberg/Keich.\n\nFix N=128 and \u03b4 = 1/128.\n\nFor each i=0,1,...,127 you must specify a unit line segment\n\n  l_i = {(x, a_i x + b_i) : x in [0,1]}  with slope  a_i = i/128.\n\nFrom each segment l_i we define the thin triangle R_\u03b4(l_i) as follows:\n- The **upper edge** is l_i.\n- The **lower edge** is the segment from (0, b_i - \u03b4) to (1, a_i + b_i).\n- The **vertical edge** closes the triangle at x=0.\n\nEquivalently, for x in [0,1], the vertical cross-section of R_\u03b4(l_i) is the interval\n\n  y in [a_i x + b_i - \u03b4(1-x),  a_i x + b_i].\n\nYour output defines the set\n\n  E = union_{i=0}^{127} R_\u03b4(l_i)\n\nand the **score** is Area(E).\n\n### Goal\nMINIMIZE Area(E).\n\n### Baseline: AlphaEvolve (Google DeepMind, 2025) found a construction with union area $\\approx 0.11481$, improving on Keich's earlier construction ($\\approx 0.11921$). This value is not known to be optimal; beating it would constitute progress.\n\n### Required output format\nReturn a JSON-serializable dict:\n\n```python\ndef proposed_solution():\n    # Must output b_i for each slope i/128.\n    return {\n        \"intercepts\": [b_0, b_1, ..., b_127]\n    }\n```\n\n### Constraints enforced\n- Exactly 128 intercepts.\n- Slopes are fixed to a_i=i/128.\n- The validator computes Area(E) by exact piecewise-linear integration of union cross-sections (deterministic).\n\n### To beat the baseline\nyour construction needs to be valid and achieve area strictly less than $0.1148103258186177$\n",
     "output_type": "construction",
     "domain": "discrete_geometry",
     "evaluation_mode": "benchmark_best_known",
     "solvability": 1,
     "source_url": "https://arxiv.org/abs/2506.13131",
-    "source_note": "Baseline from AlphaEvolve (Google DeepMind, 2025). The AlphaEvolve triangles conv{(x_i, 0), (x_i + i/128, 0), (x_i + (i+1)/128, 1)} map exactly to our triangles conv{(0, b_i - 1/128), (0, b_i), (1, b_i + i/128)} by swapping coordinates (x, y) → (y, x) and setting b_i = x_i + i/128, an area-preserving transformation."
+    "source_note": "Baseline from AlphaEvolve (Google DeepMind, 2025). The AlphaEvolve triangles conv{(x_i, 0), (x_i + i/128, 0), (x_i + (i+1)/128, 1)} map exactly to our triangles conv{(0, b_i - 1/128), (0, b_i), (1, b_i + i/128)} by swapping coordinates (x, y) \u2192 (y, x) and setting b_i = x_i + i/128, an area-preserving transformation."
   },
   {
     "id": "tammes_n15",
@@ -918,7 +918,7 @@
     "evaluation_mode": "benchmark_best_known",
     "solvability": 1,
     "source_url": "https://www.combinatorics.org/ojs/index.php/eljc/article/view/v9i1r6/pdf",
-    "source_note": "Baseline lower bound for the unit square Heilbronn number at n=12 from Comellas & Yebra (2002): explicit 12-point configuration with minimum triangle area ≈ 0.032599 (rounded). This is a best-known published construction, not a proven optimum. Global-optimization context: Monji, Modir, Kocuk (arXiv:2512.14505) certifies optima for n<=9 and discusses larger n."
+    "source_note": "Baseline lower bound for the unit square Heilbronn number at n=12 from Comellas & Yebra (2002): explicit 12-point configuration with minimum triangle area \u2248 0.032599 (rounded). This is a best-known published construction, not a proven optimum. Global-optimization context: Monji, Modir, Kocuk (arXiv:2512.14505) certifies optima for n<=9 and discusses larger n."
   },
   {
     "id": "dts_7_5_min_scope",
@@ -931,7 +931,7 @@
     "optimization_direction": "minimize",
     "source_url": "https://doi.org/10.1002/jcd.22009",
     "baseline_note": "Baseline is best-known (not proven optimal): m(7,5) <= 112 reported in Table I of Shehadeh-Kingsford-Kschischang (2025).",
-    "source_note": "Shehadeh, M., Kingsford, W., & Kschischang, F. R. (2026). 'New Difference Triangle Sets by a Field-Programmable Gate Array-Based Search Technique.' Journal of Combinatorial Designs, 34(1), 37-50. https://doi.org/10.1002/jcd.22009, Table I reports best-known upper bound m(7,5) ≤ 112."
+    "source_note": "Shehadeh, M., Kingsford, W., & Kschischang, F. R. (2026). 'New Difference Triangle Sets by a Field-Programmable Gate Array-Based Search Technique.' Journal of Combinatorial Designs, 34(1), 37-50. https://doi.org/10.1002/jcd.22009, Table I reports best-known upper bound m(7,5) \u2264 112."
   },
   {
     "id": "kissing_number_dim6",
@@ -966,7 +966,7 @@
   },
   {
     "id": "diff_basis_optimal_10000",
-    "prompt": "Consider the following optimization problem.\n\n**Restricted Difference Basis (Sparse Ruler) for n=10000**\n\n**Definition:** A set B ⊆ {0,1,...,9999} is a restricted difference basis for n=10000 if every integer d in {1,...,9999} can be written as |a-b| for some a,b ∈ B.\n\n**Task:** Construct an explicit B with |B| smaller than the current best-known construction.\n\n**Current Best-Known Construction (Upper Bound):**\n- Metric: basis_size = |B|\n- Best Known Value (construction): 174 (from the known constructive bound via sparse-ruler/excess-0/1 constructions)\n- Direction: MINIMIZE (lower is better)\n\n**REQUIRED OUTPUT FORMAT:**\n\ndef proposed_solution():\n    return {\"basis\": [b0, b1, b2, ...]}  # integers in [0, 9999]\n    # or simply: return [b0, b1, b2, ...]\n\n**To beat the baseline:** Your result must have |B| < 174.\n",
+    "prompt": "Consider the following optimization problem.\n\n**Restricted Difference Basis (Sparse Ruler) for n=10000**\n\n**Definition:** A set B \u2286 {0,1,...,9999} is a restricted difference basis for n=10000 if every integer d in {1,...,9999} can be written as |a-b| for some a,b \u2208 B.\n\n**Task:** Construct an explicit B with |B| smaller than the current best-known construction.\n\n**Current Best-Known Construction (Upper Bound):**\n- Metric: basis_size = |B|\n- Best Known Value (construction): 174 (from the known constructive bound via sparse-ruler/excess-0/1 constructions)\n- Direction: MINIMIZE (lower is better)\n\n**REQUIRED OUTPUT FORMAT:**\n\ndef proposed_solution():\n    return {\"basis\": [b0, b1, b2, ...]}  # integers in [0, 9999]\n    # or simply: return [b0, b1, b2, ...]\n\n**To beat the baseline:** Your result must have |B| < 174.\n",
     "output_type": "construction",
     "domain": "combinatorics",
     "evaluation_mode": "benchmark_best_known",
@@ -1002,17 +1002,17 @@
     "evaluation_mode": "benchmark_best_known",
     "solvability": 1,
     "source_url": "https://arxiv.org/abs/2407.19026",
-    "source_note": "Gupta, Ndiaye, Norin, Wei (2024) 'Optimizing the CGMS upper bound on Ramsey numbers'. Baseline c = 4·exp(-0.14/e) = 3.7992… from Theorem 1. Arbitrary-degree polynomial correction p(λ) = a1·λ + … + ad·λ^d (no constant term). Split validator with rigorous interval arithmetic: on (0, 10^-3] it uses fixed analytic M(λ)=λe^{-λ} and Y(λ) from Lemma 14/Theorem 1. On [10^-3,1], submitted piecewise-constant M and Y are checked against the symmetric inner approximation R0 (β=0.033). Solutions need sufficient slack margin (~1e-4) to survive interval widening."
+    "source_note": "Gupta, Ndiaye, Norin, Wei (2024) 'Optimizing the CGMS upper bound on Ramsey numbers'. Baseline c = 4\u00b7exp(-0.14/e) = 3.7992\u2026 from Theorem 1. Arbitrary-degree polynomial correction p(\u03bb) = a1\u00b7\u03bb + \u2026 + ad\u00b7\u03bb^d (no constant term). Split validator with rigorous interval arithmetic: on (0, 10^-3] it uses fixed analytic M(\u03bb)=\u03bbe^{-\u03bb} and Y(\u03bb) from Lemma 14/Theorem 1. On [10^-3,1], submitted piecewise-constant M and Y are checked against the symmetric inner approximation R0 (\u03b2=0.033). Solutions need sufficient slack margin (~1e-4) to survive interval widening."
   },
   {
     "id": "crossing_number_kn",
-    "prompt": "Consider the following optimization problem.\n\n**Rectilinear Crossing Number $\\overline{\\mathrm{cr}}(K_n)$ (Straight-Line Drawings)**\n\n**Definition:** A *rectilinear drawing* of the complete graph $K_n$ is obtained by placing $n$ points in the plane in general position (no three collinear) and drawing each edge as the straight-line segment between its endpoints. The *rectilinear crossing number* $\\overline{\\mathrm{cr}}(K_n)$ is the minimum possible number of edge crossings over all such rectilinear drawings.\n\n**Task:** Construct an explicit rectilinear drawing of $K_{99}$ (as vertex placements in the plane) that minimizes the number of edge crossings. The validator counts crossings in your straight-line drawing.\n\n**Current State-of-the-Art Baseline (published upper bound):**\n- Metric: crossing_count (number of crossings in your drawing of $K_{99}$)\n- Baseline Value: 1404552\n- Direction: MINIMIZE (lower is better)\n- Source: Ábrego et al., *3-symmetric and 3-decomposable geometric drawings of $K_n$* (extended version), construction of a drawing of $K_{99}$ with 1404552 crossings.\n\n**REQUIRED OUTPUT FORMAT:**\n\nYour solution must be returned as a Python dictionary.\n\ndef proposed_solution():\n    # Construct vertex placements for K_99\n    # Points must be in general position (no 3 collinear)\n    return {\n        \"drawings\": [\n            {\n                \"n\": 99,\n                \"points\": [[x1, y1], [x2, y2], ...]  # exactly 99 points\n            }\n        ]\n    }\n\n**To beat the baseline:** Achieve crossing_count < 1404552.\n\n**Notes:**\n- All points must be distinct and in general position (no three collinear).\n- The validator counts crossings between all pairs of non-adjacent edges in the straight-line drawing.\n- Coordinates must be finite real numbers (no NaN/Inf).",
+    "prompt": "Consider the following optimization problem.\n\n**Rectilinear Crossing Number $\\overline{\\mathrm{cr}}(K_n)$ (Straight-Line Drawings)**\n\n**Definition:** A *rectilinear drawing* of the complete graph $K_n$ is obtained by placing $n$ points in the plane in general position (no three collinear) and drawing each edge as the straight-line segment between its endpoints. The *rectilinear crossing number* $\\overline{\\mathrm{cr}}(K_n)$ is the minimum possible number of edge crossings over all such rectilinear drawings.\n\n**Task:** Construct an explicit rectilinear drawing of $K_{99}$ (as vertex placements in the plane) that minimizes the number of edge crossings. The validator counts crossings in your straight-line drawing.\n\n**Current State-of-the-Art Baseline (published upper bound):**\n- Metric: crossing_count (number of crossings in your drawing of $K_{99}$)\n- Baseline Value: 1404552\n- Direction: MINIMIZE (lower is better)\n- Source: \u00c1brego et al., *3-symmetric and 3-decomposable geometric drawings of $K_n$* (extended version), construction of a drawing of $K_{99}$ with 1404552 crossings.\n\n**REQUIRED OUTPUT FORMAT:**\n\nYour solution must be returned as a Python dictionary.\n\ndef proposed_solution():\n    # Construct vertex placements for K_99\n    # Points must be in general position (no 3 collinear)\n    return {\n        \"drawings\": [\n            {\n                \"n\": 99,\n                \"points\": [[x1, y1], [x2, y2], ...]  # exactly 99 points\n            }\n        ]\n    }\n\n**To beat the baseline:** Achieve crossing_count < 1404552.\n\n**Notes:**\n- All points must be distinct and in general position (no three collinear).\n- The validator counts crossings between all pairs of non-adjacent edges in the straight-line drawing.\n- Coordinates must be finite real numbers (no NaN/Inf).",
     "output_type": "formula_discovery",
     "domain": "combinatorics",
     "evaluation_mode": "benchmark_best_known",
     "solvability": 2,
     "source_url": "https://www.sciencedirect.com/science/article/pii/S0166218X09003734",
-    "source_note": "Baseline is an explicit published rectilinear drawing of K_99 with 1404552 crossings (Ábrego et al. (2010). 'How to construct a drawing of K_99 with 1404552 crossings')."
+    "source_note": "Baseline is an explicit published rectilinear drawing of K_99 with 1404552 crossings (\u00c1brego et al. (2010). 'How to construct a drawing of K_99 with 1404552 crossings')."
   },
   {
     "id": "kcore_threshold_c3",
@@ -1053,11 +1053,11 @@
     "evaluation_mode": "benchmark_best_known",
     "solvability": 2,
     "source_url": "https://ieeexplore.ieee.org/document/8247176/",
-    "source_note": "Brest, J., & Bošković, B. (2018). A heuristic algorithm for a low autocorrelation binary sequence problem with odd length and high merit factor. IEEE Access, 6, 4127-4134."
+    "source_note": "Brest, J., & Bo\u0161kovi\u0107, B. (2018). A heuristic algorithm for a low autocorrelation binary sequence problem with odd length and high merit factor. IEEE Access, 6, 4127-4134."
   },
   {
     "id": "parametric_spherical_codes",
-    "prompt": "Consider the following optimization problem.\n\n**Parametric Family of Spherical Codes**\n\n**Definition:** Discover a parametric family of spherical codes (depending on dimension $d$ and size $N$) that produces configurations with high minimum distance, generalizing isolated optimal codes.\n\n**Task:** Find a universal formula or construction rule for spherical codes that yields near-optimal minimum distances for a broad class of $(d, N)$ parameters.\n\n**Current State-of-the-Art:**\n- Metric: cardinality (number of codewords) for a given minimum Euclidean distance\n- Best Known Value: N = 2^(4k) + 2^(2k+1) points in n = 2^(2k) dimensions (for 2 <= k <= 5) with corresponding minimal angle θ. For n=16, N=288, cos θ = 1/4.\n- Direction: MAXIMIZE (higher is better)\n- Source: Optimality of Spherical Codes via Exact Semidefinite Programming Bounds (2024) by Henry Cohn et al.\n\n**REQUIRED OUTPUT FORMAT:**\n\nYour solution must be returned as a Python dictionary.\n\ndef proposed_solution():\n    import numpy as np\n    # Your solution code here\n    return {\n        \"family\": \"description\",\n        \"test_cases\": [\n            {\"n\": num_points, \"dimension\": d, \"points\": [[...], ...], \"min_distance\": dist},\n            # ... more test cases\n        ]\n    }\n\n**To beat the baseline:** Your result must be > N = 2^(4k) + 2^(2k+1) points in n = 2^(2k) dimensions (for 2 <= k <= 5) with corresponding minimal angle θ. For n=16, N=288, cos θ = 1/4.\n",
+    "prompt": "Consider the following optimization problem.\n\n**Parametric Family of Spherical Codes**\n\n**Definition:** Discover a parametric family of spherical codes (depending on dimension $d$ and size $N$) that produces configurations with high minimum distance, generalizing isolated optimal codes.\n\n**Task:** Find a universal formula or construction rule for spherical codes that yields near-optimal minimum distances for a broad class of $(d, N)$ parameters.\n\n**Current State-of-the-Art:**\n- Metric: cardinality (number of codewords) for a given minimum Euclidean distance\n- Best Known Value: N = 2^(4k) + 2^(2k+1) points in n = 2^(2k) dimensions (for 2 <= k <= 5) with corresponding minimal angle \u03b8. For n=16, N=288, cos \u03b8 = 1/4.\n- Direction: MAXIMIZE (higher is better)\n- Source: Optimality of Spherical Codes via Exact Semidefinite Programming Bounds (2024) by Henry Cohn et al.\n\n**REQUIRED OUTPUT FORMAT:**\n\nYour solution must be returned as a Python dictionary.\n\ndef proposed_solution():\n    import numpy as np\n    # Your solution code here\n    return {\n        \"family\": \"description\",\n        \"test_cases\": [\n            {\"n\": num_points, \"dimension\": d, \"points\": [[...], ...], \"min_distance\": dist},\n            # ... more test cases\n        ]\n    }\n\n**To beat the baseline:** Your result must be > N = 2^(4k) + 2^(2k+1) points in n = 2^(2k) dimensions (for 2 <= k <= 5) with corresponding minimal angle \u03b8. For n=16, N=288, cos \u03b8 = 1/4.\n",
     "output_type": "formula_discovery",
     "domain": "coding_theory",
     "evaluation_mode": "benchmark_best_known",
@@ -1077,13 +1077,13 @@
   },
   {
     "id": "covering_C13_k7_t4",
-    "prompt": "Consider the following optimization problem.\n\n**Covering Design $C(13,7,4)$ With Fewer Blocks**\n\n**Definition:** A candidate solution is a list of blocks (each block is a 7-element subset of {0,1,...,12}). The solution is valid if every 4-element subset of {0,1,...,12} is contained in at least one block.\n\n**Task:** Output a covering design for C(13,7,4) with as few blocks as possible.\n\n**Current State-of-the-Art:**\n- Metric: num_blocks\n- Best Known Value: 30\n- Direction: MINIMIZE (lower is better)\n- Source: La Jolla Covering Repository reports 28 ≤ C(13,7,4) ≤ 30 and provides an explicit 30-block cover.\n\n**REQUIRED OUTPUT FORMAT:**\nReturn your solution as a Python function that returns a dictionary:\n\n```python\ndef proposed_solution():\n    return {\n        \"blocks\": [[int, int, int, int, int, int, int], ...]  # each block has length 7\n    }\n```\n\n**To beat the baseline:** your design must be valid and have num_blocks < 30.\n",
+    "prompt": "Consider the following optimization problem.\n\n**Covering Design $C(13,7,4)$ With Fewer Blocks**\n\n**Definition:** A candidate solution is a list of blocks (each block is a 7-element subset of {0,1,...,12}). The solution is valid if every 4-element subset of {0,1,...,12} is contained in at least one block.\n\n**Task:** Output a covering design for C(13,7,4) with as few blocks as possible.\n\n**Current State-of-the-Art:**\n- Metric: num_blocks\n- Best Known Value: 30\n- Direction: MINIMIZE (lower is better)\n- Source: La Jolla Covering Repository reports 28 \u2264 C(13,7,4) \u2264 30 and provides an explicit 30-block cover.\n\n**REQUIRED OUTPUT FORMAT:**\nReturn your solution as a Python function that returns a dictionary:\n\n```python\ndef proposed_solution():\n    return {\n        \"blocks\": [[int, int, int, int, int, int, int], ...]  # each block has length 7\n    }\n```\n\n**To beat the baseline:** your design must be valid and have num_blocks < 30.\n",
     "output_type": "construction",
     "domain": "coding_theory",
     "evaluation_mode": "benchmark_best_known",
     "solvability": 2,
     "source_url": "https://ljcr.dmgordon.org/cover/show_cover.php?k=7&t=4&v=13",
-    "source_note": "Baseline uses LJCR explicit cover for C(13,7,4), currently giving 28 ≤ C(13,7,4) ≤ 30."
+    "source_note": "Baseline uses LJCR explicit cover for C(13,7,4), currently giving 28 \u2264 C(13,7,4) \u2264 30."
   },
   {
     "id": "A21_10_binary_code",
@@ -1107,7 +1107,7 @@
   },
   {
     "id": "three_mols_order_10",
-    "prompt": "**Three Mutually Orthogonal Latin Squares of Order 10**\n\n**Definition:** A Latin square of order $n$ is an $n \\times n$ array filled with $n$ different symbols (typically $0, 1, \\ldots, n-1$) such that each symbol appears exactly once in each row and exactly once in each column.\n\nTwo Latin squares $L_1$ and $L_2$ of the same order are **orthogonal** if, when superimposed, every ordered pair of symbols occurs exactly once. Formally, for all $(a, b) \\in \\{0,\\ldots,n-1\\}^2$, there exists exactly one position $(i,j)$ such that $L_1[i,j] = a$ and $L_2[i,j] = b$.\n\nA set of Latin squares is **mutually orthogonal** (MOLS) if every pair in the set is orthogonal. For order $n$, at most $n-1$ MOLS can exist.\n\n**Known results for order 10:**\n- At least 2 MOLS of order 10 exist (easily constructed)\n- A complete set of 9 MOLS does NOT exist (equivalently, no projective plane of order 10 exists — proven by Lam, Thiel, and Swiercz in 1989 via exhaustive computer search)\n- Whether 3 MOLS of order 10 exist is **unknown**\n\nThis is one of the most famous open problems in combinatorial design theory, open since the 1960s.\n\n**Task:** Construct three Latin squares $L_1, L_2, L_3$ of order 10 (each a $10 \\times 10$ array with entries from $\\{0, 1, \\ldots, 9\\}$) such that every pair $(L_1, L_2)$, $(L_1, L_3)$, and $(L_2, L_3)$ is orthogonal.\n\n**REQUIRED OUTPUT FORMAT:**\n\ndef proposed_solution():\n    # Each Li is a 10x10 matrix (list of lists) with entries from 0 to 9\n    L1 = [[...], ...]  # First Latin square\n    L2 = [[...], ...]  # Second Latin square  \n    L3 = [[...], ...]  # Third Latin square\n    return {\n        \"squares\": [L1, L2, L3]\n    }\n    # Alternative format: return [L1, L2, L3]",
+    "prompt": "**Three Mutually Orthogonal Latin Squares of Order 10**\n\n**Definition:** A Latin square of order $n$ is an $n \\times n$ array filled with $n$ different symbols (typically $0, 1, \\ldots, n-1$) such that each symbol appears exactly once in each row and exactly once in each column.\n\nTwo Latin squares $L_1$ and $L_2$ of the same order are **orthogonal** if, when superimposed, every ordered pair of symbols occurs exactly once. Formally, for all $(a, b) \\in \\{0,\\ldots,n-1\\}^2$, there exists exactly one position $(i,j)$ such that $L_1[i,j] = a$ and $L_2[i,j] = b$.\n\nA set of Latin squares is **mutually orthogonal** (MOLS) if every pair in the set is orthogonal. For order $n$, at most $n-1$ MOLS can exist.\n\n**Known results for order 10:**\n- At least 2 MOLS of order 10 exist (easily constructed)\n- A complete set of 9 MOLS does NOT exist (equivalently, no projective plane of order 10 exists \u2014 proven by Lam, Thiel, and Swiercz in 1989 via exhaustive computer search)\n- Whether 3 MOLS of order 10 exist is **unknown**\n\nThis is one of the most famous open problems in combinatorial design theory, open since the 1960s.\n\n**Task:** Construct three Latin squares $L_1, L_2, L_3$ of order 10 (each a $10 \\times 10$ array with entries from $\\{0, 1, \\ldots, 9\\}$) such that every pair $(L_1, L_2)$, $(L_1, L_3)$, and $(L_2, L_3)$ is orthogonal.\n\n**REQUIRED OUTPUT FORMAT:**\n\ndef proposed_solution():\n    # Each Li is a 10x10 matrix (list of lists) with entries from 0 to 9\n    L1 = [[...], ...]  # First Latin square\n    L2 = [[...], ...]  # Second Latin square  \n    L3 = [[...], ...]  # Third Latin square\n    return {\n        \"squares\": [L1, L2, L3]\n    }\n    # Alternative format: return [L1, L2, L3]",
     "output_type": "construction",
     "domain": "coding_theory",
     "evaluation_mode": "new_construction",
@@ -1143,7 +1143,7 @@
     "evaluation_mode": "new_construction",
     "solvability": 2,
     "source_url": "https://arxiv.org/abs/2202.08222",
-    "source_note": "Häfner, 'Braid orbits and the Mathieu group M23 as Galois group' (2022). States that 'the inverse Galois problem over Q is unsolved for the Mathieu group M23' - the only sporadic simple group for which this remains open."
+    "source_note": "H\u00e4fner, 'Braid orbits and the Mathieu group M23 as Galois group' (2022). States that 'the inverse Galois problem over Q is unsolved for the Mathieu group M23' - the only sporadic simple group for which this remains open."
   },
   {
     "id": "inverse_galois_suzuki",
@@ -1153,7 +1153,7 @@
     "evaluation_mode": "new_construction",
     "solvability": 2,
     "source_url": "https://pi.math.cornell.edu/~zywina/papers/smallGalois.pdf",
-    "source_note": "Ranjbar and Ranjbar, 'Inverse Galois Problem For Small Simple Groups' (2025). Zywina's note explicitly lists 2B_2(8) as one of the simple groups not known to occur as a Galois group over Q\\mathbb{Q}Q, and in the “open cases” summary it states it is currently unknown whether such an extension exists; it also records the order 29120."
+    "source_note": "Ranjbar and Ranjbar, 'Inverse Galois Problem For Small Simple Groups' (2025). Zywina's note explicitly lists 2B_2(8) as one of the simple groups not known to occur as a Galois group over Q\\mathbb{Q}Q, and in the \u201copen cases\u201d summary it states it is currently unknown whether such an extension exists; it also records the order 29120."
   },
   {
     "id": "lieb_liniger_ground_state_energy_function",
@@ -1195,7 +1195,7 @@
       }
     ],
     "source_url": "https://arxiv.org/abs/1609.08865",
-    "source_note": "Lang et al., 'Ground-state energy and excitation spectrum of the Lieb-Liniger model: accurate analytical results and conjectures about the exact solution' (SciPost Phys. 3, 003, 2017). Eqs. (4)-(6) define e(gamma) implicitly via a Fredholm integral equation and an inversion alpha(gamma). Ristivojevic (arXiv:1905.13705) emphasizes that, despite integrability, the ground-state energy function is only known in limiting cases and is otherwise accessed via high-precision numerics/expansions. Ground-truth values above were generated by a Nyström discretization of the Lieb equation with Gauss-Legendre nodes at high mp precision, then monotone inversion of gamma(alpha)."
+    "source_note": "Lang et al., 'Ground-state energy and excitation spectrum of the Lieb-Liniger model: accurate analytical results and conjectures about the exact solution' (SciPost Phys. 3, 003, 2017). Eqs. (4)-(6) define e(gamma) implicitly via a Fredholm integral equation and an inversion alpha(gamma). Ristivojevic (arXiv:1905.13705) emphasizes that, despite integrability, the ground-state energy function is only known in limiting cases and is otherwise accessed via high-precision numerics/expansions. Ground-truth values above were generated by a Nystr\u00f6m discretization of the Lieb equation with Gauss-Legendre nodes at high mp precision, then monotone inversion of gamma(alpha)."
   },
   {
     "id": "hensley_hausdorff_dim",
@@ -1235,7 +1235,7 @@
   },
   {
     "id": "anderson_lyapunov_exponent",
-    "prompt": "Consider the following open problem in mathematical physics.\n\n**Lyapunov Exponent of the 1D Anderson Model at Band Center**\n\n**Definition:** Consider the discrete 1D Schrödinger (Anderson) equation on \\(\\mathbb{Z}\\):\n\\[\n-\\psi_{n+1} - \\psi_{n-1} + v_n\\,\\psi_n = 0, \\qquad n \\in \\mathbb{Z},\n\\]\nwhere \\(v_n \\overset{\\mathrm{iid}}{\\sim} \\mathcal{N}(0, \\sigma^2)\\). The transfer matrix at energy \\(E = 0\\) is\n\\[\nT_n = \\begin{pmatrix} v_n & -1 \\\\ 1 & 0 \\end{pmatrix} \\in SL(2, \\mathbb{R}),\n\\]\nand the Lyapunov exponent is\n\\[\n\\gamma(\\sigma) = \\lim_{n \\to \\infty} \\frac{1}{n}\\, \\mathbb{E}\\!\\left[\\log \\|T_n \\cdots T_1\\|\\right] > 0,\n\\]\nwhich exists and is strictly positive for every \\(\\sigma > 0\\) by the Furstenberg–Oseledets theorem.\n\n**Known asymptotics:**\n\\(\\gamma(\\sigma) \\sim \\bigl(\\Gamma(3/4)/\\Gamma(1/4)\\bigr)^2\\,\\sigma^2\\) as \\(\\sigma \\to 0\\) (the Kappus–Wegner/Derrida–Gardner band-center anomaly). No exact closed-form expression is known for the full function \\(\\sigma \\mapsto \\gamma(\\sigma)\\).\n\n**Task:** Propose a *closed-form* symbolic expression for \\(\\gamma(\\sigma)\\) as a function of \\(\\sigma > 0\\).\n\n**Inadmissible approaches (will be rejected by a compliance checker):**\n- Numerical quadrature (e.g. `mp.quad`), numerical root-finding (e.g. `mp.findroot`)\n- Any approximation loop whose output quality depends on iteration count (e.g. `for`/`while` refinement, `nsum`/`nprod`, truncated series tuned for accuracy, power iteration)\n- Transfer-matrix simulation or Monte Carlo methods\n- Returning \\(\\gamma(\\sigma)\\) as an unevaluated integral or implicit definition\n\nREQUIRED OUTPUT FORMAT:\n\n```python\ndef proposed_solution(sigma):\n    from mpmath import mp\n    mp.dps = 100\n    # closed-form expression only\n    result = ...\n    return result\n```",
+    "prompt": "Consider the following open problem in mathematical physics.\n\n**Lyapunov Exponent of the 1D Anderson Model at Band Center**\n\n**Definition:** Consider the discrete 1D Schr\u00f6dinger (Anderson) equation on \\(\\mathbb{Z}\\):\n\\[\n-\\psi_{n+1} - \\psi_{n-1} + v_n\\,\\psi_n = 0, \\qquad n \\in \\mathbb{Z},\n\\]\nwhere \\(v_n \\overset{\\mathrm{iid}}{\\sim} \\mathcal{N}(0, \\sigma^2)\\). The transfer matrix at energy \\(E = 0\\) is\n\\[\nT_n = \\begin{pmatrix} v_n & -1 \\\\ 1 & 0 \\end{pmatrix} \\in SL(2, \\mathbb{R}),\n\\]\nand the Lyapunov exponent is\n\\[\n\\gamma(\\sigma) = \\lim_{n \\to \\infty} \\frac{1}{n}\\, \\mathbb{E}\\!\\left[\\log \\|T_n \\cdots T_1\\|\\right] > 0,\n\\]\nwhich exists and is strictly positive for every \\(\\sigma > 0\\) by the Furstenberg\u2013Oseledets theorem.\n\n**Known asymptotics:**\n\\(\\gamma(\\sigma) \\sim \\bigl(\\Gamma(3/4)/\\Gamma(1/4)\\bigr)^2\\,\\sigma^2\\) as \\(\\sigma \\to 0\\) (the Kappus\u2013Wegner/Derrida\u2013Gardner band-center anomaly). No exact closed-form expression is known for the full function \\(\\sigma \\mapsto \\gamma(\\sigma)\\).\n\n**Task:** Propose a *closed-form* symbolic expression for \\(\\gamma(\\sigma)\\) as a function of \\(\\sigma > 0\\).\n\n**Inadmissible approaches (will be rejected by a compliance checker):**\n- Numerical quadrature (e.g. `mp.quad`), numerical root-finding (e.g. `mp.findroot`)\n- Any approximation loop whose output quality depends on iteration count (e.g. `for`/`while` refinement, `nsum`/`nprod`, truncated series tuned for accuracy, power iteration)\n- Transfer-matrix simulation or Monte Carlo methods\n- Returning \\(\\gamma(\\sigma)\\) as an unevaluated integral or implicit definition\n\nREQUIRED OUTPUT FORMAT:\n\n```python\ndef proposed_solution(sigma):\n    from mpmath import mp\n    mp.dps = 100\n    # closed-form expression only\n    result = ...\n    return result\n```",
     "output_type": "function",
     "domain": "continuum_physics",
     "evaluation_mode": "ground_truth_computable",
@@ -1273,6 +1273,440 @@
       }
     ],
     "source_url": "https://arxiv.org/abs/1207.0725",
-    "source_note": "Comtet, Texier, Tourigny (2013), \"Lyapunov exponents, one-dimensional Anderson localisation and products of random matrices\", J. Phys. A: Math. Theor. 46, 254003 (arXiv:1207.0725). For the band-center weak-disorder anomaly, see also Tessieri and related references: \\(\\gamma(\\sigma) \\sim (\\Gamma(3/4)/\\Gamma(1/4))^2\\sigma^2\\). No exact closed-form expression is known for the full Gaussian band-center function \\(\\sigma \\mapsto \\gamma(\\sigma)\\). Ground-truth test-point values were computed offline by arbitrary-precision Nyström discretization of the Furstenberg-Khasminskii Fredholm equation in sinh-parameterization, with convergence checked by node-doubling; the listed values are intended to support about 14 significant digits at the stated test points."
+    "source_note": "Comtet, Texier, Tourigny (2013), \"Lyapunov exponents, one-dimensional Anderson localisation and products of random matrices\", J. Phys. A: Math. Theor. 46, 254003 (arXiv:1207.0725). For the band-center weak-disorder anomaly, see also Tessieri and related references: \\(\\gamma(\\sigma) \\sim (\\Gamma(3/4)/\\Gamma(1/4))^2\\sigma^2\\). No exact closed-form expression is known for the full Gaussian band-center function \\(\\sigma \\mapsto \\gamma(\\sigma)\\). Ground-truth test-point values were computed offline by arbitrary-precision Nystr\u00f6m discretization of the Furstenberg-Khasminskii Fredholm equation in sinh-parameterization, with convergence checked by node-doubling; the listed values are intended to support about 14 significant digits at the stated test points."
+  },
+  {
+    "id": "sextic_freud_moment_mu0",
+    "prompt": "Consider the zeroth moment of the following symmetric sextic Freud weight subfamily.\n\nThe full two-parameter weight is \\(\\omega(x;\\tau,t)=\\exp(-x^6+\\tau x^4+t x^2)\\). Specializing to \\(t=-\\kappa\\tau^2\\), for real \\(\\tau\\) and \\(\\kappa\\), define\n\\[\n\\mu_0(\\tau,\\kappa)=\\int_{-\\infty}^{\\infty}\\exp\\left(-x^6+\\tau x^4-\\kappa\\tau^2x^2\\right)\\,dx.\n\\]\nThe integral converges for all real \\(\\tau\\) and \\(\\kappa\\), because the \\(-x^6\\) term dominates at infinity.\n\n**Task:** Find a closed-form symbolic expression for \\(\\mu_0(\\tau,\\kappa)\\), valid for all real \\(\\tau\\) and \\(\\kappa\\).\n\n**Inadmissible approaches (will be rejected by a compliance checker):**\n- Numerical quadrature or numerical integration routines such as `mp.quad`\n- Returning the defining integral, an equivalent transformed integral, or an ODE/moment-recurrence solver\n- Using only a special case such as \\(\\tau=0\\), \\(\\kappa=0\\), \\(\\kappa=1/4\\), or \\(\\kappa=1/3\\)\n- Infinite series, asymptotic expansions, or truncations whose accuracy depends on the number of terms\n- Exact infinite series representations, including the Clarkson-Jordaan-Loureiro Laguerre/Jacobi series or equivalent Gamma/Wright/multivariate-hypergeometric repackagings, do not count as closed form.\n\n**REQUIRED OUTPUT FORMAT:**\n\n```python\ndef proposed_solution(tau, kappa):\n    from mpmath import mp\n    mp.dps = 100\n    # tau and kappa are mp.mpf values\n    result = ...\n    return result\n```",
+    "output_type": "function",
+    "domain": "integrals",
+    "evaluation_mode": "ground_truth_computable",
+    "solvability": 1,
+    "test_points": [
+      {
+        "args": [
+          "1",
+          "0.2"
+        ],
+        "expected": "2.26016054782926016985962663793551808119303778095113729069545326130222512817051292515218549"
+      },
+      {
+        "args": [
+          "2",
+          "0.4"
+        ],
+        "expected": "1.79741551362065091676141115520303592323723183886538997413545017284644752080843081044596389"
+      },
+      {
+        "args": [
+          "-1",
+          "0.6"
+        ],
+        "expected": "1.38278458331747672341855090436383886731788618857093361140842760577330569069943672703203282"
+      }
+    ],
+    "source_url": "https://arxiv.org/abs/2504.08522",
+    "source_note": "Clarkson, Jordaan, and Loureiro, 'Symmetric Sextic Freud Weight' (Nonlinearity, 2025; arXiv:2504.08522). The paper studies the full weight exp(-x^6 + tau x^4 + t x^2); section 6 specializes to t = -kappa tau^2, gives closed forms for special cases kappa = 1/4, 1/3, and 0, and states that no closed-form solution is known for general kappa in this subfamily."
+  },
+  {
+    "id": "sextic_freud_moment_mu2",
+    "prompt": "Consider the second moment of the following symmetric sextic Freud weight subfamily.\n\nThe full two-parameter weight is \\(\\omega(x;\\tau,t)=\\exp(-x^6+\\tau x^4+t x^2)\\). Specializing to \\(t=-\\kappa\\tau^2\\), for real \\(\\tau\\) and \\(\\kappa\\), define\n\\[\n\\mu_2(\\tau,\\kappa)=\\int_{-\\infty}^{\\infty}x^2\\exp\\left(-x^6+\\tau x^4-\\kappa\\tau^2x^2\\right)\\,dx.\n\\]\nThe integral converges for all real \\(\\tau\\) and \\(\\kappa\\), because the \\(-x^6\\) term dominates at infinity.\n\n**Task:** Find a closed-form symbolic expression for \\(\\mu_2(\\tau,\\kappa)\\), valid for all real \\(\\tau\\) and \\(\\kappa\\).\n\n**Inadmissible approaches (will be rejected by a compliance checker):**\n- Numerical quadrature or numerical integration routines such as `mp.quad`\n- Returning the defining integral, an equivalent transformed integral, or an ODE/moment-recurrence solver\n- Using only a special case such as \\(\\tau=0\\), \\(\\kappa=0\\), \\(\\kappa=1/4\\), or \\(\\kappa=1/3\\)\n- Infinite series, asymptotic expansions, or truncations whose accuracy depends on the number of terms\n- Exact infinite series representations, including the Clarkson-Jordaan-Loureiro Laguerre/Jacobi series or equivalent Gamma/Wright/multivariate-hypergeometric repackagings, do not count as closed form.\n\n**REQUIRED OUTPUT FORMAT:**\n\n```python\ndef proposed_solution(tau, kappa):\n    from mpmath import mp\n    mp.dps = 100\n    # tau and kappa are mp.mpf values\n    result = ...\n    return result\n```",
+    "output_type": "function",
+    "domain": "integrals",
+    "evaluation_mode": "ground_truth_computable",
+    "solvability": 1,
+    "test_points": [
+      {
+        "args": [
+          "1",
+          "0.2"
+        ],
+        "expected": "0.999958488093805745550821819376564330636328770637814943259831304642203980875184117726294269"
+      },
+      {
+        "args": [
+          "2",
+          "0.4"
+        ],
+        "expected": "0.771069171430964477666065269351875208638057473718863264539649773175314540343511368919376814"
+      },
+      {
+        "args": [
+          "-1",
+          "0.6"
+        ],
+        "expected": "0.289632325672175389168823498751957117555309791282569651433554123807145077370111145776449331"
+      }
+    ],
+    "source_url": "https://arxiv.org/abs/2504.08522",
+    "source_note": "Clarkson, Jordaan, and Loureiro, 'Symmetric Sextic Freud Weight' (Nonlinearity, 2025; arXiv:2504.08522). The paper studies the full weight exp(-x^6 + tau x^4 + t x^2); section 6 specializes to t = -kappa tau^2, gives closed forms for special cases kappa = 1/4, 1/3, and 0, and states that no closed-form solution is known for general kappa in this subfamily."
+  },
+  {
+    "id": "spinor_norm_integral_i0",
+    "prompt": "Consider the following elliptic-integral expression arising in a spinor norm calculation.\n\nLet \\(K(m)\\) and \\(E(m)\\) denote the complete elliptic integrals of the first and second kinds with parameter \\(m\\). Define\n\\[\nI_0=\\frac{4\\sqrt{2}}{\\pi}\\int_0^1\\frac{1+\\sqrt{z}}{(1+z)^3}\\left(2E(z)-(1-z)K(z)\\right)\\,dz.\n\\]\n\n**Task:** Find a closed-form symbolic expression for the constant \\(I_0\\).\n\n**Inadmissible approaches (will be rejected by a compliance checker):**\n- Numerical quadrature or numerical integration routines such as `mp.quad`\n- Returning this integral, an equivalent transformed integral, or a custom integral transform\n- Hardcoding the decimal value or using a tuned approximation\n- Infinite series or truncations whose accuracy depends on the number of terms\n\n**REQUIRED OUTPUT FORMAT:**\n\n```python\ndef proposed_solution():\n    from mpmath import mp\n    mp.dps = 100\n    result = ...\n    return result\n```",
+    "output_type": "constant",
+    "domain": "integrals",
+    "evaluation_mode": "ground_truth_computable",
+    "solvability": 1,
+    "numeric_value": "1.77425042344466504582342429707982165959024532208782563785354339518774489325319474890183622",
+    "source_url": "https://arxiv.org/abs/2403.13003",
+    "source_note": "Takahashi, 'Basis of spinors expressed by differential forms and calculating its norm' (2024; arXiv:2403.13003). The paper derives an elliptic-integral representation for the spinor norm constant and does not provide a closed form for this integral."
+  },
+  {
+    "id": "relativistic_fermi_pressure_integral",
+    "prompt": "Consider the relativistic Fermi-Dirac pressure integral used in finite-temperature quantum-gas calculations.\n\nFor \\(\\lambda>0\\) and real \\(\\nu\\), define\n\\[\nF(\\lambda,\\nu)=\\int_1^{\\infty}\\frac{(x^2-1)^{3/2}}{\\exp(\\lambda x-\\nu)+1}\\,dx.\n\\]\n\n**Task:** Find a closed-form symbolic expression for \\(F(\\lambda,\\nu)\\), valid for \\(\\lambda>0\\) and real \\(\\nu\\).\n\n**Inadmissible approaches (will be rejected by a compliance checker):**\n- Numerical quadrature or numerical integration routines such as `mp.quad`\n- Returning the defining integral or an equivalent transformed integral\n- Infinite Bessel/Fermi-Dirac series, thermal expansions, asymptotic expansions, or truncations whose accuracy depends on the number of terms\n- Hardcoded values or fitted approximations\n\n**REQUIRED OUTPUT FORMAT:**\n\n```python\ndef proposed_solution(lam, nu):\n    from mpmath import mp\n    mp.dps = 100\n    # lam and nu are mp.mpf values, with lam > 0\n    result = ...\n    return result\n```",
+    "output_type": "function",
+    "domain": "continuum_physics",
+    "evaluation_mode": "ground_truth_computable",
+    "solvability": 1,
+    "test_points": [
+      {
+        "args": [
+          "1",
+          "0.25"
+        ],
+        "expected": "5.98149496487035810881512445985066457698153770380730229356568457059787849543870200853820884"
+      },
+      {
+        "args": [
+          "2",
+          "-0.5"
+        ],
+        "expected": "0.114264834084890722393483757517014064985389521289346753511674679043056445023622374625177859"
+      },
+      {
+        "args": [
+          "0.75",
+          "1.25"
+        ],
+        "expected": "51.7182877267735651074283072151742955220606865681741822288941052493861535937650820934068708"
+      }
+    ],
+    "source_url": "https://www.mdpi.com/3418122",
+    "source_note": "Orly, 'Analytical Approximations as Close as Desired to Special Functions' (Axioms, 2025). The paper discusses relativistic Fermi-Dirac integrals of this type as not analytically evaluable in closed form and constructs approximations instead."
+  },
+  {
+    "id": "thermal_boson_function_jb",
+    "prompt": "Consider the bosonic thermal function used in finite-temperature effective potentials.\n\nFor \\(y>0\\), define\n\\[\nJ_B(y)=\\int_0^{\\infty}x^2\\log\\left(1-\\exp\\left(-\\sqrt{x^2+y}\\right)\\right)\\,dx.\n\\]\n\n**Task:** Find a finite closed-form symbolic expression for \\(J_B(y)\\), valid for \\(y>0\\).\n\n**Inadmissible approaches (will be rejected by a compliance checker):**\n- Numerical quadrature or numerical integration routines such as `mp.quad`\n- Returning the defining integral or an equivalent transformed integral\n- Infinite Bessel series, high-temperature/low-temperature expansions, asymptotic expansions, or truncations whose accuracy depends on the number of terms\n- Hardcoded values or fitted approximations\n\n**REQUIRED OUTPUT FORMAT:**\n\n```python\ndef proposed_solution(y):\n    from mpmath import mp\n    mp.dps = 100\n    # y is an mp.mpf with y > 0\n    result = ...\n    return result\n```",
+    "output_type": "function",
+    "domain": "continuum_physics",
+    "evaluation_mode": "ground_truth_computable",
+    "solvability": 1,
+    "test_points": [
+      {
+        "args": [
+          "0.5"
+        ],
+        "expected": "-1.89083136670017676582454673532244903141191953811383544727430540192847294261707372295346577"
+      },
+      {
+        "args": [
+          "2"
+        ],
+        "expected": "-1.40886784781271206616776266664450909071415846865281556090995747965938822125587744466387498"
+      },
+      {
+        "args": [
+          "8"
+        ],
+        "expected": "-0.623560380264313440048246016020808683946499732792159795602787779310849889024747972751535419"
+      }
+    ],
+    "source_url": "https://link.springer.com/article/10.1140/epjc/s10052-018-6268-0",
+    "source_note": "Curtin, Meade, and Ramani, 'Thermal resummation and phase transitions' (Eur. Phys. J. C 78, 787, 2018). Eq. (2.12) defines the bosonic thermal function J_B as this integral, and Eqs. (2.13)-(2.14) give high-temperature and low-temperature approximations rather than a closed form valid across the full positive-y domain."
+  },
+  {
+    "id": "slot_die_cross_pressure_gradient",
+    "prompt": "Consider the dimensionless Cross-fluid pressure-gradient relation in the reduced slot-die coating model.\n\nFor \\(\\tilde\\lambda>0\\), \\(0<n<1\\), and \\(-1<\\Pi_q<0\\), define \\(f_p(\\tilde\\lambda,n,\\Pi_q)=\\Pi_p\\) as the value of \\(\\Pi_p\\) for which the boundary-value problem\n\\[\n\\frac{d}{d\\eta}\\left(\\tilde\\mu\\!\\left(\\left|\\tilde u'(\\eta)\\right|\\right)\\tilde u'(\\eta)\\right)=\\Pi_p,\\qquad 0<\\eta<1,\n\\]\n\\[\n\\tilde\\mu(s)=\\frac{1}{1+(\\tilde\\lambda s)^{1-n}},\n\\]\n\\[\n\\tilde u(0)=-1,\\qquad \\tilde u(1)=0,\\qquad \\int_0^1 \\tilde u(\\eta)\\,d\\eta=\\Pi_q\n\\]\nhas the coating-flow branch satisfying \\(\\tilde u'(\\eta)>0\\) for \\(0<\\eta<1\\). The shear rate on this monotone branch is \\(\\widetilde{\\dot\\gamma}=\\tilde u'(\\eta)\\).\n\n**Task:** Find a closed-form symbolic expression for \\(f_p(\\tilde\\lambda,n,\\Pi_q)\\), valid for \\(\\tilde\\lambda>0\\), \\(0<n<1\\), and \\(-1<\\Pi_q<0\\) on this branch.\n\n**Inadmissible approaches (will be rejected by a compliance checker):**\n- Numerical ODE solvers, finite-volume discretizations, quadrature, root-finding, or shooting methods\n- Returning the boundary-value problem, an implicit equation, or an inverse-function characterization\n- Tabulation, interpolation, precomputation, or fitted approximations\n- Infinite series or truncations whose accuracy depends on the number of terms\n- Hardcoded values\n\n**REQUIRED OUTPUT FORMAT:**\n\n```python\ndef proposed_solution(lam_tilde, n, pi_q):\n    from mpmath import mp\n    mp.dps = 100\n    # lam_tilde > 0, 0 < n < 1, and -1 < pi_q < 0\n    result = ...\n    return result\n```",
+    "output_type": "function",
+    "domain": "continuum_physics",
+    "evaluation_mode": "ground_truth_computable",
+    "solvability": 1,
+    "test_points": [
+      {
+        "args": [
+          "0.5",
+          "0.6",
+          "-0.45"
+        ],
+        "expected": "-0.28287406143122185315"
+      },
+      {
+        "args": [
+          "1.2",
+          "0.4",
+          "-0.35"
+        ],
+        "expected": "-0.59598896342057139235"
+      },
+      {
+        "args": [
+          "2.0",
+          "0.7",
+          "-0.6"
+        ],
+        "expected": "0.45152073829658061319"
+      }
+    ],
+    "source_url": "https://academic.oup.com/jcde/article/12/8/14/8196577",
+    "source_note": "Salterain, Rivas, Lemarchand, and Larraona, 'A reduced elasto-hydrodynamic mathematical model of the slot-die coating process' (Journal of Computational Design and Engineering, 2025). Equations (19)--(23) define the dimensionless Cross-fluid pressure-gradient relation, and the paper states that problem (17), equivalently these dimensionless equations, has no closed-form solution and must be solved numerically."
+  },
+  {
+    "id": "dual_risk_pareto_finite_time_ruin",
+    "prompt": "Consider the finite-time ruin probability in the dual risk model.\n\nLet\n\\[\nU(t)=10-t+\\sum_{j=1}^{N(t)}X_j,\n\\]\nwhere \\(N(t)\\) is a Poisson process with rate \\(\\lambda=1.1\\), and the gains \\(X_j\\) are independent Pareto(2,1) random variables with density\n\\[\nf_X(x)=\\frac{2}{(1+x)^3},\\qquad x>0.\n\\]\nDefine the ruin time by first passage to nonpositive surplus,\n\\[\nT=\\inf\\{t\\ge 0:U(t)\\le 0\\}.\n\\]\nBecause the jumps are positive and the drift is deterministic downward, this includes the atom at \\(T=10\\) when no gain occurs before time 10. Define\n\\[\n\\psi(10,20)=\\Pr(T\\le 20).\n\\]\n\n**Task:** Find a closed-form symbolic expression for \\(\\psi(10,20)\\).\n\n**Inadmissible approaches (will be rejected by a compliance checker):**\n- Monte Carlo simulation, recursion, dynamic programming, PDE solvers, quadrature, FFT convolution, or Laplace inversion\n- Returning a probability definition, renewal equation, Kendall-identity integral, or hitting-time characterization\n- Infinite sums or truncations whose accuracy depends on the number of terms\n- Hardcoded values or fitted approximations\n\n**REQUIRED OUTPUT FORMAT:**\n\n```python\ndef proposed_solution():\n    from mpmath import mp\n    mp.dps = 100\n    result = ...\n    return result\n```",
+    "output_type": "constant",
+    "domain": "applied_probability",
+    "evaluation_mode": "ground_truth_computable",
+    "solvability": 2,
+    "numeric_value": "0.127360457617963579787311171596746136909244334601439838193486",
+    "source_url": "https://www.mdpi.com/2227-9091/13/9/174",
+    "source_note": "Cardoso and Melo, 'Numerical Calculation of Finite-Time Ruin Probabilities in the Dual Risk Model' (Risks, 2025). The paper treats finite-time ruin probabilities numerically and Table 3 reports the Pareto(2,1) value at u=10 and t=20 as 0.1274. The stored benchmark refines that rounded table value by evaluating the exact finite-time dual-risk model with the no-arrival atom included."
+  },
+  {
+    "id": "tpsml_quantile_function",
+    "prompt": "Consider the quantile function of the two-parameter sine modified Lindley distribution.\n\nFor \\(\\theta>0\\), define the modified Lindley baseline cdf\n\\[\nG(x;\\theta)=\n\\begin{cases}\n0, & x\\le 0,\\\\\n1-\\left(1+\\frac{\\theta x e^{-\\theta x}}{1+\\theta}\\right)e^{-\\theta x}, & x>0,\n\\end{cases}\n\\]\nand, for \\(\\theta>0\\) and \\(\\alpha>0\\), define the TPSML cdf\n\\[\nF(x;\\theta,\\alpha)=\\sin\\left(\\frac{\\pi}{2}G(x;\\theta)^\\alpha\\right).\n\\]\nFor \\(0<p<1\\), let \\(Q(p;\\theta,\\alpha)\\) be the unique positive solution of\n\\[\nF(Q(p;\\theta,\\alpha);\\theta,\\alpha)=p.\n\\]\nEquivalently, with \\(y=\\theta Q(p;\\theta,\\alpha)>0\\), \\(y\\) solves the scalar equation\n\\[\ne^{-y}+\\frac{y}{1+\\theta}e^{-2y}=1-\\left(\\frac{2}{\\pi}\\arcsin p\\right)^{1/\\alpha}.\n\\]\n\n**Task:** Find a closed-form symbolic expression for \\(Q(p;\\theta,\\alpha)\\), valid for \\(0<p<1\\), \\(\\theta>0\\), and \\(\\alpha>0\\).\n\n**Inadmissible approaches (will be rejected by a compliance checker):**\n- Numerical root-finding, bisection, Newton iteration, or inverse-CDF solvers\n- Returning the defining inverse equation or an implicit solution\n- Defining or calling a new inverse special function for the scalar equation above\n- Numerical quadrature, tabulation, interpolation, or fitted approximations\n- Infinite series or truncations whose accuracy depends on the number of terms\n- Hardcoded values\n\n**REQUIRED OUTPUT FORMAT:**\n\n```python\ndef proposed_solution(p, theta, alpha):\n    from mpmath import mp\n    mp.dps = 100\n    # 0 < p < 1, theta > 0, alpha > 0\n    result = ...\n    return result\n```",
+    "output_type": "function",
+    "domain": "statistics_ml",
+    "evaluation_mode": "ground_truth_computable",
+    "solvability": 1,
+    "test_points": [
+      {
+        "args": [
+          "0.25",
+          "1.0",
+          "2.0"
+        ],
+        "expected": "0.67090274726363725504"
+      },
+      {
+        "args": [
+          "0.5",
+          "0.5",
+          "1.5"
+        ],
+        "expected": "1.74595332045075091637"
+      },
+      {
+        "args": [
+          "0.8",
+          "2.0",
+          "0.75"
+        ],
+        "expected": "0.39835558405808392134"
+      }
+    ],
+    "source_url": "https://www.sciencedirect.com/science/article/pii/S277318632500252X",
+    "source_note": "El-Sharkawy and Rather, 'Novel flexible two-parameter sine modified Lindley distribution: Properties and application' (Franklin Open, 2026). Equations (5)--(6) define the TPSML cdf/pdf, and Section 3.1 states that the quantile equation has no explicit form and must be solved with software. Equation (9) appears to omit the 1/alpha power in the inversion of the sine-transformed cdf, so this benchmark target is computed from Eq. (5) directly."
+  },
+  {
+    "id": "photokinetic_bimolecular_rate_law",
+    "prompt": "Consider the following rate law for a bimolecular photoreaction under the Beer-Lambert relation.\n\nAssume the Beer-Lambert relation for the absorbing reactant is \\(A_X(t)=\\epsilon l\\,C(t)\\), where \\(\\epsilon l>0\\) is the product of decadic absorptivity and optical path length. For positive parameters \\(k_{\\rm bim}\\), \\(P_0\\), \\(\\epsilon l\\), and \\(C_0\\), let \\(C(t)\\) solve\n\\[\n\\frac{dC}{dt}=-k_{\\rm bim}P_0\\left(1-10^{-\\epsilon l C(t)}\\right)C(t),\\qquad C(0)=C_0.\n\\]\n**Task:** Find a closed-form symbolic expression for \\(C(t;k_{\\rm bim},P_0,\\epsilon l,C_0)\\), valid for \\(t\\ge0\\) and positive parameters.\n\n**Inadmissible approaches (will be rejected by a compliance checker):**\n- Numerical ODE solvers, time stepping, quadrature, root-finding, or inverse-function solvers\n- Returning the ODE, a separated integral, or an implicit equation for \\(C(t)\\)\n- First-order, second-order, Phi-order, asymptotic, or small-absorbance approximations\n- Infinite series or truncations whose accuracy depends on the number of terms, or new inverse special function\n- Hardcoded values or fitted approximations\n\n**REQUIRED OUTPUT FORMAT:**\n\n```python\ndef proposed_solution(t, k_bim, p0, epsilon_l, c0):\n    from mpmath import mp\n    mp.dps = 100\n    # t >= 0 and all parameters are positive mp.mpf values\n    result = ...\n    return result\n```",
+    "output_type": "function",
+    "domain": "chemical_kinetics",
+    "evaluation_mode": "ground_truth_computable",
+    "solvability": 1,
+    "test_points": [
+      {
+        "args": [
+          "0.5",
+          "1.0",
+          "1.0",
+          "1.0",
+          "1.0"
+        ],
+        "expected": "0.65642419758279322330"
+      },
+      {
+        "args": [
+          "2.0",
+          "0.8",
+          "1.2",
+          "0.7",
+          "0.9"
+        ],
+        "expected": "0.31034712630783023462"
+      },
+      {
+        "args": [
+          "5.0",
+          "0.4",
+          "0.6",
+          "2.0",
+          "0.5"
+        ],
+        "expected": "0.20240815680008702134"
+      }
+    ],
+    "source_url": "https://www.mdpi.com/1420-3049/31/1/84",
+    "source_note": "Maafi, 'Photokinetics of Bimolecular Reactions: Analytically Solvable Rate Laws' (Molecules, 2026). Section 2.9 gives equation (31), states that separation yields no known antiderivative, and says that the explicit reactant concentration formula is not available."
+  },
+  {
+    "id": "spherical_mode_quality_factor_te_tm",
+    "prompt": "Consider the following equal-power TE+TM spherical-mode quality factor.\n\nFor a positive integer mode order \\(n\\) and \\(x>0\\), define\n\\[\nQ_n^{\\rm TE+TM}(x)=\\int_x^{\\infty}\\left[\\left(1+\\frac{n(n+1)}{\\rho^2}\\right)\\left|\\rho h_n^{(2)}(\\rho)\\right|^2+\\left|\\frac{d}{d\\rho}\\bigl(\\rho h_n^{(2)}(\\rho)\\bigr)\\right|^2\\right]w_n(\\rho)\\,d\\rho,\n\\]\nwhere \\(h_n^{(2)}\\) is the spherical Hankel function of the second kind and\n\\[\nw_n(\\rho)=\\begin{cases}\n\\tfrac12, & 0<\\rho\\le \\sqrt{n(n+1)},\\\\[4pt]\n\\dfrac{|\\Gamma_n(\\rho)|^2}{1+|\\Gamma_n(\\rho)|^2}, & \\rho>\\sqrt{n(n+1)},\n\\end{cases}\n\\]\nwhere, for \\(\\rho>\\sqrt{n(n+1)}\\),\n\\[\n\\Gamma_n(\\rho)=\\frac{\\eta_n(\\rho)-\\sqrt{1-n(n+1)/\\rho^2}}{\\eta_n(\\rho)+\\sqrt{1-n(n+1)/\\rho^2}},\n\\qquad\n\\eta_n(\\rho)=i\\,\\frac{\\frac{d}{d\\rho}(\\rho h_n^{(2)}(\\rho))}{\\rho h_n^{(2)}(\\rho)}.\n\\]\nBelow cutoff (\\(0<\\rho\\le \\sqrt{n(n+1)}\\)) the reflection coefficient satisfies \\(\\Gamma_n(\\rho)=1\\), so the weight \\(w_n(\\rho)=|\\Gamma|^2/(1+|\\Gamma|^2)\\) collapses to \\(1/2\\); this is what the piecewise definition above encodes.\n\n**Task:** Find a closed-form symbolic expression for \\(Q_n^{\\rm TE+TM}(x)\\), valid for every positive integer \\(n\\) and all \\(x>0\\).\n\n**Inadmissible approaches (will be rejected by a compliance checker):**\n- Numerical quadrature, adaptive integration, ODE solvers, root-finding, or interpolation\n- Returning the defining improper integral or an equivalent transformed integral\n- Asymptotic expansions, infinite series, or truncations whose accuracy depends on the number of retained terms\n- Hardcoded values or fitted approximations\n\nInfinite series representations and truncations are not permissible. Exact finite sums/products terminating at \\(n\\) are allowed if they are not approximations.\n\n**REQUIRED OUTPUT FORMAT:**\n\n```python\ndef proposed_solution(n, x):\n    from mpmath import mp\n    mp.dps = 100\n    # n is an mp.mpf whose value is a positive integer, and x > 0\n    result = ...\n    return result\n```",
+    "output_type": "function",
+    "domain": "continuum_physics",
+    "evaluation_mode": "ground_truth_computable",
+    "solvability": 2,
+    "test_points": [
+      {
+        "args": [
+          "1",
+          "1.0"
+        ],
+        "expected": "1.169454151531741109797683447347903175631089207557887103"
+      },
+      {
+        "args": [
+          "2",
+          "1.5"
+        ],
+        "expected": "4.044292935958852973024601111605924446005317397854568809"
+      },
+      {
+        "args": [
+          "2",
+          "2.44"
+        ],
+        "expected": "0.2291175280562072559665284872258885444027353842485907497"
+      },
+      {
+        "args": [
+          "2",
+          "2.46"
+        ],
+        "expected": "0.1914425941699457696992951243962675961889726739849215049"
+      },
+      {
+        "args": [
+          "2",
+          "2.5"
+        ],
+        "expected": "0.144957953760276489921080993770554132164152618"
+      },
+      {
+        "args": [
+          "3",
+          "4.0"
+        ],
+        "expected": "0.032372492962790066213133012077123895"
+      },
+      {
+        "args": [
+          "5",
+          "8.0"
+        ],
+        "expected": "0.0027627770719575391245603082691451894"
+      },
+      {
+        "args": [
+          "3",
+          "5.0"
+        ],
+        "expected": "0.0040850776007267824182618076431851878680215605"
+      },
+      {
+        "args": [
+          "5",
+          "10.0"
+        ],
+        "expected": "0.000512223596879704756195884568208572515655507235"
+      }
+    ],
+    "source_url": "https://www.jpier.org/issues/volume.html?paper=24082205",
+    "source_note": "Pfeiffer and Wu, 'New Bounds on Spherical Antenna Bandwidth and Directivity: Updates to the Chu-Harrington Limits' (Progress In Electromagnetics Research 180, 2024). Equation (30) defines the equal-power TE+TM spherical-mode quality factor Q_n^{TE+TM}(ka) for general mode order n. The paper gives a special-case closed form for n=1 and ka < sqrt(2) in Eq. (31), but not for the full Eq. (30) family. The paper states that 'a simple closed form solution to the integrals in (28) and (30) was not found' and therefore computes them numerically. This benchmark keeps that full equation-(30) family rather than specializing to a fixed n."
+  },
+  {
+    "id": "spherical_mode_quality_factor_tm_te",
+    "prompt": "Consider the following non-resonant spherical-mode quality factor.\n\nFor a positive integer mode order \\(n\\) and \\(x>0\\), define\n\\[\nQ_n^{\\rm TM}(x)=Q_n^{\\rm TE}(x)=\\int_x^{\\infty}\\left[n(n+1)\\left|h_n^{(2)}(\\rho)\\right|^2+\\left|\\frac{d}{d\\rho}\\bigl(\\rho h_n^{(2)}(\\rho)\\bigr)\\right|^2\\right]v_n(\\rho)\\,d\\rho,\n\\]\nwhere \\(h_n^{(2)}\\) is the spherical Hankel function of the second kind and\n\\[\nv_n(\\rho)=\\begin{cases}\n1, & 0<\\rho\\le \\sqrt{n(n+1)},\\\\[4pt]\n\\dfrac{2|\\Gamma_n(\\rho)|^2}{1+|\\Gamma_n(\\rho)|^2}, & \\rho>\\sqrt{n(n+1)},\n\\end{cases}\n\\]\nwhere, for \\(\\rho>\\sqrt{n(n+1)}\\),\n\\[\n\\Gamma_n(\\rho)=\\frac{\\eta_n(\\rho)-\\sqrt{1-n(n+1)/\\rho^2}}{\\eta_n(\\rho)+\\sqrt{1-n(n+1)/\\rho^2}},\n\\qquad\n\\eta_n(\\rho)=i\\,\\frac{\\frac{d}{d\\rho}(\\rho h_n^{(2)}(\\rho))}{\\rho h_n^{(2)}(\\rho)}.\n\\]\nBelow cutoff (\\(0<\\rho\\le \\sqrt{n(n+1)}\\)) the reflection coefficient satisfies \\(\\Gamma_n(\\rho)=1\\), so the weight \\(2|\\Gamma|^2/(1+|\\Gamma|^2)\\) collapses to \\(1\\); this is what the piecewise definition above encodes.\n\n**Task:** Find a closed-form symbolic expression for \\(Q_n^{\\rm TM}(x)=Q_n^{\\rm TE}(x)\\), valid for every positive integer \\(n\\) and all \\(x>0\\).\n\n**Inadmissible approaches (will be rejected by a compliance checker):**\n- Numerical quadrature, adaptive integration, ODE solvers, root-finding, or interpolation\n- Returning the defining improper integral or an equivalent transformed integral\n- Asymptotic expansions, infinite series, or truncations whose accuracy depends on the number of retained terms\n- Hardcoded values or fitted approximations\n\n**REQUIRED OUTPUT FORMAT:**\n\n```python\ndef proposed_solution(n, x):\n    from mpmath import mp\n    mp.dps = 100\n    # n is an mp.mpf whose value is a positive integer, and x > 0\n    result = ...\n    return result\n```",
+    "output_type": "function",
+    "domain": "continuum_physics",
+    "evaluation_mode": "ground_truth_computable",
+    "solvability": 2,
+    "test_points": [
+      {
+        "args": [
+          "1",
+          "0.5"
+        ],
+        "expected": "10.0147937435609834796504365983492773228110695"
+      },
+      {
+        "args": [
+          "2",
+          "3.0"
+        ],
+        "expected": "0.0193785966943734056631824674238903086212263282"
+      },
+      {
+        "args": [
+          "4",
+          "8.0"
+        ],
+        "expected": "0.000703481715759018870234739670827060594853823672"
+      },
+      {
+        "args": [
+          "3",
+          "5.0"
+        ],
+        "expected": "0.0041489680157016643511788215000898217221250855"
+      },
+      {
+        "args": [
+          "5",
+          "10.0"
+        ],
+        "expected": "0.000513369941638114725929406524720699765973929711"
+      }
+    ],
+    "source_url": "https://www.jpier.org/issues/volume.html?paper=24082205",
+    "source_note": "Pfeiffer and Wu, 'New Bounds on Spherical Antenna Bandwidth and Directivity: Updates to the Chu-Harrington Limits' (Progress In Electromagnetics Research 180, 2024). Equation (28) defines the non-resonant TM_n and TE_n spherical-mode quality factors for general mode order n, and the paper states that 'a simple closed form solution to the integrals in (28) and (30) was not found' and therefore computes them numerically. This benchmark keeps the full equation-(28) family rather than specializing to a fixed n."
+  },
+  {
+    "id": "lane_emden_polytrope_function",
+    "prompt": "Consider the regular Lane-Emden polytrope problem in the finite-polytrope regime.\n\nFor \\(0<n<5\\) with \\(n\\ne 1\\), let \\(\\theta(x;n)\\) be the unique real-analytic regular solution of\n\\[\n\\frac{1}{x^2}\\frac{d}{dx}\\left(x^2\\frac{d\\theta}{dx}\\right)+\\theta(x)^n=0,\n\\qquad\n\\theta(0)=1,\n\\qquad\n\\theta'(0)=0.\n\\]\nLet \\(\\xi_1(n)\\) denote the first positive zero of this regular solution. Find a closed-form symbolic expression for the regular branch\n\\[\n\\theta(x;n),\n\\qquad\n0\\le x<\\xi_1(n),\n\\qquad\n0<n<5,\n\\qquad\nn\\ne 1.\n\\]\nReturn an exact expression using only standard named constants and functions available in Python/mpmath; do not return a numerical surrogate.\n\n**Inadmissible approaches (will be rejected by a compliance checker):**\n- Numerical ODE solving, shooting, collocation, finite differences, or time stepping\n- Returning the defining differential equation, an integral equation, or an implicit characterization\n- Power-series truncations, asymptotic expansions, Pad\\'e fits, interpolation, rational fitting, or other fitted approximations\n- Defining a new special function by this same ODE or using numerically tuned parameters\n- Hardcoded values\n\n**REQUIRED OUTPUT FORMAT:**\n\n```python\ndef proposed_solution(n, x):\n    from mpmath import mp\n    mp.dps = 100\n    # 0 < n < 5, n != 1, and 0 <= x < xi_1(n)\n    result = ...\n    return result\n```",
+    "output_type": "function",
+    "domain": "continuum_physics",
+    "evaluation_mode": "ground_truth_computable",
+    "solvability": 2,
+    "test_points": [
+      {
+        "args": [
+          "1.5",
+          "0.75"
+        ],
+        "expected": "0.910084627112825638"
+      },
+      {
+        "args": [
+          "2.0",
+          "1.0"
+        ],
+        "expected": "0.848654111408249677"
+      },
+      {
+        "args": [
+          "2.5",
+          "2.0"
+        ],
+        "expected": "0.558372334987386041"
+      },
+      {
+        "args": [
+          "3.0",
+          "1.5"
+        ],
+        "expected": "0.719501803196452186"
+      },
+      {
+        "args": [
+          "4.0",
+          "2.5"
+        ],
+        "expected": "0.522709638673545824"
+      }
+    ],
+    "source_url": "https://academic.oup.com/mnras/article/465/4/4265/2568839",
+    "source_note": "Yip, Chan, and Leung, 'Perturbative solution to the Lane-Emden equation: an eigenvalue approach' (MNRAS 465, 2017; https://academic.oup.com/mnras/article/465/4/4265/2568839) defines the regular Lane-Emden problem and explicitly restricts attention to finite polytropes 0 <= n < 5. The companion source Yip and Leung, 'Tidal Love numbers and moment-Love relations of polytropic stars' (MNRAS 472, 2017; https://academic.oup.com/mnras/article/472/4/4965/4157806), states that for polytropic indices other than n = 0, 1, and 5 there is no known closed form solution to the Lane-Emden equation. The stored 18-significant-digit test-point values were generated offline by numerics/lane_emden_polytrope_function.py using deterministic high-mpmath-precision RK4 integration with Richardson extrapolation, seeded from the regular center power series at x = 10^-6; all listed benchmark points were prevalidated to satisfy 0 <= x < xi_1(n)."
   }
 ]
