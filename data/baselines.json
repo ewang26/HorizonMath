@@ -310,53 +310,6 @@
     "verification_date": "2026-02-04"
   },
   {
-    "problem_id": "nikodym_finite_field",
-    "baseline": {
-      "value": "2.2334",
-      "direction": "maximize",
-      "metric": "removed_exponent = log_p(p^3 - |N|)",
-      "metric_key": "removed_exponent",
-      "source": {
-        "title": "Large point-line matchings and small Nikodym sets",
-        "authors": [
-          "Zach Hunter",
-          "Cosmin Pohoata",
-          "Jacques Verstraete",
-          "Shengtong Zhang"
-        ],
-        "year": 2026,
-        "venue": "arXiv preprint",
-        "arxiv_id": "2601.19879",
-        "doi": "10.48550/arXiv.2601.19879",
-        "url": "https://arxiv.org/abs/2601.19879"
-      },
-      "result_type": "proven",
-      "notes": "For prime fields F_p, the paper's prime-field induced-matching exponent 1.2334 implies (via their stated Nikodym/weak-Nikodym/induced-matching constructions) a Nikodym complement exponent of 2.2334 in F_p^3, i.e. |N| <= p^3 - Omega(p^{2.2334}). This is an asymptotic bound; for small primes (p <= 31) the effective threshold may differ."
-    },
-    "secondary_bounds": [
-      {
-        "type": "lower_bound",
-        "value": "~2 (from q^2 log q complement)",
-        "source": {
-          "title": "New Nikodym set constructions over finite fields",
-          "authors": [
-            "Terence Tao"
-          ],
-          "year": 2025,
-          "venue": "arXiv",
-          "arxiv_id": "2511.07721",
-          "doi": "10.48550/arXiv.2511.07721",
-          "theorem_reference": "Abstract",
-          "url": "https://arxiv.org/abs/2511.07721"
-        },
-        "superseded_by": "Large point-line matchings and small Nikodym sets"
-      }
-    ],
-    "verification_status": "verified",
-    "search_notes": "Revised to prime-field setting with normalized metric (removed_exponent). Baseline 2.2334 derived from Hunter et al. (2026) prime-field induced-matching exponent 1.2334, lifted to 3D Nikodym complement exponent. Prior bound by Tao (2025) gave complement ~q^2 log q (exponent ~2).",
-    "verification_date": "2026-02-20"
-  },
-  {
     "problem_id": "tammes_n15",
     "baseline": {
       "value": "53.657850129932673805526041483702831",
