@@ -40,7 +40,7 @@ GEMINI_API_KEY=AIza...
 
 The benchmark contains **113 problems** across 8 domains, classified by four fields in `data/problems_full.json`:
 
-- **`domain`** (problem area): mathematical_physics (22), number_theory (17), discrete_geometry (15), lattice_models (15), integrals (14), combinatorics (12), coding_theory (9), mathematical_constants (9)
+- **`domain`** (problem area): number_theory (20), special_functions (19), statistical_mechanics (15), discrete_geometry (15), combinatorics (13), spectral_theory (12), continuum_physics (10), coding_theory (9)
 - **`solvability`** (difficulty level): 0 (calibration, 10), 1 (likely solvable, 29), 2 (challenging, 66), 3 (possibly unsolvable, 8)
 - **`output_type`** (artifact type): constant (56), function (15), formula_discovery (3), construction (39)
 - **`evaluation_mode`** (how answers are checked): ground_truth_computable (71), benchmark_best_known (33), new_construction (9)
