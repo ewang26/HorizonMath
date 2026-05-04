@@ -71,6 +71,7 @@ DEFAULT_OPENAI_MODEL = "gpt-5.2"
 DEFAULT_GEMINI_MODEL = "gemini-3.1-pro-preview"
 DEFAULT_OPENROUTER_MODEL = "openai/gpt-5.2"
 DEFAULT_ANTHROPIC_MODEL = "claude-opus-4-6"
+DEFAULT_API_TIMEOUT_MINUTES = 75
 
 _SYSTEM_MESSAGE_BASE = (
     "You are a research mathematican whose goal is novel mathematical discovery. "
@@ -138,20 +139,39 @@ class RunConfig:
     output_dir: str
 
 
-def call_openai(prompt: str, model: str = DEFAULT_OPENAI_MODEL, system_message: str = "") -> dict:
-    """Call OpenAI Responses API (no tools, reasoning effort high for pro models).
+def is_pro_model(model: str) -> bool:
+    return "pro" in model.lower()
 
-    Returns dict with 'content', 'usage', and optional 'reasoning_details'.
-    """
-    client = openai.OpenAI(timeout=75 * 60)
-    kwargs = dict(
-        model=model,
-        instructions=system_message,
-        input=[{"role": "user", "content": prompt}],
-        max_output_tokens=125000,
-    )
-    kwargs["reasoning"] = {"effort": "high", "summary": "detailed"}
-    response = client.responses.create(**kwargs)
+
+def parse_optional_timeout_minutes(value: Optional[str]) -> Optional[float]:
+    if value is None:
+        return None
+
+    normalized = value.strip().lower()
+    if normalized in {"none", "no", "false", "off", "inf", "infinite", "unlimited"}:
+        return None
+
+    try:
+        minutes = float(value)
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError(
+            f"expected a number of minutes or 'none', got {value!r}"
+        ) from exc
+
+    if minutes < 0:
+        raise argparse.ArgumentTypeError("--api-timeout-minutes cannot be negative")
+    if minutes == 0:
+        return None
+    return minutes
+
+
+def format_timeout_minutes(minutes: Optional[float]) -> str:
+    if minutes is None:
+        return "none"
+    return f"{minutes:g} minutes"
+
+
+def openai_response_to_result(response) -> dict:
     result = {"content": response.output_text}
     if response.usage:
         result["usage"] = {
@@ -170,13 +190,42 @@ def call_openai(prompt: str, model: str = DEFAULT_OPENAI_MODEL, system_message: 
     return result
 
 
-def call_openai_streaming(prompt: str, model: str = DEFAULT_OPENAI_MODEL, system_message: str = "", problem_id: str = "") -> dict:
+def call_openai(
+    prompt: str,
+    model: str = DEFAULT_OPENAI_MODEL,
+    system_message: str = "",
+    timeout_seconds: Optional[float] = DEFAULT_API_TIMEOUT_MINUTES * 60,
+) -> dict:
+    """Call OpenAI Responses API (no tools, reasoning effort high for pro models).
+
+    Returns dict with 'content', 'usage', and optional 'reasoning_details'.
+    """
+    client = openai.OpenAI(timeout=timeout_seconds)
+    kwargs = dict(
+        model=model,
+        instructions=system_message,
+        input=[{"role": "user", "content": prompt}],
+        max_output_tokens=125000,
+    )
+    kwargs["reasoning"] = {"effort": "high", "summary": "detailed"}
+    response = client.responses.create(**kwargs)
+    return openai_response_to_result(response)
+
+
+def call_openai_streaming(
+    prompt: str,
+    model: str = DEFAULT_OPENAI_MODEL,
+    system_message: str = "",
+    problem_id: str = "",
+    timeout_seconds: Optional[float] = DEFAULT_API_TIMEOUT_MINUTES * 60,
+    verbose: bool = True,
+) -> dict:
     """Like call_openai but streams to stdout with [HH:MM:SS]-prefixed lines for hang detection.
 
     Prints reasoning summary and answer lines as they arrive, then returns the
     same dict as call_openai: 'content', 'usage', optional 'reasoning_details'.
     """
-    client = openai.OpenAI(timeout=75 * 60)
+    client = openai.OpenAI(timeout=timeout_seconds)
 
     def ts() -> str:
         return datetime.now().strftime("%H:%M:%S")
@@ -191,19 +240,22 @@ def call_openai_streaming(prompt: str, model: str = DEFAULT_OPENAI_MODEL, system
     )
 
     label = problem_id or "problem"
-    print(f"[{ts()}] ── {label} ── REASONING ──────────────────────────────", flush=True)
+    if verbose:
+        print(f"[{ts()}] ── {label} ── REASONING ──────────────────────────────", flush=True)
+    else:
+        print(f"[{ts()}] {label} — streaming response started", flush=True)
 
     line_buf = ""
     section = "reasoning"
     final_response = None
 
     for event in stream:
-        if event.type == "response.reasoning_summary_text.delta":
+        if event.type == "response.reasoning_summary_text.delta" and verbose:
             line_buf += event.delta
             while "\n" in line_buf:
                 line, line_buf = line_buf.split("\n", 1)
                 print(f"[{ts()}] {line}", flush=True)
-        elif event.type == "response.output_text.delta":
+        elif event.type == "response.output_text.delta" and verbose:
             if section == "reasoning":
                 if line_buf:
                     print(f"[{ts()}] {line_buf}", flush=True)
@@ -217,37 +269,31 @@ def call_openai_streaming(prompt: str, model: str = DEFAULT_OPENAI_MODEL, system
         elif event.type == "response.completed":
             final_response = event.response
 
-    if line_buf:
-        print(f"[{ts()}] {line_buf}", flush=True)
-    print(f"[{ts()}] ── {label} ── DONE ───────────────────────────────────", flush=True)
+    if verbose:
+        if line_buf:
+            print(f"[{ts()}] {line_buf}", flush=True)
+        print(f"[{ts()}] ── {label} ── DONE ───────────────────────────────────", flush=True)
+    else:
+        print(f"[{ts()}] {label} — streaming response completed", flush=True)
 
     if final_response is None:
         return {"content": ""}
 
-    result = {"content": final_response.output_text}
-    if final_response.usage:
-        result["usage"] = {
-            "input_tokens": final_response.usage.input_tokens,
-            "output_tokens": final_response.usage.output_tokens,
-            "total_tokens": final_response.usage.total_tokens,
-        }
-    reasoning_items = [
-        item for item in final_response.output if getattr(item, "type", None) == "reasoning"
-    ]
-    if reasoning_items:
-        result["reasoning_details"] = [
-            item.model_dump() if hasattr(item, "model_dump") else item
-            for item in reasoning_items
-        ]
-    return result
+    return openai_response_to_result(final_response)
 
 
-def call_openai_with_code_execution(prompt: str, model: str = DEFAULT_OPENAI_MODEL, system_message: str = "", container_id: Optional[str] = None) -> dict:
+def call_openai_with_code_execution(
+    prompt: str,
+    model: str = DEFAULT_OPENAI_MODEL,
+    system_message: str = "",
+    container_id: Optional[str] = None,
+    timeout_seconds: Optional[float] = DEFAULT_API_TIMEOUT_MINUTES * 60,
+) -> dict:
     """Call OpenAI with code interpreter tool enabled.
 
     Returns dict with 'content' and 'usage'.
     """
-    client = openai.OpenAI(timeout=75 * 60)
+    client = openai.OpenAI(timeout=timeout_seconds)
     container = container_id if container_id else {"type": "auto"}
     response = client.responses.create(
         model=model,
@@ -268,7 +314,12 @@ def call_openai_with_code_execution(prompt: str, model: str = DEFAULT_OPENAI_MOD
     return result
 
 
-def call_openrouter(prompt: str, model: str = DEFAULT_OPENROUTER_MODEL, system_message: str = "") -> dict:
+def call_openrouter(
+    prompt: str,
+    model: str = DEFAULT_OPENROUTER_MODEL,
+    system_message: str = "",
+    timeout_seconds: Optional[float] = DEFAULT_API_TIMEOUT_MINUTES * 60,
+) -> dict:
     """Call OpenRouter API (OpenAI-compatible, no tool use, reasoning enabled).
 
     Returns dict with 'content' and optional 'reasoning_details'.
@@ -280,7 +331,7 @@ def call_openrouter(prompt: str, model: str = DEFAULT_OPENROUTER_MODEL, system_m
     client = openai.OpenAI(
         base_url="https://openrouter.ai/api/v1",
         api_key=api_key,
-        timeout=75 * 60,
+        timeout=timeout_seconds,
     )
     response = client.chat.completions.create(
         model=model,
@@ -438,6 +489,37 @@ def retry_api_call(fn, *args, max_retries=3, **kwargs):
                 raise last_exception
 
 
+def call_openai_for_model(
+    prompt: str,
+    model: str,
+    system_message: str,
+    *,
+    problem_id: str,
+    container_id: Optional[str],
+    stream: bool,
+    timeout_seconds: Optional[float],
+) -> dict:
+    if is_pro_model(model):
+        return retry_api_call(
+            call_openai_streaming,
+            prompt,
+            model,
+            system_message,
+            problem_id,
+            timeout_seconds,
+            stream,
+        )
+
+    return retry_api_call(
+        call_openai_with_code_execution,
+        prompt,
+        model,
+        system_message,
+        container_id,
+        timeout_seconds,
+    )
+
+
 def run_single_problem(
     problem: dict,
     problem_index: int,
@@ -445,6 +527,7 @@ def run_single_problem(
     model: str,
     container_id: Optional[str] = None,
     stream: bool = False,
+    api_timeout_seconds: Optional[float] = DEFAULT_API_TIMEOUT_MINUTES * 60,
 ) -> dict:
     """Run LLM on a single problem and return the raw response."""
     prompt = problem["prompt"]
@@ -454,18 +537,20 @@ def run_single_problem(
     reasoning_details = None
     usage = None
     if provider == "openai":
-        if "pro" in model:
-            if stream:
-                result = retry_api_call(call_openai_streaming, prompt, model, system_message, problem["id"])
-            else:
-                result = retry_api_call(call_openai, prompt, model, system_message)
-        else:
-            result = retry_api_call(call_openai_with_code_execution, prompt, model, system_message, container_id=container_id)
+        result = call_openai_for_model(
+            prompt,
+            model,
+            system_message,
+            problem_id=problem["id"],
+            container_id=container_id,
+            stream=stream,
+            timeout_seconds=api_timeout_seconds,
+        )
         response = result["content"]
         usage = result.get("usage")
         reasoning_details = result.get("reasoning_details")
     elif provider == "openrouter":
-        result = retry_api_call(call_openrouter, prompt, model, system_message)
+        result = retry_api_call(call_openrouter, prompt, model, system_message, api_timeout_seconds)
         response = result["content"]
         reasoning_details = result.get("reasoning_details")
         usage = result.get("usage")
@@ -486,15 +571,20 @@ def run_single_problem(
         print(f"    ⚠ Empty response for {problem['id']}, retrying once...")
         sys.stdout.flush()
         if provider == "openai":
-            if "pro" in model:
-                result = retry_api_call(call_openai, prompt, model, system_message)
-            else:
-                result = retry_api_call(call_openai_with_code_execution, prompt, model, system_message, container_id=container_id)
+            result = call_openai_for_model(
+                prompt,
+                model,
+                system_message,
+                problem_id=problem["id"],
+                container_id=container_id,
+                stream=stream,
+                timeout_seconds=api_timeout_seconds,
+            )
             response = result["content"]
             usage = result.get("usage")
             reasoning_details = result.get("reasoning_details")
         elif provider == "openrouter":
-            result = retry_api_call(call_openrouter, prompt, model, system_message)
+            result = retry_api_call(call_openrouter, prompt, model, system_message, api_timeout_seconds)
             response = result["content"]
             reasoning_details = result.get("reasoning_details")
             usage = result.get("usage")
@@ -594,6 +684,16 @@ def main():
         help="Number of problems to process in parallel (default: 1)",
     )
     parser.add_argument(
+        "--api-timeout-minutes",
+        type=str,
+        default=None,
+        help=(
+            "API timeout in minutes, or 'none' for no client timeout. Defaults to "
+            "none for OpenAI pro models and 75 for other models. Can also be set "
+            "with OPENMATH_API_TIMEOUT_MINUTES."
+        ),
+    )
+    parser.add_argument(
         "--debug",
         action="store_true",
         help="Save prompts locally without calling the model API",
@@ -609,6 +709,20 @@ def main():
             "anthropic": DEFAULT_ANTHROPIC_MODEL,
         }
         args.model = model_defaults[args.provider]
+
+    is_openai_pro = args.provider == "openai" and is_pro_model(args.model)
+
+    try:
+        if args.api_timeout_minutes is not None:
+            api_timeout_minutes = parse_optional_timeout_minutes(args.api_timeout_minutes)
+        elif os.getenv("OPENMATH_API_TIMEOUT_MINUTES") is not None:
+            api_timeout_minutes = parse_optional_timeout_minutes(os.environ["OPENMATH_API_TIMEOUT_MINUTES"])
+        else:
+            api_timeout_minutes = None if is_openai_pro else DEFAULT_API_TIMEOUT_MINUTES
+    except argparse.ArgumentTypeError as exc:
+        print(str(exc), file=sys.stderr)
+        sys.exit(1)
+    api_timeout_seconds = None if api_timeout_minutes is None else api_timeout_minutes * 60
 
     # Paths
     project_root = Path(__file__).parent.parent
@@ -712,6 +826,9 @@ def main():
     print(f"Model: {args.model}")
     print(f"Problems: {len(problems)}")
     print(f"Parallel: {args.parallel}")
+    print(f"API timeout: {format_timeout_minutes(api_timeout_minutes)}")
+    if args.provider == "openai" and is_pro_model(args.model):
+        print("OpenAI pro mode: streaming")
     print(f"Output: {output_dir}")
     print()
 
@@ -801,7 +918,15 @@ def main():
         if container_queue is not None:
             container_id = container_queue.get()
         try:
-            response_data = run_single_problem(problem, i, args.provider, args.model, container_id=container_id, stream=(args.parallel == 1))
+            response_data = run_single_problem(
+                problem,
+                i,
+                args.provider,
+                args.model,
+                container_id=container_id,
+                stream=(args.parallel == 1),
+                api_timeout_seconds=api_timeout_seconds,
+            )
         finally:
             if container_queue is not None and container_id is not None:
                 container_queue.put(container_id)
