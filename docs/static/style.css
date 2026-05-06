@@ -88,57 +88,8 @@ a:hover { text-decoration-color: var(--fg); }
   line-height: 1.6;
 }
 
-.hero .authors {
-  font-size: 0.98rem;
-  margin-bottom: 0.5rem;
-  line-height: 2;
-  color: var(--fg);
-}
-
-.hero .authors span { white-space: nowrap; }
-.hero .authors span:not(:last-child)::after { content: ', '; }
-.hero .authors a { color: var(--fg); text-decoration: none; }
-.hero .authors a:hover { color: var(--accent); }
-.hero .authors sup { font-size: 0.65em; color: var(--fg-3); }
-
-.hero .affiliations {
-  font-size: 0.82rem;
-  color: #555;
-  margin-bottom: 0.2rem;
-}
-
-.hero .note {
-  font-size: 0.78rem;
-  color: #555;
-  margin-bottom: 1.75rem;
-}
-
-.links {
-  display: flex;
-  justify-content: center;
-  gap: 0.6rem;
-  flex-wrap: wrap;
-}
-
-.btn {
-  display: inline-block;
-  padding: 0.45rem 1.4rem;
-  border: 1.5px solid var(--fg);
-  border-radius: 4px;
-  color: var(--fg);
-  font-weight: 500;
-  font-size: 0.88rem;
-  text-decoration: none;
-  transition: all 0.15s;
-}
-
-.btn:hover {
-  background: var(--fg);
-  color: #fff;
-}
-
 /* ===== Alternating section backgrounds ===== */
-.hero, #benchmark, #examples, #citation {
+.hero, #benchmark, #examples {
   background: #fafafa;
 }
 

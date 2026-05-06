@@ -1,25 +1,6 @@
 <h1 align="center">HorizonMath</h1>
 
-<h3 align="center">Measuring AI Progress Toward Mathematical Discovery with Automatic Verification</h3>
-
-<p align="center">
-  <a href="https://arxiv.org/abs/2603.15617"><img src="https://img.shields.io/badge/arXiv-2603.15617-b31b1b.svg" alt="arXiv"></a>
-  <a href="https://ewang26.github.io/HorizonMath/"><img src="https://img.shields.io/badge/Project-Page-blue.svg" alt="Project Page"></a>
-  <a href="https://huggingface.co/datasets/squashenthus/HorizonMath"><img src="https://img.shields.io/badge/%F0%9F%A4%97-Dataset-yellow.svg" alt="Dataset"></a>
-</p>
-
-<p align="center">
-  Erik Y. Wang*, Sumeet Motwani, James V. Roggeveen, Eliot Hodges, Dulhan Jayalath,<br>
-  Charles London, Kalyan Ramakrishnan, Flaviu Cipcigan, Philip Torr, Alessandro Abate
-</p>
-
-<p align="center">
-  University of Oxford · Benchmark · Harvard University · Princeton University · Ellison Institute of Technology
-</p>
-
-<p align="center">
-  *Correspondence: <a href="mailto:erik.wang@dtc.ox.ac.uk">erik.wang@dtc.ox.ac.uk</a>
-</p>
+<h3 align="center">Measuring Progress in Reasoning Toward Mathematical Discovery with Automatic Verification</h3>
 
 ## Setup
 
@@ -246,18 +227,3 @@ For `benchmark_best_known` problems, provide a baseline entry for `data/baseline
 - `direction`: `"minimize"` or `"maximize"` — whether lower or higher values are better.
 - `metric_key`: which key from the validator's returned metrics to compare against the baseline.
 - Include a source citation for the baseline value.
-
-## Citation
-
-```bibtex
-@article{wang2026horizonmath,
-  title     = {HorizonMath: Measuring AI Progress Toward Mathematical
-               Discovery with Automatic Verification},
-  author    = {Wang, Erik Y. and Motwani, Sumeet and Roggeveen, James V.
-               and Hodges, Eliot and Jayalath, Dulhan and London, Charles
-               and Ramakrishnan, Kalyan and Cipcigan, Flaviu
-               and Torr, Philip and Abate, Alessandro},
-  year      = {2026},
-  note      = {Working Draft}
-}
-```

@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>HorizonMath: Measuring AI Progress Toward Mathematical Discovery</title>
-  <meta name="description" content="HorizonMath is a benchmark of 100+ unsolved mathematical problems with automated verification for measuring AI progress toward mathematical discovery.">
+  <title>HorizonMath: Measuring Progress in Reasoning Toward Mathematical Discovery</title>
+  <meta name="description" content="HorizonMath is a benchmark of 100+ unsolved mathematical problems with automated verification for measuring progress in reasoning toward mathematical discovery.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
@@ -17,31 +17,7 @@
 <header class="hero">
   <div class="container">
     <h1 class="title">HorizonMath</h1>
-    <p class="subtitle">Measuring AI Progress Toward Mathematical Discovery with Automatic Verification</p>
-    <div class="authors">
-      <span><a href="https://erikyw.com/">Erik Y. Wang</a><sup>1,2,*</sup></span>
-      <span><a href="https://sumeetmotwani.com/">Sumeet Motwani</a><sup>1,*</sup></span>
-      <span><a href="https://www.jamesroggeveen.com/">James V. Roggeveen</a><sup>3</sup></span>
-      <span><a href="https://www.eliothodges.com/">Eliot Hodges</a><sup>4</sup></span>
-      <span><a href="https://dulhanjayalath.com/">Dulhan Jayalath</a><sup>1</sup></span>
-      <span><a href="https://le-big-mac.github.io/">Charles London</a><sup>1</sup></span>
-      <span><a href="#">Kalyan Ramakrishnan</a><sup>1</sup></span>
-      <span><a href="#">Flaviu Cipcigan</a><sup>5</sup></span>
-      <span><a href="https://torrvision.com/">Philip Torr</a><sup>1</sup></span>
-      <span><a href="https://www.cs.ox.ac.uk/people/alessandro.abate/home.html">Alessandro Abate</a><sup>1</sup></span>
-    </div>
-    <p class="affiliations">
-      <sup>1</sup>University of Oxford &nbsp;
-      <sup>2</sup>Benchmark &nbsp;
-      <sup>3</sup>Harvard University &nbsp;
-      <sup>4</sup>Princeton University &nbsp;
-      <sup>5</sup>Ellison Institute of Technology
-    </p>
-    <p class="note"><sup>*</sup>Corresponding authors</p>
-    <div class="links">
-      <a href="https://arxiv.org/abs/2603.15617" class="btn">Paper</a>
-      <a href="https://github.com/ewang26/HorizonMath" class="btn">Code</a>
-    </div>
+    <p class="subtitle">Measuring Progress in Reasoning Toward Mathematical Discovery with Automatic Verification</p>
   </div>
 </header>
 
@@ -59,11 +35,11 @@
 <section id="benchmark" class="section">
   <div class="container">
     <h2>Benchmark Overview</h2>
-    <p>101 problems across 8 mathematical domains. Problems without known solutions cannot exist in any training corpus&mdash;any correct solution signals true reasoning and autonomous discovery.</p>
+    <p>113 problems across 8 mathematical domains. Problems without known solutions cannot exist in any training corpus&mdash;any correct solution signals true reasoning and autonomous discovery.</p>
 
     <div class="stats-row">
       <div class="stat">
-        <span class="stat-number">101</span>
+        <span class="stat-number">113</span>
         <span class="stat-label">Problems</span>
       </div>
       <div class="stat">
@@ -71,7 +47,7 @@
         <span class="stat-label">Domains</span>
       </div>
       <div class="stat">
-        <span class="stat-number">91</span>
+        <span class="stat-number">103</span>
         <span class="stat-label">Unsolved</span>
       </div>
       <div class="stat">
@@ -87,8 +63,8 @@
           <thead><tr><th>Level</th><th>Description</th><th>Count</th></tr></thead>
           <tbody>
             <tr><td>0</td><td>Calibration (solved)</td><td>10</td></tr>
-            <tr><td>1</td><td>Likely solvable</td><td>23</td></tr>
-            <tr><td>2</td><td>Challenging</td><td>60</td></tr>
+            <tr><td>1</td><td>Likely solvable</td><td>29</td></tr>
+            <tr><td>2</td><td>Challenging</td><td>66</td></tr>
             <tr><td>3</td><td>Likely unsolvable</td><td>8</td></tr>
           </tbody>
         </table>
@@ -98,12 +74,12 @@
         <table>
           <thead><tr><th>Domain</th><th>Count</th></tr></thead>
           <tbody>
+            <tr><td>Mathematical Physics</td><td>22</td></tr>
             <tr><td>Number Theory</td><td>17</td></tr>
             <tr><td>Discrete Geometry</td><td>15</td></tr>
             <tr><td>Lattice Models</td><td>15</td></tr>
-            <tr><td>Continuum Physics</td><td>13</td></tr>
+            <tr><td>Integrals</td><td>14</td></tr>
             <tr><td>Combinatorics</td><td>12</td></tr>
-            <tr><td>Integrals</td><td>11</td></tr>
             <tr><td>Coding Theory</td><td>9</td></tr>
             <tr><td>Mathematical Constants</td><td>9</td></tr>
           </tbody>
@@ -117,7 +93,7 @@
 <section id="key-results" class="section">
   <div class="container">
     <h2>Key Results</h2>
-    <p>We evaluate three frontier models on 101 research-level math problems. State-of-the-art models score near 0%, but <strong>GPT 5.4 Pro produces 2 potentially novel mathematical results</strong> that improve on published baselines.</p>
+    <p>We evaluate three frontier models on research-level math problems. State-of-the-art models score near 0%, but <strong>GPT 5.4 Pro produces 2 potentially novel mathematical results</strong> that improve on published baselines.</p>
 
     <table class="key-results-table">
       <thead>
@@ -278,33 +254,17 @@
           <tr><td>Erd&#337;s Problems</td><td>1,000+</td><td>&check;</td><td>&cross;</td><td>&cross;</td></tr>
           <tr><td>IMO-AnswerBench</td><td>400</td><td>&cross;</td><td>&check;</td><td>&check;</td></tr>
           <tr><td>Optimization Constants</td><td>96</td><td>&check;</td><td>&cross;</td><td>&check;</td></tr>
-          <tr class="ours-row"><td><strong>HorizonMath</strong></td><td><strong>101</strong></td><td><strong>&check;</strong></td><td><strong>&check;</strong></td><td><strong>&check;</strong></td></tr>
+          <tr class="ours-row"><td><strong>HorizonMath</strong></td><td><strong>113</strong></td><td><strong>&check;</strong></td><td><strong>&check;</strong></td><td><strong>&check;</strong></td></tr>
         </tbody>
       </table>
     </div>
   </div>
 </section>
 
-<!-- Citation -->
-<section id="citation" class="section">
-  <div class="container">
-    <h2>BibTeX</h2>
-    <pre class="bibtex"><code>@article{wang2026horizonmathmeasuringaiprogress,
-      title={HorizonMath: Measuring AI Progress Toward Mathematical Discovery with Automatic Verification},
-      author={Erik Y. Wang and Sumeet Motwani and James V. Roggeveen and Eliot Hodges and Dulhan Jayalath and Charles London and Kalyan Ramakrishnan and Flaviu Cipcigan and Philip Torr and Alessandro Abate},
-      year={2026},
-      eprint={2603.15617},
-      archivePrefix={arXiv},
-      primaryClass={cs.LG},
-      url={https://arxiv.org/abs/2603.15617},
-}</code></pre>
-  </div>
-</section>
-
 <!-- Footer -->
 <footer>
   <div class="container">
-    <p>HorizonMath &copy; 2026 &middot; <a href="https://github.com/ewang26/HorizonMath">GitHub</a></p>
+    <p>HorizonMath &copy; 2026</p>
   </div>
 </footer>
 
