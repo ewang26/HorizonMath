@@ -57,7 +57,11 @@ Respond with ONLY a JSON object (no markdown fences) with two fields:
 DEFAULT_COMPLIANCE_ROUNDS = 3
 
 
-def _single_compliance_check(prompt: str) -> ComplianceResult:
+def _single_compliance_check(
+    prompt: str,
+    *,
+    fail_closed: bool = False,
+) -> ComplianceResult:
     """Run a single compliance check call against Gemini."""
     try:
         client = genai.Client()
@@ -80,18 +84,24 @@ def _single_compliance_check(prompt: str) -> ComplianceResult:
 
         result = json.loads(text)
         return ComplianceResult(
-            compliant=bool(result.get("compliant", True)),
+            compliant=bool(result.get("compliant", not fail_closed)),
             reason=str(result.get("reason", "")),
         )
     except (json.JSONDecodeError, KeyError) as e:
         return ComplianceResult(
-            compliant=True,
-            reason=f"Compliance check parse error (defaulting to compliant): {e}",
+            compliant=not fail_closed,
+            reason=(
+                "Compliance check parse error "
+                f"(defaulting to {'non-compliant' if fail_closed else 'compliant'}): {e}"
+            ),
         )
     except Exception as e:
         return ComplianceResult(
-            compliant=True,
-            reason=f"Compliance check API error (defaulting to compliant): {e}",
+            compliant=not fail_closed,
+            reason=(
+                "Compliance check API error "
+                f"(defaulting to {'non-compliant' if fail_closed else 'compliant'}): {e}"
+            ),
         )
 
 
@@ -99,6 +109,7 @@ def check_solution_compliance(
     code: str,
     problem_prompt: str = "",
     n: int = DEFAULT_COMPLIANCE_ROUNDS,
+    fail_closed: bool = False,
 ) -> ComplianceResult:
     """Check whether extracted solution code uses only allowed techniques.
 
@@ -113,14 +124,18 @@ def check_solution_compliance(
             included in the compliance check so the reviewer can enforce them.
         n: Number of compliance check rounds (default 3). Majority vote
             determines the final result.
+        fail_closed: Mark unavailable, malformed, or failed checks non-compliant.
 
     Returns:
         ComplianceResult with compliant flag and explanation.
     """
     if not os.environ.get("GOOGLE_API_KEY"):
         return ComplianceResult(
-            compliant=True,
-            reason="Compliance check skipped (GOOGLE_API_KEY is not set).",
+            compliant=not fail_closed,
+            reason=(
+                "Compliance check unavailable (GOOGLE_API_KEY is not set; "
+                f"defaulting to {'non-compliant' if fail_closed else 'compliant'})."
+            ),
         )
 
     problem_context = ""
@@ -136,7 +151,7 @@ def check_solution_compliance(
 
     results = []
     for _ in range(n):
-        results.append(_single_compliance_check(prompt))
+        results.append(_single_compliance_check(prompt, fail_closed=fail_closed))
 
     compliant_count = sum(1 for r in results if r.compliant)
     non_compliant_count = n - compliant_count

@@ -17,9 +17,11 @@ Usage:
 """
 
 import argparse
+import hashlib
 import json
 import os
 import sys
+from collections import Counter
 from datetime import datetime
 from pathlib import Path
 
@@ -44,6 +46,7 @@ from evaluate import (
 )
 from evaluator import extract_proposed_solution, check_solution_compliance
 from baseline_comparator import load_baselines
+from benchmark_prompts import system_messages_sha256
 
 
 def _sanitize_for_json(obj):
@@ -67,6 +70,8 @@ def evaluate_response(
     problem_index: int,
     response: str,
     baselines: dict[str, dict],
+    *,
+    require_compliance: bool = False,
 ) -> dict:
     """Evaluate an LLM response for a problem."""
     mode = determine_mode(problem, "auto")
@@ -120,7 +125,9 @@ def evaluate_response(
             extraction = extract_proposed_solution(response)
             if extraction and extraction.code:
                 compliance = check_solution_compliance(
-                    extraction.code, problem_prompt=problem.get("prompt", "")
+                    extraction.code,
+                    problem_prompt=problem.get("prompt", ""),
+                    fail_closed=require_compliance,
                 )
                 eval_dict["compliance_check"] = True
                 eval_dict["compliance_passed"] = compliance.compliant
@@ -464,8 +471,11 @@ def main():
     parser.add_argument(
         "--data-file",
         type=str,
-        default="data/problems_full.json",
-        help="Path to problems JSON file",
+        default=None,
+        help=(
+            "Path to problems JSON file (defaults to config.json problems_file, "
+            "then data/problems_full.json)"
+        ),
     )
     parser.add_argument(
         "--baselines-file",
@@ -483,10 +493,8 @@ def main():
     # Paths
     project_root = Path(__file__).parent.parent
     results_dir = Path(args.results_dir)
-    data_path = project_root / args.data_file
-    baselines_path = project_root / args.baselines_file
-
     responses_path = results_dir / "responses.jsonl"
+    generation_errors_path = results_dir / "generation_errors.jsonl"
     evaluations_path = results_dir / "evaluation.jsonl"
     summary_path = results_dir / "summary.json"
 
@@ -494,25 +502,17 @@ def main():
         print(f"Error: Results directory not found: {results_dir}", file=sys.stderr)
         sys.exit(1)
 
-    if not responses_path.exists():
-        print(f"Error: No responses.jsonl found in {results_dir}", file=sys.stderr)
+    if not responses_path.exists() and not generation_errors_path.exists():
+        print(
+            f"Error: No responses or generation errors found in {results_dir}",
+            file=sys.stderr,
+        )
         sys.exit(1)
 
     if evaluations_path.exists() and not args.force:
         print(f"Error: evaluation.jsonl already exists in {results_dir}", file=sys.stderr)
         print("Use --force to overwrite existing evaluation results.")
         sys.exit(1)
-
-    if not data_path.exists():
-        print(f"Error: Data file not found: {data_path}", file=sys.stderr)
-        sys.exit(1)
-
-    # Load problems and baselines
-    all_problems = load_problems(data_path)
-    baselines = load_baselines(baselines_path) if baselines_path.exists() else {}
-
-    # Build mapping from problem id to (index, problem)
-    problem_by_id = {p["id"]: (i, p) for i, p in enumerate(all_problems)}
 
     # Load config if available
     config = {}
@@ -521,8 +521,41 @@ def main():
         with open(config_path) as f:
             config = json.load(f)
 
+    data_file = (
+        args.data_file
+        or config.get("problems_file")
+        or "data/problems_full.json"
+    )
+    data_path = project_root / data_file
+    baselines_path = project_root / args.baselines_file
+    if not data_path.exists():
+        print(f"Error: Data file not found: {data_path}", file=sys.stderr)
+        sys.exit(1)
+
+    expected_dataset_hash = config.get("dataset_sha256")
+    if expected_dataset_hash:
+        actual_dataset_hash = hashlib.sha256(data_path.read_bytes()).hexdigest()
+        if actual_dataset_hash != expected_dataset_hash:
+            print(
+                "Error: Problem dataset content differs from the generation run",
+                file=sys.stderr,
+            )
+            sys.exit(1)
+    expected_system_hash = config.get("system_messages_sha256")
+    if expected_system_hash and expected_system_hash != system_messages_sha256():
+        print(
+            "Error: Canonical benchmark system messages differ from the generation run",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+    # Load problems and baselines only after validating run provenance.
+    all_problems = load_problems(data_path)
+    baselines = load_baselines(baselines_path) if baselines_path.exists() else {}
+    problem_by_id = {p["id"]: (i, p) for i, p in enumerate(all_problems)}
+
     # Load responses
-    responses = load_responses(responses_path)
+    responses = load_responses(responses_path) if responses_path.exists() else []
     total = len(responses)
 
     print(f"Results directory: {results_dir}")
@@ -535,24 +568,92 @@ def main():
     # Auto-detect GitHub Actions for collapsible log groups
     is_github_actions = os.getenv("GITHUB_ACTIONS") == "true"
 
-    # Load any pre-existing error entries from generation phase,
-    # dropping stale errors for problems that were later successfully generated
+    # Load the latest generation error for each problem, dropping stale errors for
+    # problems that were later successfully generated. Older runs wrote these
+    # entries into evaluation.jsonl; preserve those only with --force.
     response_problem_ids = {r.get("problem_id") for r in responses}
-    generation_errors = []
-    if evaluations_path.exists():
-        with open(evaluations_path) as f:
+    generation_errors_by_problem = {}
+    error_sources = [generation_errors_path]
+    if args.force and evaluations_path.exists():
+        error_sources.append(evaluations_path)
+    for error_source in error_sources:
+        if not error_source.exists():
+            continue
+        with open(error_source) as f:
             for line in f:
                 line = line.strip()
                 if line:
                     try:
                         entry = json.loads(line)
                         if entry.get("error_type") == "runtime":
-                            if entry.get("problem_id") not in response_problem_ids:
-                                generation_errors.append(entry)
+                            problem_id = entry.get("problem_id")
+                            if problem_id and problem_id not in response_problem_ids:
+                                generation_errors_by_problem[problem_id] = entry
                     except json.JSONDecodeError:
                         pass
-        if generation_errors:
-            print(f"Loaded {len(generation_errors)} generation error(s) from previous run")
+    generation_errors = list(generation_errors_by_problem.values())
+    if generation_errors:
+        print(f"Loaded {len(generation_errors)} generation error(s) from Phase 1")
+
+    response_counts = Counter(
+        response.get("problem_id")
+        for response in responses
+        if response.get("problem_id")
+    )
+    duplicate_response_ids = sorted(
+        problem_id
+        for problem_id, count in response_counts.items()
+        if count > 1
+    )
+    if duplicate_response_ids:
+        print(
+            "Error: Duplicate responses for problem IDs: "
+            + ", ".join(duplicate_response_ids),
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+    selected_problem_ids = config.get("selected_problem_ids")
+    if selected_problem_ids is not None:
+        selected_set = set(selected_problem_ids)
+        if len(selected_set) != len(selected_problem_ids):
+            print(
+                "Error: config.json contains duplicate selected problem IDs",
+                file=sys.stderr,
+            )
+            sys.exit(1)
+        unknown_selected = sorted(selected_set - problem_by_id.keys())
+        response_ids = set(response_counts)
+        generation_error_ids = set(generation_errors_by_problem)
+        overlap = sorted(response_ids & generation_error_ids)
+        missing = sorted(selected_set - response_ids - generation_error_ids)
+        unexpected = sorted(
+            (response_ids | generation_error_ids) - selected_set
+        )
+        coverage_errors = []
+        if unknown_selected:
+            coverage_errors.append(
+                "selected IDs absent from dataset: " + ", ".join(unknown_selected)
+            )
+        if overlap:
+            coverage_errors.append(
+                "both response and generation error: " + ", ".join(overlap)
+            )
+        if missing:
+            coverage_errors.append(
+                "no terminal outcome: " + ", ".join(missing)
+            )
+        if unexpected:
+            coverage_errors.append(
+                "unexpected outcome IDs: " + ", ".join(unexpected)
+            )
+        if coverage_errors:
+            print(
+                "Error: Run is not complete and uniquely scoreable: "
+                + "; ".join(coverage_errors),
+                file=sys.stderr,
+            )
+            sys.exit(1)
 
     # Evaluate each response
     start_time = datetime.now()
@@ -575,7 +676,11 @@ def main():
 
         # Evaluate
         eval_result = evaluate_response(
-            problem, problem_index, response_text, baselines
+            problem,
+            problem_index,
+            response_text,
+            baselines,
+            require_compliance=config.get("provider") == "codex-cloud",
         )
         evaluations.append(eval_result)
 

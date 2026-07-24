@@ -69,6 +69,45 @@ def test_api_error_defaults_compliant(mock_client_cls):
     assert "api error" in result.reason.lower()
 
 
+def test_missing_key_fails_closed(monkeypatch):
+    monkeypatch.delenv("GOOGLE_API_KEY", raising=False)
+    result = check_solution_compliance(
+        "def proposed_solution():\n    return mp.pi",
+        fail_closed=True,
+    )
+    assert result.compliant is False
+    assert "not set" in result.reason.lower()
+
+
+@patch("evaluator.compliance.genai.Client")
+def test_api_error_fails_closed_when_required(mock_client_cls):
+    mock_client = MagicMock()
+    mock_client.models.generate_content.side_effect = Exception("API connection failed")
+    mock_client_cls.return_value = mock_client
+
+    result = check_solution_compliance(
+        "def proposed_solution():\n    return mp.pi",
+        fail_closed=True,
+    )
+    assert result.compliant is False
+    assert "api error" in result.reason.lower()
+
+
+@patch("evaluator.compliance.genai.Client")
+def test_missing_compliant_field_fails_closed(mock_client_cls):
+    mock_client = MagicMock()
+    mock_client.models.generate_content.return_value = _mock_genai_response(
+        '{"reason": "missing required verdict"}'
+    )
+    mock_client_cls.return_value = mock_client
+
+    result = check_solution_compliance(
+        "def proposed_solution():\n    return mp.pi",
+        fail_closed=True,
+    )
+    assert result.compliant is False
+
+
 @patch("evaluator.compliance.genai.Client")
 def test_markdown_fenced_json_response(mock_client_cls):
     mock_client = MagicMock()

@@ -103,6 +103,36 @@ uv run scripts/evaluate_responses.py results/<run_dir>/            # Evaluate al
 uv run scripts/evaluate_responses.py results/<run_dir>/ --force    # Re-evaluate from scratch
 ```
 
+### Coding-agent evaluation with Codex cloud
+
+Coding agents run through a separate Phase 1 entry point and produce the same
+`responses.jsonl` consumed by Phase 2:
+
+```bash
+uv run scripts/run_agent_benchmark.py \
+  --env YOUR_ENVIRONMENT \
+  --agent-workspace ../HorizonMath-agent-workspace \
+  --agent-repo-url git@github.com:YOUR_ORG/HorizonMath-agent-workspace.git \
+  --confirm-environment-isolated \
+  --confirm-goal-tools-available \
+  --confirm-agent-internet-off \
+  --problem w4_watson_integral
+
+uv run scripts/evaluate_responses.py results/codex-cloud_<label>_<timestamp>/
+```
+
+For verifier isolation, cloud agents run in a separate minimal repository with
+independent git history and agent-phase internet disabled. They receive the same
+system-message text and problem prompt as the single-shot runners, are required to
+use a Codex goal for each problem, and have the tools installed in the cloud
+container. The cloud CLI embeds that system text in the task prompt rather than at
+the single-shot API’s system role, so this is an agentic—not role-identical—condition.
+Because the cloud CLI does not expose goal lifecycle or environment-binding
+telemetry, scored runs require explicit operator attestations. Returned code is
+executed in an OS sandbox with no trusted-repository access. See [the Codex cloud
+agent evaluation guide](docs/codex_cloud_agents.md) for setup, limitations, full
+runs, resume behavior, and security checks.
+
 ### Output Structure
 
 Results are saved to timestamped folders in `results/`:
