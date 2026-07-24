@@ -67,6 +67,9 @@ The `tmux_run.sh` wrapper runs both phases in a detached tmux session, so benchm
 # Specify provider and model
 ./scripts/tmux_run.sh --provider openai --model gpt-5.2-pro
 
+# GPT-5.6 Sol with max reasoning
+./scripts/tmux_run.sh --provider openai --model gpt-5.6-sol --reasoning-effort max
+
 # Single problem
 ./scripts/tmux_run.sh --problem diff_basis_upper
 
@@ -91,10 +94,16 @@ tmux kill-session -t openmath # Abort the run
 ```bash
 uv run scripts/run_benchmark.py                                    # Full benchmark (OpenRouter gpt-5.2)
 uv run scripts/run_benchmark.py --provider openai --model gpt-5.2-pro  # Use OpenAI directly
+uv run scripts/run_benchmark.py --provider openai --model gpt-5.6-sol --reasoning-effort max
 uv run scripts/run_benchmark.py --problem w4_watson_integral       # Single problem
 uv run scripts/run_benchmark.py --parallel 10                      # Parallel generation
 uv run scripts/run_benchmark.py --resume results/<run_dir>/        # Resume interrupted run
 ```
+
+OpenAI GPT-5.6 models available to the runner are `gpt-5.6-sol`,
+`gpt-5.6-terra`, and `gpt-5.6-luna`. For OpenAI and OpenRouter requests,
+`--reasoning-effort` accepts `none`, `low`, `medium`, `high`, `xhigh`, or `max`.
+The default remains `high` for compatibility with existing benchmark runs.
 
 **Phase 2 — Evaluate responses:**
 
