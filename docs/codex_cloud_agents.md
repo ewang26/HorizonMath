@@ -5,6 +5,11 @@ model providers. Each problem becomes an independent Codex cloud task with termi
 and tool access. The cloud agent does its reasoning and computation remotely, writes
 one answer file, and the existing trusted evaluator scores that answer locally.
 
+This repository-backed workflow is the supported way to automate Codex cloud
+evaluations. The current app's repository-free/projectless Codex tasks run on the
+calling host, while Codex cloud tasks check out a connected repository. Do not
+describe projectless local tasks as cloud execution.
+
 ## Trust boundary
 
 Do not attach the cloud environment to `ewang26/HorizonMath`. That repository
@@ -81,6 +86,8 @@ uv run scripts/run_agent_benchmark.py \
   --env YOUR_ENVIRONMENT \
   --agent-workspace ../HorizonMath-agent-workspace \
   --agent-repo-url git@github.com:YOUR_ORG/HorizonMath-agent-workspace.git \
+  --model gpt-5.6-sol \
+  --reasoning-effort ultra \
   --problem w4_watson_integral
 ```
 
@@ -108,6 +115,8 @@ uv run scripts/run_agent_benchmark.py \
   --env YOUR_ENVIRONMENT \
   --agent-workspace ../HorizonMath-agent-workspace \
   --agent-repo-url git@github.com:YOUR_ORG/HorizonMath-agent-workspace.git \
+  --model gpt-5.6-sol \
+  --reasoning-effort ultra \
   --confirm-environment-isolated \
   --confirm-goal-tools-available \
   --confirm-agent-internet-off \
@@ -121,6 +130,8 @@ uv run scripts/run_agent_benchmark.py \
   --env YOUR_ENVIRONMENT \
   --agent-workspace ../HorizonMath-agent-workspace \
   --agent-repo-url git@github.com:YOUR_ORG/HorizonMath-agent-workspace.git \
+  --model gpt-5.6-sol \
+  --reasoning-effort ultra \
   --confirm-environment-isolated \
   --confirm-goal-tools-available \
   --confirm-agent-internet-off \
@@ -140,8 +151,13 @@ runtime exposes goal tools and that the environment is attached to the companion
 repository with a clean setup/cache. If machine-auditable goal lifecycle evidence is
 mandatory, the current cloud CLI surface is insufficient.
 
-`--model-label` changes result metadata only. The actual model is selected by the
-Codex cloud environment/account, not by this runner.
+`--model` and `--reasoning-effort` are passed to every `codex cloud exec`
+submission as `model` and `model_reasoning_effort` configuration overrides. The
+runner records the requested values in `config.json` and each response. The
+current cloud CLI returns the task ID and URL but does not echo the resolved model
+or reasoning effort in machine-readable task metadata. These records prove what
+the runner requested, not independent confirmation of what the service resolved.
+If independent runtime confirmation is mandatory, do not score the run.
 
 Before a multi-problem run, complete the documented one-problem command and its
 trusted evaluation in the exact environment. Inspect the saved prompt, task URL,
@@ -157,6 +173,8 @@ uv run scripts/run_agent_benchmark.py \
   --env YOUR_ENVIRONMENT \
   --agent-workspace ../HorizonMath-agent-workspace \
   --agent-repo-url git@github.com:YOUR_ORG/HorizonMath-agent-workspace.git \
+  --model gpt-5.6-sol \
+  --reasoning-effort ultra \
   --confirm-environment-isolated \
   --confirm-goal-tools-available \
   --confirm-agent-internet-off \
@@ -254,3 +272,41 @@ Before submitting a task, the runner verifies:
 The Codex cloud CLI does not currently expose these environment and goal properties
 for machine verification, so the final four items are operator attestations and
 are recorded in `config.json`.
+
+## Prompt for a fresh Codex coordinator session
+
+Open the trusted HorizonMath checkout on this branch in a normal Codex session.
+The coordinator may run locally; scored problem solving may not. Replace the three
+placeholders before sending this prompt:
+
+```text
+Follow the root AGENTS.md exactly.
+
+Run a new coding-agent evaluation on HorizonMath dataset indices 1–10 inclusive.
+Use scripts/run_agent_benchmark.py with:
+- Codex cloud environment: YOUR_CODEX_CLOUD_ENVIRONMENT
+- verifier-free companion checkout: YOUR_AGENT_WORKSPACE_PATH
+- companion GitHub repository: YOUR_AGENT_REPOSITORY_URL
+- model: gpt-5.6-sol
+- reasoning effort: ultra
+- parallel cloud tasks: 10
+
+Every scored solver must be a fresh codex cloud exec task in the configured
+OpenAI-managed cloud environment. Do not use create_thread, projectless tasks,
+worktrees, or local collaboration agents as scored solvers. Local coordination
+and trusted evaluation are expected.
+
+Use the required environment, goal-tool, internet-off, and completed-canary
+confirmations only after verifying they are true. Generate prompts before
+submission, wait for all ten terminal outcomes, run the trusted evaluator with
+mandatory Gemini compliance checking, and report per-problem results, compliant
+pass rate, generation failures, and links to every run artifact.
+
+If the cloud environment or attestations cannot be verified, or if independent
+machine confirmation of the resolved model settings is required, fail closed
+before scored submission and report the exact blocker.
+```
+
+`--range` is zero-based and inclusive. The prompt above intentionally selects
+dataset indices 1 through 10. Use `0–9` only when the intended indices are 0
+through 9.

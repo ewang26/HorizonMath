@@ -34,9 +34,14 @@ def test_compliant_solution(mock_client_cls):
     )
     mock_client_cls.return_value = mock_client
 
-    result = check_solution_compliance("def proposed_solution():\n    return mp.gamma(mp.mpf('1')/4)")
+    result = check_solution_compliance(
+        "def proposed_solution():\n    return mp.gamma(mp.mpf('1')/4)"
+    )
     assert result.compliant is True
     assert "known constants" in result.reason
+    review_prompt = mock_client.models.generate_content.call_args.kwargs["contents"]
+    assert "Hardcoded numerical targets" in review_prompt
+    assert "Rationalized decimal approximations" in review_prompt
 
 
 @patch("evaluator.compliance.genai.Client")

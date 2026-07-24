@@ -7,7 +7,6 @@ single-file diff back into the response format used by evaluate_responses.py.
 
 from __future__ import annotations
 
-import hashlib
 import re
 import subprocess
 from dataclasses import dataclass
@@ -179,50 +178,6 @@ Submission contract:
 """
 
 
-def build_conversation_agent_prompt(
-    *,
-    problem_id: str,
-    system_message: str,
-    problem_prompt: str,
-) -> str:
-    """Build the exact payload for one repository-free Codex cloud container.
-
-    ``system_message`` and ``problem_prompt`` are inserted byte-for-byte.  The
-    surrounding orchestration text may define the agentic execution condition,
-    but must never summarize, rewrite, or replace either benchmark input.
-    """
-
-    system_sha256 = hashlib.sha256(system_message.encode("utf-8")).hexdigest()
-    problem_sha256 = hashlib.sha256(problem_prompt.encode("utf-8")).hexdigest()
-    return f"""You are the primary Codex agent for exactly one HorizonMath problem.
-You must run inside an OpenAI-hosted Codex cloud VM/container. Model inference
-being remote is not enough: Python, mpmath, symbolic calculations, subprocesses,
-tool calls, and subagent coordination must all execute inside that cloud
-container. A projectless conversation with hostId="local" is forbidden.
-
-No repository or worktree may be attached. Do not open or inspect the trusted
-HorizonMath checkout, its git history, validators, ground truth, baselines, or
-evaluation code. You may spawn as many subagents as you need inside the same
-Codex cloud environment; give every subagent only the exact benchmark text
-contained in this task. Do not use local collaboration subagents.
-
-The two benchmark blocks below are canonical inputs. They are copied verbatim from
-the benchmark source. Do not paraphrase, summarize, correct, or replace them.
-
-<benchmark_system_message sha256="{system_sha256}">
-{system_message}
-</benchmark_system_message>
-
-<problem_statement problem_id="{problem_id}" sha256="{problem_sha256}">
-{problem_prompt}
-</problem_statement>
-
-Return the complete response to be evaluated in your final message. It must include
-the exact ``proposed_solution()`` function required by the benchmark text. Do not
-return an answer only through a side channel, scratch file, or subagent message.
-"""
-
-
 def extract_new_file_from_diff(diff: str, expected_path: str) -> str:
     """Extract one newly-created answer file from a unified git diff.
 
@@ -352,9 +307,11 @@ class CodexCloudClient:
         """Verify that the installed CLI exposes cloud task submission."""
 
         result = self._run(["cloud", "exec", "--help"])
-        if "--env" not in result.stdout or "--branch" not in result.stdout:
+        required_options = ("--config", "--env", "--branch", "--attempts")
+        if any(option not in result.stdout for option in required_options):
             raise CloudTaskError(
-                "Installed Codex CLI does not expose the required cloud exec options"
+                "Installed Codex CLI does not expose the required cloud exec "
+                "configuration, environment, branch, and attempt options"
             )
 
     def submit(
@@ -363,13 +320,19 @@ class CodexCloudClient:
         prompt: str,
         environment: str,
         branch: str,
+        model: str,
+        reasoning_effort: str,
     ) -> TaskSubmission:
-        """Submit one cloud task, passing the full problem prompt over stdin."""
+        """Submit one cloud task with explicit model settings and exact stdin."""
 
         result = self._run(
             [
                 "cloud",
                 "exec",
+                "--config",
+                f'model="{model}"',
+                "--config",
+                f'model_reasoning_effort="{reasoning_effort}"',
                 "--env",
                 environment,
                 "--attempts",

@@ -103,84 +103,49 @@ uv run scripts/evaluate_responses.py results/<run_dir>/            # Evaluate al
 uv run scripts/evaluate_responses.py results/<run_dir>/ --force    # Re-evaluate from scratch
 ```
 
-### Coding-agent evaluation in Codex cloud containers (default)
-
-When this repository is open in Codex, ask Codex to run the selected problems as
-independent, repository-free tasks in OpenAI-hosted Codex cloud containers. The
-root [AGENTS.md](AGENTS.md) defines the fail-closed orchestration contract:
-
-- one OpenAI-hosted Codex cloud container per primary agent;
-- all agent tool execution and subagent coordination occur in that container;
-- `hostId: local` and local output paths are explicitly forbidden;
-- the exact canonical system message and exact dataset prompt are sent verbatim;
-- the requested model and reasoning effort are set on every conversation;
-- each primary agent may spawn as many subagents as it needs;
-- agentic numeric results require the Gemini compliance check.
-
-Codex prepares the machine-checkable prompt manifest with:
-
-```bash
-uv run scripts/prepare_conversation_benchmark.py \
-  --range 0-9 \
-  --model gpt-5.6-sol \
-  --reasoning-effort ultra
-```
-
-The preparation script does not launch agents or access GitHub. It records hashes
-of the canonical inputs in `prompts.jsonl` and creates an empty
-`cloud_runtime.jsonl`. Before sending a prompt, Codex must receive explicit task
-creation metadata proving an OpenAI-hosted Codex container, a non-local host and
-cloud environment, no repository attachment, and the requested model/reasoning
-settings. `projectless` alone is not proof: a projectless task returning
-`hostId: local` is local execution and must be rejected.
-
-Codex then sends each complete `agent_task_prompt` without rewriting it, waits for
-all terminal outcomes, records only each primary agent's final response, and binds
-the creation/result metadata in `cloud_runtime.jsonl`. Both of these commands fail
-closed if that evidence is absent or inconsistent:
-
-```bash
-uv run scripts/validate_conversation_run.py results/<run_dir>/
-uv run scripts/evaluate_responses.py results/<run_dir>/
-```
-
-If the available Codex surface cannot explicitly confirm the hosted container and
-model settings, the workflow stops before scored prompt submission. It never
-falls back to local threads, local collaboration agents, or the trusted checkout.
-
-See [the Codex conversation evaluation guide](docs/codex_conversation_agents.md).
-
-### GitHub-backed Codex cloud evaluation (opt-in)
+### Coding-agent evaluation with Codex cloud
 
 Coding agents run through a separate Phase 1 entry point and produce the same
-`responses.jsonl` consumed by Phase 2:
+`responses.jsonl` consumed by Phase 2. The coordinator runs locally, but every
+scored solver is submitted through `codex cloud exec` and performs its reasoning,
+tool use, and computation in an OpenAI-managed cloud container.
+
+Codex cloud requires a connected repository. Scored solvers use a separate,
+verifier-free companion repository with independent history; they never run in
+the trusted HorizonMath checkout. Repository-free `create_thread` tasks are local
+on the current app surface and are not a substitute.
+
+For example, dataset indices 1–10 (`--range` is zero-based and inclusive):
 
 ```bash
 uv run scripts/run_agent_benchmark.py \
   --env YOUR_ENVIRONMENT \
   --agent-workspace ../HorizonMath-agent-workspace \
   --agent-repo-url git@github.com:YOUR_ORG/HorizonMath-agent-workspace.git \
+  --model gpt-5.6-sol \
+  --reasoning-effort ultra \
+  --range 1-10 \
+  --parallel 10 \
   --confirm-environment-isolated \
   --confirm-goal-tools-available \
   --confirm-agent-internet-off \
-  --problem w4_watson_integral
+  --confirm-live-canary
 
 uv run scripts/evaluate_responses.py results/codex-cloud_<label>_<timestamp>/
 ```
 
-This is an alternative implementation for users who explicitly want a
-GitHub-backed Codex environment. For verifier isolation, cloud agents run in a
-separate minimal repository with
-independent git history and agent-phase internet disabled. They receive the same
-system-message text and problem prompt as the single-shot runners, are required to
-use a Codex goal for each problem, and have the tools installed in the cloud
-container. The cloud CLI embeds that system text in the task prompt rather than at
-the single-shot API’s system role, so this is an agentic—not role-identical—condition.
-Because the cloud CLI does not expose goal lifecycle or environment-binding
-telemetry, scored runs require explicit operator attestations. Returned code is
-executed in an OS sandbox with no trusted-repository access. See [the Codex cloud
-agent evaluation guide](docs/codex_cloud_agents.md) for setup, limitations, full
-runs, resume behavior, and security checks.
+The runner writes `prompts.jsonl` before submission, sends one exact task prompt
+per problem, waits for terminal outcomes, and records the requested model and
+reasoning effort. The current Codex cloud CLI does not echo the resolved model
+settings in task metadata, so those fields record explicit submission
+configuration rather than independent runtime attestation. If independent
+machine confirmation is required, the run must fail closed.
+
+Agent-phase internet must be disabled. Numeric coding-agent results require the
+Gemini compliance check and fail closed when it is unavailable or errors.
+See [the Codex cloud agent evaluation guide](docs/codex_cloud_agents.md) for
+companion-repository setup, the required one-problem canary, limitations, resume
+behavior, and security checks.
 
 ### Output Structure
 

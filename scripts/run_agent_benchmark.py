@@ -239,9 +239,9 @@ def latest_task_events(path: Path) -> dict[str, dict]:
     return latest
 
 
-def create_results_dir(base: Path, model_label: str) -> Path:
+def create_results_dir(base: Path, run_label: str) -> Path:
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    safe_label = re.sub(r"[^A-Za-z0-9_.-]+", "-", model_label).strip("-")
+    safe_label = re.sub(r"[^A-Za-z0-9_.-]+", "-", run_label).strip("-")
     output = base / f"codex-cloud_{safe_label or 'default'}_{timestamp}"
     output.mkdir(parents=True)
     return output
@@ -336,12 +336,15 @@ def main() -> None:
     )
     parser.add_argument("--max-status-errors", type=int, default=5)
     parser.add_argument(
-        "--model-label",
-        default="codex-cloud-default",
-        help=(
-            "Results metadata label only; model selection is controlled by the "
-            "Codex cloud environment/account"
-        ),
+        "--model",
+        default="gpt-5.6-sol",
+        help="Model passed to every Codex cloud task (default: gpt-5.6-sol)",
+    )
+    parser.add_argument(
+        "--reasoning-effort",
+        choices=("low", "medium", "high", "xhigh", "max", "ultra"),
+        default="ultra",
+        help="Reasoning effort passed to every Codex cloud task (default: ultra)",
     )
     parser.add_argument("--codex-binary", default="codex")
     parser.add_argument("--resume", type=Path, help="Resume an existing results directory")
@@ -359,6 +362,10 @@ def main() -> None:
 
     if args.parallel < 1:
         parser.error("--parallel must be at least 1")
+    if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]*", args.model):
+        parser.error(
+            "--model must be a model ID containing letters, digits, '.', '_' or '-'"
+        )
     if args.poll_interval <= 0 or args.task_timeout <= 0:
         parser.error("--poll-interval and --task-timeout must be positive")
     if not args.debug and not args.confirm_agent_internet_off:
@@ -413,7 +420,8 @@ def main() -> None:
         expected = {
             "environment": args.env,
             "branch": args.branch,
-            "model": args.model_label,
+            "model": args.model,
+            "reasoning_effort": args.reasoning_effort,
             "problems_file": args.data_file,
             "dataset_sha256": dataset_sha256,
             "system_messages_sha256": system_messages_sha256(),
@@ -436,7 +444,10 @@ def main() -> None:
             )
         run_id = old_config["run_id"]
     else:
-        output_dir = create_results_dir(project_root / "results", args.model_label)
+        output_dir = create_results_dir(
+            project_root / "results",
+            f"{args.model}_{args.reasoning_effort}",
+        )
         run_id = uuid.uuid4().hex[:12]
         dataset_sha256 = hashlib.sha256(
             (project_root / args.data_file).read_bytes()
@@ -445,7 +456,12 @@ def main() -> None:
             "run_id": run_id,
             "timestamp": utc_now(),
             "provider": "codex-cloud",
-            "model": args.model_label,
+            "model": args.model,
+            "reasoning_effort": args.reasoning_effort,
+            "model_configuration_source": "codex-cloud-exec config override",
+            "resolved_model_confirmation": (
+                "not exposed by the current codex cloud CLI"
+            ),
             "problems_file": args.data_file,
             "output_dir": str(output_dir),
             "environment": args.env,
@@ -533,9 +549,19 @@ def main() -> None:
                 prompts_path,
                 {
                     "problem_id": problem_id,
+                    "problem_index": index,
                     "system_message": system_message,
+                    "system_message_sha256": hashlib.sha256(
+                        system_message.encode("utf-8")
+                    ).hexdigest(),
                     "prompt": problem["prompt"],
+                    "problem_prompt_sha256": hashlib.sha256(
+                        problem["prompt"].encode("utf-8")
+                    ).hexdigest(),
                     "agent_task_prompt": cloud_prompt,
+                    "agent_task_prompt_sha256": hashlib.sha256(
+                        cloud_prompt.encode("utf-8")
+                    ).hexdigest(),
                     "answer_path": output_path,
                 },
             )
@@ -573,6 +599,8 @@ def main() -> None:
                         prompt=cloud_prompt,
                         environment=args.env,
                         branch=args.branch,
+                        model=args.model,
+                        reasoning_effort=args.reasoning_effort,
                     )
                 except CloudTaskError as exc:
                     message = f"Cloud task submission failed: {exc}"
@@ -598,6 +626,8 @@ def main() -> None:
                     "problem_index": index,
                     "task_id": submission.task_id,
                     "task_url": submission.url,
+                    "requested_model": args.model,
+                    "requested_reasoning_effort": args.reasoning_effort,
                     "submitted_at": utc_now(),
                     "answer_path": output_path,
                 }
@@ -668,7 +698,8 @@ def main() -> None:
                             "problem_index": index,
                             "title": problem_id,
                             "provider": "codex-cloud",
-                            "model": args.model_label,
+                            "model": args.model,
+                            "reasoning_effort": args.reasoning_effort,
                             "response": response,
                             "timestamp": utc_now(),
                             "cloud_task_id": task["task_id"],

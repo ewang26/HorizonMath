@@ -2,74 +2,98 @@
 
 ## Default coding-agent evaluation workflow
 
-When a user asks Codex from a conversation to evaluate Codex/coding agents on
-HorizonMath, use **repository-free tasks running in OpenAI-hosted Codex cloud
-VMs/containers** by default.
+When a user asks Codex to evaluate coding agents on HorizonMath, use
+`scripts/run_agent_benchmark.py`. It is the supported Codex cloud workflow.
 
-“Cloud” refers to the execution runtime, not only model inference. Every scored
-agent's Python/mpmath work, symbolic calculations, subprocesses, tool calls, and
-subagent coordination must run in the OpenAI-hosted container. A task created
-with `hostId: local`, a path on the user's machine, or any other local runtime is
-not a cloud task and is invalid.
+The architecture has two deliberately different runtimes:
 
-Do not silently substitute:
+- The coordinator and trusted evaluator run from this HorizonMath checkout.
+- Every scored solver runs as a separate `codex cloud exec` task in an
+  OpenAI-managed Codex cloud container.
 
-- `create_thread` with `target.type: "projectless"` when it returns
-  `hostId: "local"`;
-- local collaboration subagents;
-- a ChatGPT Work cloud task that does not explicitly confirm a Codex cloud
-  container plus the requested Codex model and reasoning effort;
-- direct model API calls; or
-- the GitHub-backed `scripts/run_agent_benchmark.py` workflow.
+Local orchestration is allowed. Local solving is not. Do not use `create_thread`,
+projectless tasks, worktrees, or local collaboration subagents as scored solvers.
+Model inference being remote does not make a local Codex task a cloud task.
 
-### Required preflight
+Codex cloud checks out a repository. There is no supported repository-free Codex
+cloud-task target in the current CLI/app workflow. Never claim otherwise. Use the
+separate verifier-free companion repository created by
+`scripts/create_agent_workspace.py`; never attach scored agents to the trusted
+HorizonMath repository.
 
-Before sending any scored prompt, inspect the available task-creation capability.
-It must explicitly confirm all of the following in its creation result:
+## Required setup
 
-- execution location: `openai-hosted`;
-- runtime kind: `codex-cloud-container`;
-- a non-local host ID and cloud environment ID;
-- no repository or worktree attachment; and
-- the exact requested model and reasoning effort.
+Before a scored run, confirm all of the following:
 
-Never infer cloud execution from words such as `projectless`, `conversation`,
-`background`, or `cloud inference`. Never infer the model settings merely because
-the creation call accepted them. If the returned metadata does not confirm every
-item above, stop before prompt submission and explain that this Codex surface
-cannot run the benchmark condition. This is the required fail-closed behavior.
+1. The companion repository has independent git history and contains only the
+   generated allowlisted seed files.
+2. A Codex cloud environment is connected to that companion GitHub repository.
+3. Agent-phase internet access is **Off**.
+4. The environment setup, maintenance script, and cache contain no HorizonMath
+   checkout, validators, ground truth, baselines, or evaluation artifacts.
+5. The cloud runtime exposes the required Codex goal tools.
+6. A one-problem canary has completed and been evaluated in that exact
+   environment before a multi-problem run.
 
-1. Run `scripts/prepare_conversation_benchmark.py` with the user's exact problem
-   selection, model, and reasoning effort.
-   Preparing the manifest is not completion: continue autonomously through thread
-   creation, waiting, response collection, and evaluation in the same task. Do not
-   ask the user to launch or copy prompts manually.
-2. Read each complete `agent_task_prompt` from the generated `prompts.jsonl`.
-   Send that string verbatim. Never reconstruct, shorten, paraphrase, or summarize
-   the canonical `system_message` or `prompt`.
-3. Create one fresh primary task per problem in an explicitly confirmed
-   OpenAI-hosted Codex cloud container, with no repository or worktree attached.
-   Never run a scored agent in the trusted HorizonMath checkout or anywhere else
-   on the local machine.
-4. Copy the task-creation confirmation and terminal outcome into
-   `cloud_runtime.jsonl`, following
-   `docs/codex_conversation_agents.md`. This file must contain exactly one record
-   per selected problem. A successful record must bind the prompt hash, task ID,
-   cloud environment, non-local host, model, reasoning effort, and final-response
-   hash.
-5. The primary cloud agent may spawn as many subagents as it needs inside its cloud
-   environment. Subagents must receive only the exact benchmark text already
-   present in the primary task. Do not use local collaboration agents.
-6. Record only the primary cloud agent's final response in `responses.jsonl`,
-   with one terminal outcome per selected problem. Wait for every task; do not
-   declare the run complete from submission acknowledgements.
-7. Run `scripts/validate_conversation_run.py` before evaluation. It rejects missing
-   evidence, `hostId: local`, local execution, model/reasoning mismatches, prompt
-   mismatches, response mismatches, and incomplete terminal coverage.
-8. Evaluate with `scripts/evaluate_responses.py`, which repeats the same cloud
-   provenance validation. Agentic numeric runs require the Gemini compliance
-   check and fail closed when its credential is absent or the check errors. Never
-   report numeric agreement alone as a benchmark pass.
+The runner checks the local and remote companion-repository history and records
+the required operator attestations. If any prerequisite cannot be established,
+stop before submitting scored tasks.
 
-`scripts/run_agent_benchmark.py` is a separate, opt-in GitHub-repository workflow.
-Use it only when the user explicitly asks for that implementation.
+## Required run behavior
+
+1. Use one fresh Codex cloud task per selected problem. The runner uses one
+   attempt per problem and may submit tasks in parallel.
+2. Pass the requested model and reasoning effort explicitly to every
+   `codex cloud exec` submission using the runner's `--model` and
+   `--reasoning-effort` options.
+3. The runner must generate `prompts.jsonl` before task submission. Each cloud
+   prompt must contain the complete canonical system message and problem prompt
+   without paraphrasing, shortening, reconstruction, or correction.
+4. The primary cloud solver may spawn subagents inside its hosted environment.
+   Do not supplement it with local collaboration agents.
+5. Wait for every selected task to reach a terminal outcome. Record only the
+   answer produced by the primary cloud task in `responses.jsonl`.
+6. Run `scripts/evaluate_responses.py` in the trusted checkout after generation.
+   Agentic numeric runs require the Gemini compliance check and fail closed if
+   its credential is absent or the check errors.
+7. Treat hard-coded numerical targets, rationalized decimal approximations,
+   numerical integration, and every other prohibited construction as failures
+   even when numerically correct.
+8. Report per-problem results, the compliant pass rate, generation failures, and
+   links to `config.json`, `prompts.jsonl`, `cloud_tasks.jsonl`,
+   `responses.jsonl`, `generation_errors.jsonl`, `evaluation.jsonl`, and
+   `summary.json`.
+
+## Model-verification limitation
+
+The runner passes `model` and `model_reasoning_effort` as explicit Codex CLI
+configuration overrides and records those requested settings. The current cloud
+CLI returns a task ID and URL, but does not echo the resolved model or reasoning
+effort in machine-readable task metadata. Do not describe the recorded request as
+independent runtime attestation.
+
+If the user requires machine-confirmed resolved model settings, fail closed and
+state that the current `codex cloud` CLI cannot provide that evidence. If explicit
+submission settings plus the cloud task record are acceptable, proceed.
+
+## Example: dataset indices 1 through 10
+
+`--range` is zero-based and inclusive. To run indices 1–10 with ten concurrent
+cloud tasks:
+
+```bash
+uv run scripts/run_agent_benchmark.py \
+  --env YOUR_CODEX_CLOUD_ENVIRONMENT \
+  --agent-workspace ../HorizonMath-agent-workspace \
+  --agent-repo-url git@github.com:YOUR_ORG/HorizonMath-agent-workspace.git \
+  --model gpt-5.6-sol \
+  --reasoning-effort ultra \
+  --range 1-10 \
+  --parallel 10 \
+  --confirm-environment-isolated \
+  --confirm-goal-tools-available \
+  --confirm-agent-internet-off \
+  --confirm-live-canary
+```
+
+Do not substitute `--range 0-9`; that selects different dataset indices.
