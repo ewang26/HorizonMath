@@ -47,6 +47,21 @@ from evaluate import (
 from evaluator import extract_proposed_solution, check_solution_compliance
 from baseline_comparator import load_baselines
 from benchmark_prompts import system_messages_sha256
+from conversation_benchmark import (
+    ConversationRunError,
+    validate_conversation_cloud_run,
+)
+
+
+AGENTIC_PROVIDERS = frozenset({"codex-cloud", "codex-conversation"})
+
+
+def requires_compliance(config: dict) -> bool:
+    """Return whether numeric answers must pass the fail-closed compliance check."""
+
+    if config.get("provider") in AGENTIC_PROVIDERS:
+        return True
+    return config.get("require_compliance") is True
 
 
 def _sanitize_for_json(obj):
@@ -595,6 +610,20 @@ def main():
     if generation_errors:
         print(f"Loaded {len(generation_errors)} generation error(s) from Phase 1")
 
+    try:
+        validate_conversation_cloud_run(
+            results_dir=results_dir,
+            config=config,
+            responses=responses,
+            generation_errors=generation_errors,
+        )
+    except ConversationRunError as exc:
+        print(
+            f"Error: Codex cloud runtime provenance failed: {exc}",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
     response_counts = Counter(
         response.get("problem_id")
         for response in responses
@@ -680,7 +709,7 @@ def main():
             problem_index,
             response_text,
             baselines,
-            require_compliance=config.get("provider") == "codex-cloud",
+            require_compliance=requires_compliance(config),
         )
         evaluations.append(eval_result)
 

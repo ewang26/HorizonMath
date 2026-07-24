@@ -12,6 +12,13 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "scripts"))
 from evaluator.compliance import check_solution_compliance, ComplianceResult
 
 
+@pytest.fixture(autouse=True)
+def _dummy_google_api_key(monkeypatch):
+    """Let mocked-client tests reach the mock without using a real credential."""
+
+    monkeypatch.setenv("GOOGLE_API_KEY", "dummy-test-key")
+
+
 def _mock_genai_response(text: str):
     """Create a mock genai response with the given text."""
     mock_response = MagicMock()

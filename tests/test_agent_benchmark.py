@@ -23,6 +23,7 @@ from agent_benchmark import (  # noqa: E402
     TaskSubmission,
     answer_path,
     build_agent_prompt,
+    build_conversation_agent_prompt,
     extract_new_file_from_diff,
     parse_task_state,
     parse_task_submission,
@@ -31,9 +32,14 @@ from agent_benchmark import (  # noqa: E402
 )
 from create_agent_workspace import create_workspace  # noqa: E402
 from benchmark_prompts import system_messages_sha256  # noqa: E402
+from conversation_benchmark import (  # noqa: E402
+    ConversationRunError,
+    validate_conversation_cloud_run,
+)
 import evaluator.sandbox as sandbox_module  # noqa: E402
 from evaluator.sandbox import ExecutionStatus, execute_sandboxed  # noqa: E402
 import evaluate_responses  # noqa: E402
+import prepare_conversation_benchmark  # noqa: E402
 import run_agent_benchmark  # noqa: E402
 from run_agent_benchmark import preflight_agent_workspace  # noqa: E402
 
@@ -80,6 +86,227 @@ def test_agent_prompt_contains_only_explicit_public_inputs():
     assert "test_points" not in prompt
     assert "use Codex goal setting" in prompt
     assert "answers/run/sample_problem.md" in prompt
+
+
+def test_conversation_prompt_preserves_canonical_inputs_verbatim():
+    system_message = "SYSTEM sentinel\n\n  preserve whitespace α"
+    problem_prompt = "PROBLEM sentinel\n\n```python\nreturn 1\n```"
+    prompt = build_conversation_agent_prompt(
+        problem_id="sample_problem",
+        system_message=system_message,
+        problem_prompt=problem_prompt,
+    )
+
+    system_match = re.search(
+        r'<benchmark_system_message sha256="[0-9a-f]{64}">\n'
+        r"(.*?)\n</benchmark_system_message>",
+        prompt,
+        flags=re.DOTALL,
+    )
+    problem_match = re.search(
+        r'<problem_statement problem_id="sample_problem" sha256="[0-9a-f]{64}">\n'
+        r"(.*?)\n</problem_statement>",
+        prompt,
+        flags=re.DOTALL,
+    )
+    assert system_match and system_match.group(1) == system_message
+    assert problem_match and problem_match.group(1) == problem_prompt
+    assert "You may spawn as many subagents as you need" in prompt
+    assert "OpenAI-hosted Codex cloud VM/container" in prompt
+    assert 'hostId="local" is forbidden' in prompt
+
+
+def test_conversation_manifest_uses_exact_dataset_text(tmp_path, monkeypatch):
+    system_message = "This mode uses the canonical benchmark message."
+    problem_prompt = "Exact public statement.\nDo not rewrite this line."
+    data_file = tmp_path / "problems.json"
+    data_file.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "sample_problem",
+                    "prompt": problem_prompt,
+                    "evaluation_mode": "ground_truth_computable",
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
+    output_dir = tmp_path / "conversation-run"
+    monkeypatch.setitem(
+        prepare_conversation_benchmark.SYSTEM_MESSAGES,
+        "ground_truth_computable",
+        system_message,
+    )
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "prepare_conversation_benchmark.py",
+            "--problem",
+            "sample_problem",
+            "--data-file",
+            str(data_file),
+            "--model",
+            "gpt-5.6-sol",
+            "--reasoning-effort",
+            "ultra",
+            "--output-dir",
+            str(output_dir),
+        ],
+    )
+    prepare_conversation_benchmark.main()
+
+    prompt_record = json.loads((output_dir / "prompts.jsonl").read_text())
+    config = json.loads((output_dir / "config.json").read_text())
+    assert prompt_record["system_message"] == system_message
+    assert prompt_record["prompt"] == problem_prompt
+    assert system_message in prompt_record["agent_task_prompt"]
+    assert problem_prompt in prompt_record["agent_task_prompt"]
+    assert config["provider"] == "codex-conversation"
+    assert config["model"] == "gpt-5.6-sol"
+    assert config["reasoning_effort"] == "ultra"
+    assert config["repository_attachment"] == "none"
+    assert config["primary_agent_may_spawn_subagents"] is True
+    assert config["require_compliance"] is True
+    assert config["required_execution_location"] == "openai-hosted"
+    assert config["required_runtime_kind"] == "codex-cloud-container"
+    assert config["local_agent_execution_forbidden"] is True
+    assert prompt_record["agent_task_prompt_sha256"] == hashlib.sha256(
+        prompt_record["agent_task_prompt"].encode()
+    ).hexdigest()
+    assert config["prompts_jsonl_sha256"] == hashlib.sha256(
+        (output_dir / "prompts.jsonl").read_bytes()
+    ).hexdigest()
+    assert (output_dir / "cloud_runtime.jsonl").read_text() == ""
+
+
+def _write_conversation_run(
+    results_dir: Path,
+    *,
+    evidence_overrides: dict | None = None,
+) -> tuple[dict, list[dict]]:
+    prompt = "exact complete agent task prompt"
+    response_text = "def proposed_solution():\n    return 1\n"
+    config = {
+        "provider": "codex-conversation",
+        "runtime_contract_version": 1,
+        "required_execution_location": "openai-hosted",
+        "required_runtime_kind": "codex-cloud-container",
+        "local_agent_execution_forbidden": True,
+        "selected_problem_ids": ["sample_problem"],
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "ultra",
+    }
+    responses = [
+        {
+            "problem_id": "sample_problem",
+            "problem_index": 0,
+            "provider": "codex-conversation",
+            "model": "gpt-5.6-sol",
+            "response": response_text,
+        }
+    ]
+    evidence = {
+        "problem_id": "sample_problem",
+        "problem_index": 0,
+        "terminal_outcome": "completed",
+        "task_created": True,
+        "execution_location": "openai-hosted",
+        "runtime_kind": "codex-cloud-container",
+        "host_id": "openai-cloud-host-123",
+        "cloud_environment_id": "env_123",
+        "task_id": "task_123",
+        "repository_attachment": "none",
+        "local_execution_used": False,
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "ultra",
+        "creation_confirmation_source": "task-creation-response",
+        "agent_task_prompt_sha256": hashlib.sha256(prompt.encode()).hexdigest(),
+        "response_source": "primary-final-response",
+        "response_sha256": hashlib.sha256(response_text.encode()).hexdigest(),
+    }
+    evidence.update(evidence_overrides or {})
+    (results_dir / "prompts.jsonl").write_text(
+        json.dumps(
+            {
+                "problem_id": "sample_problem",
+                "problem_index": 0,
+                "agent_task_prompt": prompt,
+            }
+        )
+        + "\n"
+    )
+    config["prompts_jsonl_sha256"] = hashlib.sha256(
+        (results_dir / "prompts.jsonl").read_bytes()
+    ).hexdigest()
+    (results_dir / "config.json").write_text(json.dumps(config))
+    (results_dir / "responses.jsonl").write_text(
+        json.dumps(responses[0]) + "\n"
+    )
+    (results_dir / "cloud_runtime.jsonl").write_text(
+        json.dumps(evidence) + "\n"
+    )
+    return config, responses
+
+
+def test_conversation_runtime_gate_accepts_confirmed_codex_cloud(tmp_path):
+    config, responses = _write_conversation_run(tmp_path)
+    validate_conversation_cloud_run(
+        results_dir=tmp_path,
+        config=config,
+        responses=responses,
+        generation_errors=[],
+    )
+
+
+@pytest.mark.parametrize(
+    ("overrides", "message"),
+    [
+        ({"host_id": "local"}, "host_id='local' is local"),
+        ({"execution_location": "local"}, "execution_location"),
+        ({"runtime_kind": "projectless"}, "runtime_kind"),
+        ({"reasoning_effort": "high"}, "reasoning_effort"),
+        ({"repository_attachment": "worktree"}, "repository_attachment"),
+    ],
+)
+def test_conversation_runtime_gate_rejects_local_or_unconfirmed_runs(
+    tmp_path, overrides, message
+):
+    config, responses = _write_conversation_run(
+        tmp_path,
+        evidence_overrides=overrides,
+    )
+    with pytest.raises(ConversationRunError, match=message):
+        validate_conversation_cloud_run(
+            results_dir=tmp_path,
+            config=config,
+            responses=responses,
+            generation_errors=[],
+        )
+
+
+def test_conversation_runtime_gate_rejects_missing_evidence(tmp_path):
+    config, responses = _write_conversation_run(tmp_path)
+    (tmp_path / "cloud_runtime.jsonl").write_text("")
+    with pytest.raises(ConversationRunError, match="exactly one terminal record"):
+        validate_conversation_cloud_run(
+            results_dir=tmp_path,
+            config=config,
+            responses=responses,
+            generation_errors=[],
+        )
+
+
+def test_conversation_agent_runs_always_require_compliance():
+    assert evaluate_responses.requires_compliance(
+        {"provider": "codex-conversation"}
+    )
+    assert evaluate_responses.requires_compliance({"provider": "codex-cloud"})
+    assert not evaluate_responses.requires_compliance({"provider": "openai"})
+    assert evaluate_responses.requires_compliance(
+        {"provider": "openai", "require_compliance": True}
+    )
 
 
 def test_answer_path_rejects_traversal():

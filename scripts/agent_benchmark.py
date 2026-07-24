@@ -7,6 +7,7 @@ single-file diff back into the response format used by evaluate_responses.py.
 
 from __future__ import annotations
 
+import hashlib
 import re
 import subprocess
 from dataclasses import dataclass
@@ -146,6 +147,8 @@ def build_agent_prompt(
     return f"""You are being evaluated as a coding agent on one HorizonMath problem.
 You have full use of the tools installed in this cloud container. Do all reasoning,
 experimentation, and computation in the cloud.
+You are the primary agent and may spawn as many subagents as you need. Give each
+subagent only the benchmark system message and problem text included below.
 
 Required first action: use Codex goal setting to create this exact goal:
 {objective}
@@ -173,6 +176,50 @@ Submission contract:
 - You are intentionally not given validators, evaluator code, baselines beyond
   those stated in the problem, numeric ground truth, or hidden test points. Do not
   attempt to locate or reconstruct benchmark-private evaluation artifacts.
+"""
+
+
+def build_conversation_agent_prompt(
+    *,
+    problem_id: str,
+    system_message: str,
+    problem_prompt: str,
+) -> str:
+    """Build the exact payload for one repository-free Codex cloud container.
+
+    ``system_message`` and ``problem_prompt`` are inserted byte-for-byte.  The
+    surrounding orchestration text may define the agentic execution condition,
+    but must never summarize, rewrite, or replace either benchmark input.
+    """
+
+    system_sha256 = hashlib.sha256(system_message.encode("utf-8")).hexdigest()
+    problem_sha256 = hashlib.sha256(problem_prompt.encode("utf-8")).hexdigest()
+    return f"""You are the primary Codex agent for exactly one HorizonMath problem.
+You must run inside an OpenAI-hosted Codex cloud VM/container. Model inference
+being remote is not enough: Python, mpmath, symbolic calculations, subprocesses,
+tool calls, and subagent coordination must all execute inside that cloud
+container. A projectless conversation with hostId="local" is forbidden.
+
+No repository or worktree may be attached. Do not open or inspect the trusted
+HorizonMath checkout, its git history, validators, ground truth, baselines, or
+evaluation code. You may spawn as many subagents as you need inside the same
+Codex cloud environment; give every subagent only the exact benchmark text
+contained in this task. Do not use local collaboration subagents.
+
+The two benchmark blocks below are canonical inputs. They are copied verbatim from
+the benchmark source. Do not paraphrase, summarize, correct, or replace them.
+
+<benchmark_system_message sha256="{system_sha256}">
+{system_message}
+</benchmark_system_message>
+
+<problem_statement problem_id="{problem_id}" sha256="{problem_sha256}">
+{problem_prompt}
+</problem_statement>
+
+Return the complete response to be evaluated in your final message. It must include
+the exact ``proposed_solution()`` function required by the benchmark text. Do not
+return an answer only through a side channel, scratch file, or subagent message.
 """
 
 
