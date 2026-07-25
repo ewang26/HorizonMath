@@ -21,6 +21,9 @@ Usage:
     # Override provider/model
     uv run scripts/run_benchmark.py --provider gemini
 
+    # Use GPT-5.6 Sol with max reasoning
+    uv run scripts/run_benchmark.py --provider openai --model gpt-5.6-sol --reasoning-effort max
+
     # Resume interrupted run
     uv run scripts/run_benchmark.py --resume results/openrouter_openai-gpt-5.2_20260205_143022/
 
@@ -72,6 +75,18 @@ DEFAULT_GEMINI_MODEL = "gemini-3.1-pro-preview"
 DEFAULT_OPENROUTER_MODEL = "openai/gpt-5.2"
 DEFAULT_ANTHROPIC_MODEL = "claude-opus-4-6"
 DEFAULT_API_TIMEOUT_MINUTES = 75
+GPT_5_6_MODELS = ("gpt-5.6-sol", "gpt-5.6-terra", "gpt-5.6-luna")
+REASONING_EFFORTS = ("none", "low", "medium", "high", "xhigh", "max")
+DEFAULT_REASONING_EFFORT = "high"
+
+
+def openai_reasoning_config(effort: str) -> dict[str, str]:
+    """Build a Responses API reasoning configuration for the requested effort."""
+
+    config = {"effort": effort}
+    if effort != "none":
+        config["summary"] = "detailed"
+    return config
 
 _SYSTEM_MESSAGE_BASE = (
     "You are a research mathematican whose goal is novel mathematical discovery. "
@@ -137,6 +152,7 @@ class RunConfig:
     model: str
     problems_file: str
     output_dir: str
+    reasoning_effort: str = DEFAULT_REASONING_EFFORT
 
 
 def is_pro_model(model: str) -> bool:
@@ -194,9 +210,10 @@ def call_openai(
     prompt: str,
     model: str = DEFAULT_OPENAI_MODEL,
     system_message: str = "",
+    reasoning_effort: str = DEFAULT_REASONING_EFFORT,
     timeout_seconds: Optional[float] = DEFAULT_API_TIMEOUT_MINUTES * 60,
 ) -> dict:
-    """Call OpenAI Responses API (no tools, reasoning effort high for pro models).
+    """Call OpenAI Responses API without tools.
 
     Returns dict with 'content', 'usage', and optional 'reasoning_details'.
     """
@@ -207,7 +224,7 @@ def call_openai(
         input=[{"role": "user", "content": prompt}],
         max_output_tokens=125000,
     )
-    kwargs["reasoning"] = {"effort": "high", "summary": "detailed"}
+    kwargs["reasoning"] = openai_reasoning_config(reasoning_effort)
     response = client.responses.create(**kwargs)
     return openai_response_to_result(response)
 
@@ -217,6 +234,7 @@ def call_openai_streaming(
     model: str = DEFAULT_OPENAI_MODEL,
     system_message: str = "",
     problem_id: str = "",
+    reasoning_effort: str = DEFAULT_REASONING_EFFORT,
     timeout_seconds: Optional[float] = DEFAULT_API_TIMEOUT_MINUTES * 60,
     verbose: bool = True,
 ) -> dict:
@@ -235,7 +253,7 @@ def call_openai_streaming(
         instructions=system_message,
         input=[{"role": "user", "content": prompt}],
         max_output_tokens=125000,
-        reasoning={"effort": "high", "summary": "detailed"},
+        reasoning=openai_reasoning_config(reasoning_effort),
         stream=True,
     )
 
@@ -287,6 +305,7 @@ def call_openai_with_code_execution(
     model: str = DEFAULT_OPENAI_MODEL,
     system_message: str = "",
     container_id: Optional[str] = None,
+    reasoning_effort: str = DEFAULT_REASONING_EFFORT,
     timeout_seconds: Optional[float] = DEFAULT_API_TIMEOUT_MINUTES * 60,
 ) -> dict:
     """Call OpenAI with code interpreter tool enabled.
@@ -302,7 +321,7 @@ def call_openai_with_code_execution(
         # tools=[{"type": "code_interpreter", "container": container}, {"type": "web_search_preview"}],  # code_interpreter temporarily disabled
         tools=[{"type": "web_search_preview"}],
         max_output_tokens=125000,
-        reasoning={"effort": "high", "summary": "detailed"},
+        reasoning=openai_reasoning_config(reasoning_effort),
     )
     result = {"content": response.output_text}
     if response.usage:
@@ -318,6 +337,7 @@ def call_openrouter(
     prompt: str,
     model: str = DEFAULT_OPENROUTER_MODEL,
     system_message: str = "",
+    reasoning_effort: str = DEFAULT_REASONING_EFFORT,
     timeout_seconds: Optional[float] = DEFAULT_API_TIMEOUT_MINUTES * 60,
 ) -> dict:
     """Call OpenRouter API (OpenAI-compatible, no tool use, reasoning enabled).
@@ -340,7 +360,12 @@ def call_openrouter(
             {"role": "user", "content": prompt},
         ],
         max_tokens=125000,
-        extra_body={"reasoning": {"enabled": True, "effort": "high"}},
+        extra_body={
+            "reasoning": {
+                "enabled": reasoning_effort != "none",
+                "effort": reasoning_effort,
+            }
+        },
     )
     message = response.choices[0].message
     result = {"content": message.content}
@@ -497,6 +522,7 @@ def call_openai_for_model(
     problem_id: str,
     container_id: Optional[str],
     stream: bool,
+    reasoning_effort: str,
     timeout_seconds: Optional[float],
 ) -> dict:
     if is_pro_model(model):
@@ -505,9 +531,10 @@ def call_openai_for_model(
             prompt,
             model,
             system_message,
-            problem_id,
-            timeout_seconds,
-            stream,
+            problem_id=problem_id,
+            reasoning_effort=reasoning_effort,
+            timeout_seconds=timeout_seconds,
+            verbose=stream,
         )
 
     return retry_api_call(
@@ -515,8 +542,9 @@ def call_openai_for_model(
         prompt,
         model,
         system_message,
-        container_id,
-        timeout_seconds,
+        container_id=container_id,
+        reasoning_effort=reasoning_effort,
+        timeout_seconds=timeout_seconds,
     )
 
 
@@ -525,6 +553,7 @@ def run_single_problem(
     problem_index: int,
     provider: str,
     model: str,
+    reasoning_effort: str = DEFAULT_REASONING_EFFORT,
     container_id: Optional[str] = None,
     stream: bool = False,
     api_timeout_seconds: Optional[float] = DEFAULT_API_TIMEOUT_MINUTES * 60,
@@ -544,13 +573,21 @@ def run_single_problem(
             problem_id=problem["id"],
             container_id=container_id,
             stream=stream,
+            reasoning_effort=reasoning_effort,
             timeout_seconds=api_timeout_seconds,
         )
         response = result["content"]
         usage = result.get("usage")
         reasoning_details = result.get("reasoning_details")
     elif provider == "openrouter":
-        result = retry_api_call(call_openrouter, prompt, model, system_message, api_timeout_seconds)
+        result = retry_api_call(
+            call_openrouter,
+            prompt,
+            model,
+            system_message,
+            reasoning_effort=reasoning_effort,
+            timeout_seconds=api_timeout_seconds,
+        )
         response = result["content"]
         reasoning_details = result.get("reasoning_details")
         usage = result.get("usage")
@@ -578,13 +615,21 @@ def run_single_problem(
                 problem_id=problem["id"],
                 container_id=container_id,
                 stream=stream,
+                reasoning_effort=reasoning_effort,
                 timeout_seconds=api_timeout_seconds,
             )
             response = result["content"]
             usage = result.get("usage")
             reasoning_details = result.get("reasoning_details")
         elif provider == "openrouter":
-            result = retry_api_call(call_openrouter, prompt, model, system_message, api_timeout_seconds)
+            result = retry_api_call(
+                call_openrouter,
+                prompt,
+                model,
+                system_message,
+                reasoning_effort=reasoning_effort,
+                timeout_seconds=api_timeout_seconds,
+            )
             response = result["content"]
             reasoning_details = result.get("reasoning_details")
             usage = result.get("usage")
@@ -607,6 +652,8 @@ def run_single_problem(
         "response": response,
         "timestamp": datetime.now().isoformat(),
     }
+    if provider in {"openai", "openrouter"}:
+        data["reasoning_effort"] = reasoning_effort
     if reasoning_details:
         data["reasoning_details"] = reasoning_details
     if usage:
@@ -652,7 +699,22 @@ def main():
     parser.add_argument(
         "--model",
         type=str,
-        help=f"Model name (default: {DEFAULT_OPENROUTER_MODEL} for OpenRouter, {DEFAULT_OPENAI_MODEL} for OpenAI, {DEFAULT_GEMINI_MODEL} for Gemini, {DEFAULT_ANTHROPIC_MODEL} for Anthropic)",
+        help=(
+            "Model name. OpenAI GPT-5.6 options: "
+            f"{', '.join(GPT_5_6_MODELS)}. Defaults: {DEFAULT_OPENROUTER_MODEL} "
+            f"for OpenRouter, {DEFAULT_OPENAI_MODEL} for OpenAI, "
+            f"{DEFAULT_GEMINI_MODEL} for Gemini, and {DEFAULT_ANTHROPIC_MODEL} "
+            "for Anthropic"
+        ),
+    )
+    parser.add_argument(
+        "--reasoning-effort",
+        choices=REASONING_EFFORTS,
+        default=DEFAULT_REASONING_EFFORT,
+        help=(
+            "Reasoning effort for OpenAI and OpenRouter requests "
+            f"(default: {DEFAULT_REASONING_EFFORT})"
+        ),
     )
     parser.add_argument(
         "--problem",
@@ -786,6 +848,7 @@ def main():
             valid_fields = {f.name for f in RunConfig.__dataclass_fields__.values()}
             config_data = {k: v for k, v in config_data.items() if k in valid_fields}
             config = RunConfig(**config_data)
+            args.reasoning_effort = config.reasoning_effort
         else:
             # Create config from directory name
             run_id = str(uuid.uuid4())[:8]
@@ -796,6 +859,7 @@ def main():
                 model=args.model,
                 problems_file=args.data_file,
                 output_dir=str(output_dir),
+                reasoning_effort=args.reasoning_effort,
             )
 
         completed = get_completed_problems(output_dir / "responses.jsonl")
@@ -810,6 +874,7 @@ def main():
             model=args.model,
             problems_file=args.data_file,
             output_dir=str(output_dir),
+            reasoning_effort=args.reasoning_effort,
         )
         completed = set()
 
@@ -824,6 +889,8 @@ def main():
 
     print(f"Provider: {args.provider}")
     print(f"Model: {args.model}")
+    if args.provider in {"openai", "openrouter"}:
+        print(f"Reasoning effort: {args.reasoning_effort}")
     print(f"Problems: {len(problems)}")
     print(f"Parallel: {args.parallel}")
     print(f"API timeout: {format_timeout_minutes(api_timeout_minutes)}")
@@ -923,6 +990,7 @@ def main():
                 i,
                 args.provider,
                 args.model,
+                reasoning_effort=args.reasoning_effort,
                 container_id=container_id,
                 stream=(args.parallel == 1),
                 api_timeout_seconds=api_timeout_seconds,
