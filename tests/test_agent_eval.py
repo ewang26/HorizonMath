@@ -121,7 +121,8 @@ def test_modal_auth_is_interactive_ephemeral_and_never_copied_from_local_disk():
         repo_root / "agent_eval" / "runtime" / "entrypoint.py"
     ).read_text()
 
-    assert '["codex", "login", "--device-auth"]' in entrypoint
+    assert "_resolve_codex_bin" in entrypoint
+    assert '"login", "--device-auth"' in entrypoint
     assert "prepare_ephemeral_codex_home" in entrypoint
     assert "AUTH_VOLUME_NAME" not in launcher
     assert "local_auth_path" not in launcher

@@ -9,6 +9,9 @@ import subprocess
 import sys
 from pathlib import Path
 
+from openai_codex import CodexConfig
+from openai_codex.client import _resolve_codex_bin
+
 AUTH_ROOT = Path("/codex-home")
 RUNTIME_ROOT = Path("/opt/horizonmath_agent_runtime")
 
@@ -53,8 +56,17 @@ def main() -> int:
         "exists only inside this ephemeral Modal Sandbox.",
         flush=True,
     )
+    codex_bin = _resolve_codex_bin(
+        CodexConfig(
+            cwd="/",
+            env=env,
+            client_name="horizonmath_modal_device_auth",
+            client_title="HorizonMath Modal Device Auth",
+            client_version="1.0.0",
+        )
+    )
     subprocess.run(
-        ["codex", "login", "--device-auth"],
+        [str(codex_bin), "login", "--device-auth"],
         check=True,
         env=env,
     )
