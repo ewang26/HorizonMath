@@ -2,8 +2,8 @@
 
 Verifies that model solutions use genuine closed-form expressions rather than
 forbidden numerical techniques (numerical integration, truncated series,
-numerical root-finding, etc.). Uses Gemini 3.6 Flash with high thinking by
-default, with GPT-5.6 Terra at high reasoning available as an alternative.
+numerical root-finding, etc.). Uses GPT-5.6 Terra with high reasoning by
+default, with Gemini 3.6 Flash at high thinking available as an alternative.
 """
 
 import json
@@ -82,7 +82,7 @@ Respond with ONLY a JSON object (no markdown fences) with two fields:
 
 
 DEFAULT_COMPLIANCE_ROUNDS = 3
-DEFAULT_COMPLIANCE_PROVIDER = "gemini"
+DEFAULT_COMPLIANCE_PROVIDER = "openai"
 COMPLIANCE_MODEL = "gemini-3.6-flash"
 COMPLIANCE_THINKING_LEVEL = types.ThinkingLevel.HIGH
 OPENAI_COMPLIANCE_MODEL = "gpt-5.6-terra"

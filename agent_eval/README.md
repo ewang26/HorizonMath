@@ -122,6 +122,13 @@ uv run --group agent-eval python -m agent_eval.cloud_scorer \
   --run-id <run-id>
 ```
 
+The trusted scorer loads the project-local `.env` file. Numerically correct
+solutions are reviewed three times against the integrated compliance rubric
+using GPT-5.6 Terra with high reasoning by default, so set `OPENAI_API_KEY`
+before scoring. Set `COMPLIANCE_PROVIDER=gemini` and
+`COMPLIANCE_MODEL=gemini-3.6-flash` to use the optional Gemini high-thinking
+reviewer instead.
+
 ## Full dataset and recovery
 
 Modal Sandboxes have a 24-hour maximum lifetime. At four-way concurrency, use
