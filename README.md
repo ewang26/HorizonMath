@@ -10,7 +10,7 @@
 
 <p align="center">
   Erik Y. Wang*, Sumeet Motwani, James V. Roggeveen, Eliot Hodges, Dulhan Jayalath,<br>
-  Charles London, Kalyan Ramakrishnan, Flaviu Cipcigan, Philip Torr, Alessandro Abate
+  Charles London, Kalyan Ramakrishnan, Cheng Zhang, Flaviu Cipcigan, Philip Torr, Alessandro Abate
 </p>
 
 <p align="center">

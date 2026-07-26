@@ -16,6 +16,9 @@
 #   # Single problem
 #   ./scripts/tmux_run.sh --problem 041_diff_basis_upper
 #
+#   # Multiple specific problems (comma-separated, run sequentially one at a time)
+#   ./scripts/tmux_run.sh --problems "sextic_freud_moment_mu0,spinor_norm_integral_i0,thermal_boson_function_jb"
+#
 #   # Resume an interrupted run
 #   ./scripts/tmux_run.sh --resume results/openrouter_openai-gpt-5.2_20260205_143022/
 #
@@ -38,8 +41,9 @@
 #
 set -euo pipefail
 
-# Parse --phase flag before forwarding remaining args
+# Parse --phase and --problems flags before forwarding remaining args
 PHASE="both"
+PROBLEMS=""
 FORWARD_ARGS=()
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -49,6 +53,14 @@ while [[ $# -gt 0 ]]; do
                 exit 1
             fi
             PHASE="$2"
+            shift 2
+            ;;
+        --problems)
+            if [[ $# -lt 2 ]]; then
+                echo "Error: --problems requires a comma-separated list of problem IDs"
+                exit 1
+            fi
+            PROBLEMS="$2"
             shift 2
             ;;
         *)
@@ -126,14 +138,35 @@ echo " OpenMath Benchmark — tmux session"
 echo " Started: \$(date)"
 echo " Phase: \$PHASE"
 echo " Args: $*"
+[ -n "$PROBLEMS" ] && echo " Problems: $PROBLEMS"
 echo "=========================================="
 echo ""
+
+GENERATED_DIRS=()
 
 # Phase 1: Generate responses
 if [ "\$PHASE" = "generate" ] || [ "\$PHASE" = "both" ]; then
     echo ">>> Phase 1: Generating responses..."
-    uv run scripts/run_benchmark.py --parallel 5 $* || GEN_EXIT=\$?
-    GEN_EXIT=\${GEN_EXIT:-0}
+    PROBLEMS_LIST="$PROBLEMS"
+    if [ -n "\$PROBLEMS_LIST" ]; then
+        # Run each problem ID sequentially
+        IFS=',' read -ra PROBLEM_ARRAY <<< "\$PROBLEMS_LIST"
+        OVERALL_EXIT=0
+        for prob in "\${PROBLEM_ARRAY[@]}"; do
+            prob="\$(echo "\$prob" | xargs)"  # trim whitespace
+            echo ""
+            echo "--- Problem: \$prob ---"
+            uv run scripts/run_benchmark.py --problem "\$prob" $* || OVERALL_EXIT=\$?
+            LATEST_DIR=\$(ls -td results/*/ 2>/dev/null | head -1)
+            GENERATED_DIRS+=("\$LATEST_DIR")
+        done
+        GEN_EXIT=\$OVERALL_EXIT
+    else
+        uv run scripts/run_benchmark.py --parallel 5 $* || GEN_EXIT=\$?
+        GEN_EXIT=\${GEN_EXIT:-0}
+        LATEST_DIR=\$(ls -td results/*/ 2>/dev/null | head -1)
+        GENERATED_DIRS+=("\$LATEST_DIR")
+    fi
 
     if [ \$GEN_EXIT -ne 0 ] && [ \$GEN_EXIT -ne 130 ]; then
         echo ""
@@ -143,41 +176,44 @@ fi
 
 # Phase 2: Evaluate responses
 if [ "\$PHASE" = "evaluate" ] || [ "\$PHASE" = "both" ]; then
-    # Determine results directory
+    # Determine results directories to evaluate
     if [ "\$PHASE" = "evaluate" ]; then
         # Extract --resume value from args
-        RESULTS_DIR=""
         EVAL_ARGS=($*)
         for ((i=0; i<\${#EVAL_ARGS[@]}; i++)); do
             if [ "\${EVAL_ARGS[i]}" = "--resume" ] && [ \$((i+1)) -lt \${#EVAL_ARGS[@]} ]; then
-                RESULTS_DIR="\${EVAL_ARGS[i+1]}"
+                GENERATED_DIRS=("\${EVAL_ARGS[i+1]}")
                 break
             fi
         done
-    else
-        # Find the most recent results directory
-        RESULTS_DIR=\$(ls -td results/*/ 2>/dev/null | head -1)
     fi
 
-    if [ -z "\$RESULTS_DIR" ] || [ ! -f "\$RESULTS_DIR/responses.jsonl" ]; then
+    if [ \${#GENERATED_DIRS[@]} -eq 0 ]; then
         echo ""
-        echo "WARNING: No responses.jsonl found in \${RESULTS_DIR:-<none>}. Skipping evaluation."
+        echo "WARNING: No results directories found. Skipping evaluation."
     else
-        echo ""
-        echo ">>> Phase 2: Evaluating responses in \$RESULTS_DIR ..."
-        uv run scripts/evaluate_responses.py "\$RESULTS_DIR" --force || EVAL_EXIT=\$?
-        EVAL_EXIT=\${EVAL_EXIT:-0}
+        for RESULTS_DIR in "\${GENERATED_DIRS[@]}"; do
+            if [ -z "\$RESULTS_DIR" ] || [ ! -f "\$RESULTS_DIR/responses.jsonl" ]; then
+                echo ""
+                echo "WARNING: No responses.jsonl found in \${RESULTS_DIR:-<none>}. Skipping."
+                continue
+            fi
+            echo ""
+            echo ">>> Phase 2: Evaluating responses in \$RESULTS_DIR ..."
+            EVAL_EXIT=0
+            uv run scripts/evaluate_responses.py "\$RESULTS_DIR" --force || EVAL_EXIT=\$?
 
-        echo ""
-        echo "=========================================="
-        echo " Benchmark complete at \$(date)"
-        echo " Results: \$RESULTS_DIR"
-        if [ \$EVAL_EXIT -eq 0 ]; then
-            echo " Status: SUCCESS"
-        else
-            echo " Status: Evaluation exited with code \$EVAL_EXIT"
-        fi
-        echo "=========================================="
+            echo ""
+            echo "=========================================="
+            echo " Benchmark complete at \$(date)"
+            echo " Results: \$RESULTS_DIR"
+            if [ \$EVAL_EXIT -eq 0 ]; then
+                echo " Status: SUCCESS"
+            else
+                echo " Status: Evaluation exited with code \$EVAL_EXIT"
+            fi
+            echo "=========================================="
+        done
     fi
 fi
 
