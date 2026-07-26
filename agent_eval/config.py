@@ -5,7 +5,6 @@ from __future__ import annotations
 from pathlib import Path
 
 APP_NAME = "horizonmath-codex-agent-eval"
-AUTH_VOLUME_NAME = "horizonmath-codex-auth-v1"
 STATE_VOLUME_NAME = "horizonmath-codex-agent-state-v1"
 
 DEFAULT_MODEL = "gpt-5.6-sol"
@@ -34,61 +33,7 @@ AGENT_PERMISSION_PROFILE = "horizonmath-agent"
 def codex_config_toml() -> str:
     """Return the clean, least-privilege Codex configuration used on Modal."""
 
-    return f"""\
-model = "{DEFAULT_MODEL}"
-model_reasoning_effort = "{DEFAULT_EFFORT}"
-approval_policy = "never"
-web_search = "disabled"
-default_permissions = "{AGENT_PERMISSION_PROFILE}"
-cli_auth_credentials_store = "file"
-check_for_update_on_startup = false
-
-[history]
-persistence = "save-all"
-
-[features]
-apps = false
-multi_agent = false
-memories = false
-remote_plugin = false
-skill_mcp_dependency_install = false
-web_search = false
-web_search_cached = false
-web_search_request = false
-
-[tools]
-view_image = false
-
-[shell_environment_policy]
-inherit = "core"
-exclude = [
-  "*API_KEY*",
-  "*ACCESS_TOKEN*",
-  "*AUTH*",
-  "*CREDENTIAL*",
-  "*SECRET*",
-  "*TOKEN*",
-  "CODEX_*",
-  "MODAL_*",
-]
-
-[permissions.{AGENT_PERMISSION_PROFILE}]
-description = "Write only inside the active problem workspace; no network or evaluator access."
-
-[permissions.{AGENT_PERMISSION_PROFILE}.filesystem]
-":minimal" = "read"
-"{REMOTE_AUTH_ROOT}" = "deny"
-"{REMOTE_STATE_ROOT}" = "deny"
-"{REMOTE_RUNTIME_ROOT}" = "deny"
-"{REMOTE_FORBIDDEN_ROOT}" = "deny"
-
-[permissions.{AGENT_PERMISSION_PROFILE}.filesystem.":workspace_roots"]
-"." = "write"
-"**/*.env" = "deny"
-
-[permissions.{AGENT_PERMISSION_PROFILE}.network]
-enabled = false
-"""
+    return (Path(__file__).parent / "runtime" / "config.toml").read_text()
 
 
 def sandbox_timeout_seconds(

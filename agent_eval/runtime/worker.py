@@ -86,7 +86,7 @@ def validate_runtime() -> None:
     auth_path = AUTH_ROOT / "auth.json"
     config_path = AUTH_ROOT / "config.toml"
     if not auth_path.is_file() or not config_path.is_file():
-        raise RuntimeError("Codex auth/config was not seeded")
+        raise RuntimeError("Ephemeral Codex device auth/config is unavailable")
     auth = json.loads(auth_path.read_text())
     if auth.get("auth_mode") != "chatgpt":
         raise RuntimeError("Codex must use ChatGPT-managed authentication")
@@ -359,7 +359,6 @@ async def solve_problem(
         finally:
             atomic_json(result_path, status)
             sync_mount(STATE_ROOT)
-            sync_mount(AUTH_ROOT)
         print(
             json.dumps(
                 {
@@ -434,6 +433,10 @@ async def run(args: argparse.Namespace) -> int:
             if not account_dump.get("account"):
                 raise RuntimeError("Codex app-server did not report a logged-in account")
 
+            print(
+                f"HORIZONMATH_WORKER_STARTED {args.run_id}",
+                flush=True,
+            )
             semaphore = asyncio.Semaphore(manifest["concurrency"])
             results = await asyncio.gather(
                 *[
@@ -451,7 +454,6 @@ async def run(args: argparse.Namespace) -> int:
         )
         atomic_json(run_dir / "runner_status.json", runner_status)
         sync_mount(STATE_ROOT)
-        sync_mount(AUTH_ROOT)
         raise
 
     ordered = sorted(results, key=lambda item: item["problem_index"])
@@ -490,7 +492,6 @@ async def run(args: argparse.Namespace) -> int:
     )
     atomic_json(run_dir / "runner_status.json", runner_status)
     sync_mount(STATE_ROOT)
-    sync_mount(AUTH_ROOT)
     return 0
 
 

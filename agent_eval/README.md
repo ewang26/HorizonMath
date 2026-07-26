@@ -27,11 +27,13 @@ The outer Modal Sandbox:
 - runs under Modal's Sandbox isolation;
 - can reach only `chatgpt.com`, `openai.com`, and their subdomains so the Codex
   controller can authenticate and request inference;
-- mounts a dedicated Codex auth Volume and a separate state Volume; and
+- keeps the device-authorized Codex session only on its ephemeral filesystem,
+  while mounting a separate state Volume for non-secret checkpoints; and
 - has no benchmark source tree or Modal secrets.
 
-Codex command subprocesses use a custom permission profile that denies the auth
-Volume, state Volume, runtime source, and a canary path. It grants writes only
+Codex command subprocesses use a custom permission profile that denies the
+ephemeral controller auth directory, state Volume, runtime source, and a canary
+path. It grants writes only
 to the active problem workspace and grants no network. Web search, apps,
 plugins, memories, image tools, and multi-agent tools are disabled.
 
@@ -52,28 +54,30 @@ Install the evaluation dependencies:
 uv sync --group agent-eval --group dev
 ```
 
-The local Codex CLI must use file-backed ChatGPT authentication at
-`$CODEX_HOME/auth.json` (or `~/.codex/auth.json`). The first preflight uploads
-that refreshable credential to the private `horizonmath-codex-auth-v1` Modal
-Volume. Treat this as transferring a password-equivalent credential to trusted
-private cloud infrastructure.
+The launcher never reads or uploads the local Codex credential. It starts a
+fresh Modal Sandbox and displays an OpenAI device-login URL and one-time code.
+Complete that login interactively. OpenAI then issues a Codex session directly
+to that Sandbox. The session is stored only under the Sandbox's ephemeral
+`/codex-home`; it is not mounted from or copied to a Modal Volume and disappears
+when the Sandbox terminates.
 
-The launcher seeds `auth.json` only when it is absent. Later runs preserve the
-copy Codex refreshed in place. Do not run multiple agent Sandboxes concurrently
-against this Volume, and do not use `--force-auth` unless intentionally
-replacing the remote credential from a fresh trusted local login.
+Each new or resumed Sandbox therefore requires a new device login. Only the
+sanitized manifest, progress checkpoints, thread ids, and responses persist in
+the state Volume.
 
 No `OPENAI_API_KEY` or `CODEX_API_KEY` is accepted by the worker.
 
 ## Preflight and launch
 
-Run the remote auth/model/security preflight:
+An optional standalone preflight performs its own ephemeral device login:
 
 ```bash
 uv run --group agent-eval python -m agent_eval.modal_runner preflight
 ```
 
-Launch the first ten zero-based dataset entries:
+Launch the first ten zero-based dataset entries. This command stays attached
+until device login and all security preflights succeed, then detaches after the
+worker has started:
 
 ```bash
 uv run --group agent-eval python -m agent_eval.modal_runner launch \
@@ -110,13 +114,14 @@ uv run --group agent-eval python -m agent_eval.cloud_scorer \
 
 Modal Sandboxes have a 24-hour maximum lifetime. At four-way concurrency, use
 batches of at most 28 problems; smaller batches provide more recovery margin.
-Run batches sequentially because one process must own the refreshable
-`auth.json`.
+Each batch uses one app-server and one ephemeral device-authorized session.
+Run batches sequentially to keep subscription load controlled and make the
+usage attributable.
 
 Every problem checkpoint is committed to the state Volume when it starts,
-receives a Codex thread/turn id, and finishes. Re-running the same run id skips
-completed and timed-out entries. Failed entries remain visible for deliberate
-retry or diagnosis.
+receives a Codex thread/turn id, and finishes. Re-running the same run id after
+a new device login skips completed and timed-out entries and can resume stored
+thread ids. Failed entries remain visible for deliberate retry or diagnosis.
 
 ## Validation
 

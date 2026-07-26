@@ -114,6 +114,22 @@ def test_codex_config_denies_secrets_state_and_network():
     assert parsed["permissions"][AGENT_PERMISSION_PROFILE]["network"]["enabled"] is False
 
 
+def test_modal_auth_is_interactive_ephemeral_and_never_copied_from_local_disk():
+    repo_root = Path(__file__).resolve().parents[1]
+    launcher = (repo_root / "agent_eval" / "modal_runner.py").read_text()
+    entrypoint = (
+        repo_root / "agent_eval" / "runtime" / "entrypoint.py"
+    ).read_text()
+
+    assert '["codex", "login", "--device-auth"]' in entrypoint
+    assert "prepare_ephemeral_codex_home" in entrypoint
+    assert "AUTH_VOLUME_NAME" not in launcher
+    assert "local_auth_path" not in launcher
+    assert "seed_codex_home" not in launcher
+    assert 'str(REMOTE_AUTH_ROOT):' not in launcher
+    assert '"auth_persisted": False' in launcher
+
+
 def test_first_ten_batch_fits_inside_modal_lifetime():
     assert sandbox_timeout_seconds(10, 4, PROBLEM_TIMEOUT_SECONDS) == 34200
     with pytest.raises(ValueError):
