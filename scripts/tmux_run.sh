@@ -200,8 +200,8 @@ if [ "\$PHASE" = "evaluate" ] || [ "\$PHASE" = "both" ]; then
             fi
             echo ""
             echo ">>> Phase 2: Evaluating responses in \$RESULTS_DIR ..."
+            EVAL_EXIT=0
             uv run scripts/evaluate_responses.py "\$RESULTS_DIR" --force || EVAL_EXIT=\$?
-            EVAL_EXIT=\${EVAL_EXIT:-0}
 
             echo ""
             echo "=========================================="
