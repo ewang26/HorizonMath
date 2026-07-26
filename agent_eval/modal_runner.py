@@ -72,6 +72,7 @@ def agent_image() -> modal.Image:
             "ca-certificates",
             "git",
             "jq",
+            "libseccomp-dev",
             "ripgrep",
         )
         .pip_install(
@@ -86,6 +87,21 @@ def agent_image() -> modal.Image:
             RUNTIME_PATH,
             str(REMOTE_RUNTIME_ROOT),
             copy=True,
+        )
+        .run_commands(
+            (
+                "gcc -O2 -Wall -Wextra "
+                f"{REMOTE_RUNTIME_ROOT / 'sandbox_shell.c'} "
+                "-lseccomp -o /tmp/horizonmath-sandbox-shell"
+            ),
+            (
+                "bash -c '"
+                "mv /bin/bash /bin/bash.real && "
+                "mv /bin/sh /bin/sh.real && "
+                "cp /tmp/horizonmath-sandbox-shell /bin/bash && "
+                "cp /tmp/horizonmath-sandbox-shell /bin/sh"
+                "'"
+            ),
         )
         .env(
             {

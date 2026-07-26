@@ -100,7 +100,7 @@ def test_manifest_rejects_path_traversal_identifiers():
         )
 
 
-def test_codex_config_denies_secrets_state_and_network():
+def test_codex_config_denies_secrets_and_uses_seccomp_network_boundary():
     config = codex_config_toml()
     parsed = tomllib.loads(config)
     assert f'default_permissions = "{AGENT_PERMISSION_PROFILE}"' in config
@@ -108,10 +108,20 @@ def test_codex_config_denies_secrets_state_and_network():
     assert '"/codex-home" = "deny"' in config
     assert '"/state" = "deny"' in config
     assert '"/opt/horizonmath_agent_runtime" = "deny"' in config
-    assert "enabled = false" in config
+    assert "enabled = true" in config
     assert '":workspace_roots"' in config
     assert '"." = "write"' in config
-    assert parsed["permissions"][AGENT_PERMISSION_PROFILE]["network"]["enabled"] is False
+    assert parsed["permissions"][AGENT_PERMISSION_PROFILE]["network"]["enabled"] is True
+
+    seccomp_source = (
+        Path(__file__).resolve().parents[1]
+        / "agent_eval"
+        / "runtime"
+        / "sandbox_shell.c"
+    ).read_text()
+    for syscall in ("socket", "connect", "sendto", "recvfrom"):
+        assert f"SCMP_SYS({syscall})" in seccomp_source
+    assert "PR_SET_NO_NEW_PRIVS" in seccomp_source
 
 
 def test_modal_auth_is_interactive_ephemeral_and_never_copied_from_local_disk():
