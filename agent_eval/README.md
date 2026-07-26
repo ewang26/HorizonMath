@@ -33,13 +33,18 @@ The outer Modal Sandbox:
 
 Codex command subprocesses use a custom permission profile that denies the
 ephemeral controller auth directory, state Volume, runtime source, and a canary
-path. It grants writes only
-to the active problem workspace and grants no network. Web search, apps,
-plugins, memories, image tools, and multi-agent tools are disabled.
+path. It grants writes only to the active problem workspace. Every tool shell
+starts through a compiled seccomp launcher that sets `NO_NEW_PRIVS` and denies
+socket syscalls before Bash starts; all descendants inherit the restriction.
+This is necessary because Modal's gVisor kernel does not support the nested
+network namespace setup used by Codex's Linux sandbox. The controller remains
+outside that filter and is separately limited to OpenAI/ChatGPT domains.
+Web search, apps, plugins, memories, image tools, and multi-agent tools are
+disabled.
 
 Before starting any model thread, the worker runs a deterministic nested
 sandbox self-test. The run aborts unless a sandboxed command can write its
-workspace but cannot read protected mounts or open an outbound socket.
+workspace but cannot read protected mounts or open a direct-IP outbound socket.
 
 Candidate solutions are scored separately. `cloud_scorer.py` sends only code
 and public function arguments to a fresh `block_network=True` Modal Sandbox.

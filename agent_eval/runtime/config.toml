@@ -50,4 +50,6 @@ description = "Write only inside the active problem workspace; no network or eva
 "**/*.env" = "deny"
 
 [permissions.horizonmath-agent.network]
-enabled = false
+# gVisor cannot create Codex's nested network namespace. Network syscalls are
+# instead denied by the inherited seccomp filter in sandbox_shell.c.
+enabled = true

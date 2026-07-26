@@ -29,6 +29,10 @@ async def preflight(run_id: str | None = None) -> dict:
     os.environ.pop("CODEX_API_KEY", None)
     workspace = WORK_ROOT / "_preflight"
     workspace.mkdir(parents=True, exist_ok=True)
+    STATE_ROOT.mkdir(parents=True, exist_ok=True)
+    (STATE_ROOT / ".controller-canary").write_text(
+        "HORIZONMATH_STATE_CANARY\n"
+    )
 
     validate_runtime()
     config = CodexConfig(

@@ -125,13 +125,16 @@ def run_sandbox_self_test(codex_bin: Path, workspace: Path) -> dict[str, Any]:
     probe = r"""
 set -eu
 test ! -r /codex-home/auth.json
-test ! -r /state
+test ! -r /state/.controller-canary
 test ! -r /forbidden/canary.txt
 printf 'workspace-ok\n' > sandbox-self-test.txt
 test -s sandbox-self-test.txt
 if python - <<'PY'
 import socket
-socket.create_connection(("1.1.1.1", 443), timeout=1)
+try:
+    socket.create_connection(("1.1.1.1", 443), timeout=1)
+except OSError:
+    raise SystemExit(1)
 PY
 then
   echo "network unexpectedly available" >&2
@@ -382,6 +385,10 @@ async def run(args: argparse.Namespace) -> int:
     Path(os.environ["TMPDIR"]).mkdir(parents=True, exist_ok=True)
     FORBIDDEN_ROOT.mkdir(parents=True, exist_ok=True)
     (FORBIDDEN_ROOT / "canary.txt").write_text("HORIZONMATH_FORBIDDEN_CANARY\n")
+    STATE_ROOT.mkdir(parents=True, exist_ok=True)
+    (STATE_ROOT / ".controller-canary").write_text(
+        "HORIZONMATH_STATE_CANARY\n"
+    )
 
     validate_runtime()
     run_dir = STATE_ROOT / "runs" / args.run_id
