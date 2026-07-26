@@ -43,29 +43,6 @@ FORBIDDEN_TERMS = {
 }
 IDENTIFIER_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,79}$")
 
-AGENTS_TEXT = """\
-# HorizonMath agent evaluation
-
-Solve only the problem provided in this workspace.
-
-- You may use the shell, Python, compilers, and local experimentation extensively.
-- Internet access, web search, external connectors, and other problem data are unavailable.
-- Do not try to access anything outside this workspace.
-- Put the final implementation in `solution.py` as a function named exactly
-  `proposed_solution`.
-- Your final response must include the complete `proposed_solution` implementation.
-- Keep working until you have your strongest candidate, but finish before the hard
-  three-hour limit.
-"""
-
-TURN_SUFFIX = """\
-
-Work autonomously and use local tools for as long as they improve the answer. Validate
-your candidate numerically or structurally when possible. Do not ask questions and do
-not stop at a plan. Before finishing, write the final function to `solution.py` and
-include the same complete function in your final response.
-"""
-
 
 def utc_now() -> str:
     return datetime.now(UTC).isoformat()
@@ -181,12 +158,17 @@ def workspace_for(run_id: str, problem: dict[str, Any]) -> Path:
     return WORK_ROOT / run_id / f"{problem['problem_index']:03d}_{safe_id}"
 
 
+def initial_turn_prompt(problem: dict[str, Any]) -> str:
+    """Return the dataset prompt verbatim for a fresh agent thread."""
+
+    return problem["prompt"]
+
+
 def prepare_workspace(run_id: str, problem: dict[str, Any]) -> Path:
     workspace = workspace_for(run_id, problem)
     if workspace.exists():
         shutil.rmtree(workspace)
     workspace.mkdir(parents=True)
-    (workspace / "AGENTS.md").write_text(AGENTS_TEXT)
     (workspace / "problem.md").write_text(problem["prompt"] + "\n")
     (workspace / ".tmp").mkdir()
     subprocess.run(["git", "init", "-q"], cwd=workspace, check=True)
@@ -200,7 +182,7 @@ def prepare_workspace(run_id: str, problem: dict[str, Any]) -> Path:
         cwd=workspace,
         check=True,
     )
-    subprocess.run(["git", "add", "AGENTS.md", "problem.md"], cwd=workspace, check=True)
+    subprocess.run(["git", "add", "problem.md"], cwd=workspace, check=True)
     subprocess.run(
         ["git", "commit", "-qm", "Initialize verifier-free problem workspace"],
         cwd=workspace,
@@ -276,7 +258,6 @@ async def solve_problem(
                     "The previous worker was interrupted. Continue the same problem from "
                     "your retained conversation, recreate any needed local files, and finish "
                     "with the complete proposed_solution implementation."
-                    + TURN_SUFFIX
                 )
                 resumed = True
             else:
@@ -287,7 +268,7 @@ async def solve_problem(
                     ephemeral=False,
                     model=manifest["model"],
                 )
-                turn_prompt = problem["prompt"] + TURN_SUFFIX
+                turn_prompt = initial_turn_prompt(problem)
                 resumed = False
             status.update(
                 {

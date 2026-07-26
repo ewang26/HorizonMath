@@ -8,6 +8,13 @@ local Python/compiler tools, and a hard 10,800-second limit. The default run is
 `gpt-5.6-sol` at `xhigh`, with four concurrent threads inside one Codex
 app-server process.
 
+For a fresh thread, the developer instructions are byte-for-byte the canonical
+`SYSTEM_MESSAGES` used by `scripts/run_benchmark.py`, and the user turn is
+byte-for-byte the dataset problem prompt. The time limit, tool availability,
+network policy, and output capture are enforced by the harness and are not
+described through extra model-visible addenda. Codex's built-in agent/tool
+instructions remain an inherent difference from a single-shot API request.
+
 ## Security boundary
 
 The trusted local launcher reads `data/problems_full.json`, then uploads a

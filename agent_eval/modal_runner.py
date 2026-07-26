@@ -47,18 +47,14 @@ def run_id_now() -> str:
 
 
 def developer_instructions() -> dict[str, str]:
+    """Return the canonical single-shot instructions without agent addenda."""
+
     scripts_dir = REPO_ROOT / "scripts"
     if str(scripts_dir) not in sys.path:
         sys.path.insert(0, str(scripts_dir))
     from benchmark_prompts import SYSTEM_MESSAGES
 
-    addendum = (
-        "\n\nThis is a long-horizon coding-agent evaluation. You have a hard three-hour "
-        "wall-clock limit. Use local computational tools extensively, but do not attempt "
-        "internet access or access outside the assigned workspace. Finish with your strongest "
-        "concrete proposed_solution implementation."
-    )
-    return {mode: text + addendum for mode, text in SYSTEM_MESSAGES.items()}
+    return dict(SYSTEM_MESSAGES)
 
 
 def agent_image() -> modal.Image:
