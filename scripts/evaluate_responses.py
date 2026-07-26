@@ -131,10 +131,17 @@ def evaluate_response(
                 )
                 eval_dict["compliance_check"] = True
                 eval_dict["compliance_passed"] = compliance.compliant
+                eval_dict["compliance_status"] = compliance.status
                 eval_dict["compliance_reason"] = compliance.reason
-                if not compliance.compliant:
+                eval_dict["compliance_provider"] = compliance.provider
+                eval_dict["compliance_model"] = compliance.model
+                if compliance.compliant is False:
                     eval_dict["success"] = False
                     eval_dict["error_type"] = "compliance"
+                    eval_dict["error_message"] = compliance.reason
+                elif compliance.compliant is None:
+                    eval_dict["success"] = False
+                    eval_dict["error_type"] = "compliance_indeterminate"
                     eval_dict["error_message"] = compliance.reason
 
         return eval_dict
@@ -157,6 +164,9 @@ def format_summary_line(index: int, total: int, problem: dict, eval_result: dict
             if error_type == "compliance":
                 reason = eval_result.get("compliance_reason", "")
                 return f"[{index + 1}/{total}] {problem_id} — FAIL (compliance: {reason[:60]})"
+            if error_type == "compliance_indeterminate":
+                reason = eval_result.get("compliance_reason", "")
+                return f"[{index + 1}/{total}] {problem_id} — INDETERMINATE (compliance: {reason[:60]})"
             digits_str = f", {digits} digits" if digits is not None else ""
             return f"[{index + 1}/{total}] {problem_id} — FAIL ({error_type}{digits_str})"
     elif mode == "construction":
@@ -218,6 +228,9 @@ def print_progress(
             if error_type == "compliance":
                 reason = eval_result.get("compliance_reason", "")
                 print(f"        ✗ FAIL - compliance: {reason[:80]}")
+            elif error_type == "compliance_indeterminate":
+                reason = eval_result.get("compliance_reason", "")
+                print(f"        ? INDETERMINATE - compliance: {reason[:80]}")
             else:
                 error_msg = eval_result.get("error_message", "")
                 digits_str = f" ({digits} digits)" if digits is not None else ""
@@ -356,6 +369,8 @@ def compute_summary(
 
     avg_digits = sum(all_numeric_digits) / len(all_numeric_digits) if all_numeric_digits else 0.0
 
+    indeterminate = by_error_type.get("compliance_indeterminate", 0)
+
     return {
         "run_id": config.get("run_id", ""),
         "timestamp": config.get("timestamp", ""),
@@ -363,7 +378,8 @@ def compute_summary(
         "model": config.get("model", ""),
         "total_problems": total,
         "passed": passed,
-        "failed": total - passed,
+        "failed": total - passed - indeterminate,
+        "indeterminate": indeterminate,
         "pass_rate": pass_rate,
         "by_evaluation_mode": by_mode,
         "by_error_type": by_error_type,
@@ -387,9 +403,13 @@ def print_summary(summary: dict, output_dir: Path) -> None:
     total = summary["total_problems"]
     passed = summary["passed"]
     failed = summary["failed"]
+    indeterminate = summary.get("indeterminate", 0)
     pass_rate = summary["pass_rate"]
 
-    print(f"Total: {total} | Passed: {passed} ({pass_rate}) | Failed: {failed}")
+    print(
+        f"Total: {total} | Passed: {passed} ({pass_rate}) | "
+        f"Failed: {failed} | Indeterminate: {indeterminate}"
+    )
 
     print("\nBy Mode:")
     for mode_name, mode_stats in summary["by_evaluation_mode"].items():

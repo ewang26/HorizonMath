@@ -112,6 +112,20 @@ uv run scripts/evaluate_responses.py results/<run_dir>/            # Evaluate al
 uv run scripts/evaluate_responses.py results/<run_dir>/ --force    # Re-evaluate from scratch
 ```
 
+The compliance reviewer uses Gemini 3.6 Flash with high thinking by default.
+To use GPT-5.6 Terra with high reasoning instead, set these values in the
+project-local `.env` file:
+
+```bash
+COMPLIANCE_PROVIDER=openai
+COMPLIANCE_MODEL=gpt-5.6-terra
+COMPLIANCE_REASONING_EFFORT=high
+```
+
+The selected provider requires its corresponding API key. Missing keys, API
+failures, invalid responses, and inconclusive votes are recorded as
+`indeterminate`, never as compliant.
+
 ### Output Structure
 
 Results are saved to timestamped folders in `results/`:

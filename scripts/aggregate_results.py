@@ -120,11 +120,13 @@ def compute_summary(evaluations: list[dict]) -> dict:
         by_mode[mode_key]["pass_rate"] = f"{(mp / mt * 100):.1f}%" if mt > 0 else "0.0%"
 
     avg_digits = sum(all_numeric_digits) / len(all_numeric_digits) if all_numeric_digits else 0.0
+    indeterminate = by_error_type.get("compliance_indeterminate", 0)
 
     return {
         "total_problems": total,
         "passed": passed,
-        "failed": total - passed,
+        "failed": total - passed - indeterminate,
+        "indeterminate": indeterminate,
         "pass_rate": f"{(passed / total * 100):.1f}%" if total > 0 else "0.0%",
         "by_evaluation_mode": by_mode,
         "by_error_type": by_error_type,
@@ -149,6 +151,8 @@ def format_problem_line(e: dict) -> str:
         else:
             err = e.get("error_type", "")
             d_str = f", {digits} digits" if digits is not None else ""
+            if err == "compliance_indeterminate":
+                return f"  ?     {pid} (compliance indeterminate{d_str})"
             return f"  FAIL  {pid} ({err}{d_str})"
     elif mode == "construction":
         if e.get("valid"):
@@ -178,13 +182,17 @@ def print_report(evaluations: list[dict], summary: dict, source_dirs: list[Path]
     total = summary["total_problems"]
     passed = summary["passed"]
     failed = summary["failed"]
+    indeterminate = summary.get("indeterminate", 0)
     rate = summary["pass_rate"]
 
     print("=" * 60)
     print("           AGGREGATED EVALUATION SUMMARY")
     print("=" * 60)
     print(f"Source directories: {len(source_dirs)}")
-    print(f"Total: {total} | Passed: {passed} ({rate}) | Failed: {failed}")
+    print(
+        f"Total: {total} | Passed: {passed} ({rate}) | "
+        f"Failed: {failed} | Indeterminate: {indeterminate}"
+    )
 
     print("\nBy Mode:")
     for mode_name, mode_stats in summary["by_evaluation_mode"].items():
