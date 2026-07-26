@@ -50,9 +50,16 @@ def _sanitize_for_json(obj):
     """Recursively convert numpy/non-native types to JSON-serializable Python types."""
     if isinstance(obj, dict):
         return {k: _sanitize_for_json(v) for k, v in obj.items()}
-    if isinstance(obj, list):
+    if isinstance(obj, (list, tuple)):
         return [_sanitize_for_json(v) for v in obj]
-    # numpy.bool_ is a subclass of int but not bool — check bool first
+    # numpy scalars/arrays (np.bool_, np.int64, np.float64, np.ndarray, ...) are
+    # not subclasses of Python bool/int/float, so isinstance checks miss them and
+    # json.dumps then chokes. Detect them by module and convert via .item()/.tolist().
+    if type(obj).__module__ == "numpy":
+        if getattr(obj, "ndim", 0) > 0 and hasattr(obj, "tolist"):
+            return _sanitize_for_json(obj.tolist())
+        if hasattr(obj, "item"):
+            return _sanitize_for_json(obj.item())
     if isinstance(obj, bool):
         return bool(obj)
     if isinstance(obj, int):
