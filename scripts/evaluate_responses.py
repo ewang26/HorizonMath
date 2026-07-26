@@ -22,6 +22,7 @@ import os
 import sys
 from datetime import datetime
 from pathlib import Path
+from typing import Callable
 
 # Load .env and map GEMINI_API_KEY -> GOOGLE_API_KEY for compliance checker
 _project_root = Path(__file__).parent.parent
@@ -74,12 +75,19 @@ def evaluate_response(
     problem_index: int,
     response: str,
     baselines: dict[str, dict],
+    executor: Callable | None = None,
 ) -> dict:
     """Evaluate an LLM response for a problem."""
     mode = determine_mode(problem, "auto")
+    executor_kwargs = {"executor": executor} if executor is not None else {}
 
     if mode == "construction":
-        result = evaluate_construction_problem(problem, problem_index, response)
+        result = evaluate_construction_problem(
+            problem,
+            problem_index,
+            response,
+            **executor_kwargs,
+        )
         return {
             "problem_id": result.problem_id,
             "problem_index": result.problem_index,
@@ -92,7 +100,13 @@ def evaluate_response(
             "error_message": result.error_message,
         }
     elif mode == "benchmark":
-        result = evaluate_benchmark_problem(problem, problem_index, response, baselines)
+        result = evaluate_benchmark_problem(
+            problem,
+            problem_index,
+            response,
+            baselines,
+            **executor_kwargs,
+        )
         return {
             "problem_id": result.problem_id,
             "problem_index": result.problem_index,
@@ -107,7 +121,12 @@ def evaluate_response(
             "error_message": result.error_message,
         }
     else:
-        result = evaluate_problem(problem, problem_index, response)
+        result = evaluate_problem(
+            problem,
+            problem_index,
+            response,
+            **executor_kwargs,
+        )
         eval_dict = {
             "problem_id": problem.get("id", f"problem_{problem_index}"),
             "problem_index": result.problem_index,

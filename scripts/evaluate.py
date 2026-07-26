@@ -26,7 +26,7 @@ import sys
 from concurrent.futures import ProcessPoolExecutor, TimeoutError as FuturesTimeoutError
 from dataclasses import dataclass, asdict
 from pathlib import Path
-from typing import Optional
+from typing import Callable, Optional
 
 from evaluator import extract_proposed_solution, execute_sandboxed, evaluate_single
 
@@ -128,7 +128,8 @@ def evaluate_problem(
     problem: dict,
     problem_index: int,
     llm_output: str,
-    required_digits: int = DEFAULT_PRECISION_DIGITS
+    required_digits: int = DEFAULT_PRECISION_DIGITS,
+    executor: Callable = execute_sandboxed,
 ) -> EvaluationResult:
     """Evaluate an LLM's solution for a single problem (numeric mode).
 
@@ -144,6 +145,7 @@ def evaluate_problem(
         problem_index=problem_index,
         required_digits=required_digits,
         timeout=EXECUTION_TIMEOUT,
+        executor=executor,
     )
 
     # Convert evaluator's EvaluationResult to local EvaluationResult format
@@ -177,7 +179,8 @@ def evaluate_benchmark_problem(
     problem: dict,
     problem_index: int,
     llm_output: str,
-    baselines: dict[str, dict]
+    baselines: dict[str, dict],
+    executor: Callable = execute_sandboxed,
 ) -> BenchmarkEvaluationResult:
     """
     Evaluate a benchmark problem using validators and baseline comparison.
@@ -236,7 +239,7 @@ def evaluate_benchmark_problem(
         )
 
     # Execute the function to get the construction (returns JSON) using evaluator module
-    execution = execute_sandboxed(extraction.code, timeout=EXECUTION_TIMEOUT, return_json=True)
+    execution = executor(extraction.code, timeout=EXECUTION_TIMEOUT, return_json=True)
     if not execution:
         return BenchmarkEvaluationResult(
             problem_id=problem_id,
@@ -326,6 +329,7 @@ def evaluate_construction_problem(
     problem: dict,
     problem_index: int,
     llm_output: str,
+    executor: Callable = execute_sandboxed,
 ) -> ConstructionEvaluationResult:
     """
     Evaluate a construction problem using validators (pass/fail, no baseline comparison).
@@ -365,7 +369,7 @@ def evaluate_construction_problem(
             error_message=extraction.error_message or 'Could not extract proposed_solution() function from LLM output'
         )
 
-    execution = execute_sandboxed(extraction.code, timeout=EXECUTION_TIMEOUT, return_json=True)
+    execution = executor(extraction.code, timeout=EXECUTION_TIMEOUT, return_json=True)
     if not execution:
         return ConstructionEvaluationResult(
             problem_id=problem_id,

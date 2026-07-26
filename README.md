@@ -56,6 +56,18 @@ The benchmark has a two-phase pipeline:
 
 This separation means you can re-evaluate responses without re-prompting models, and long-running generation survives interruptions via `--resume`.
 
+### Long-horizon Codex agents on Modal
+
+The repository also includes a verifier-free cloud runner that uses
+ChatGPT-managed Codex subscription authentication, one coding-agent thread per
+problem, local shell/Python tools, and a three-hour per-problem limit. It pins
+`gpt-5.6-sol` at `xhigh`, checkpoints to Modal Volumes, and evaluates candidate
+code in separate networkless Modal Sandboxes.
+
+See [`agent_eval/README.md`](agent_eval/README.md) for the threat model,
+authentication warning, preflight, launch, monitoring, recovery, and scoring
+commands.
+
 ### Running with tmux (recommended)
 
 The `tmux_run.sh` wrapper runs both phases in a detached tmux session, so benchmark runs survive SSH disconnects. Output is logged to `results/tmux_run_<timestamp>.log`.

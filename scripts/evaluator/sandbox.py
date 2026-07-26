@@ -37,6 +37,12 @@ DEFAULT_TIMEOUT = 300  # 5 minutes
 DEFAULT_PRECISION_DPS = 110  # digits of precision for mpmath
 
 
+def strip_expected_values(test_points: list[dict]) -> list[dict]:
+    """Return only candidate inputs; expected values must stay in the scorer."""
+
+    return [{"args": list(point.get("args", []))} for point in test_points]
+
+
 def get_python_executable() -> str:
     """Get the Python executable, preferring venv if available."""
     script_dir = Path(__file__).parent.parent
@@ -77,6 +83,7 @@ def execute_sandboxed(
     """
     if test_points is not None:
         # Multi-point evaluation mode
+        candidate_points = strip_expected_values(test_points)
         wrapper_code = f'''
 import sys, json
 sys.setrecursionlimit(10000)
@@ -88,7 +95,7 @@ mp.dps = {precision_dps}
 
 if __name__ == "__main__":
     try:
-        test_points = {json.dumps(test_points)}
+        test_points = {json.dumps(candidate_points)}
         results = []
         for tp in test_points:
             args = [mp.mpf(a) if isinstance(a, str) else a for a in tp["args"]]
