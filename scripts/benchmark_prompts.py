@@ -1,4 +1,4 @@
-"""System instructions mirrored from the single-shot benchmark for agent runs."""
+"""Canonical system instructions shared by single-shot and agent evaluations."""
 
 _SYSTEM_MESSAGE_BASE = (
     "You are a research mathematican whose goal is novel mathematical discovery. "

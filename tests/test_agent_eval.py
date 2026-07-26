@@ -15,7 +15,11 @@ from agent_eval.config import (
     sandbox_timeout_seconds,
 )
 from agent_eval.manifest import build_manifest, validate_manifest
-from agent_eval.runtime.worker import validate_manifest as validate_runtime_manifest
+from agent_eval.modal_runner import developer_instructions
+from agent_eval.runtime.worker import (
+    initial_turn_prompt,
+    validate_manifest as validate_runtime_manifest,
+)
 
 SCRIPTS_DIR = Path(__file__).resolve().parents[1] / "scripts"
 if str(SCRIPTS_DIR) not in sys.path:
@@ -23,6 +27,7 @@ if str(SCRIPTS_DIR) not in sys.path:
 
 from benchmark_prompts import SYSTEM_MESSAGES
 from evaluator.sandbox import strip_expected_values
+from run_benchmark import SYSTEM_MESSAGES as SINGLE_SHOT_SYSTEM_MESSAGES
 
 
 def sample_problem() -> dict:
@@ -34,6 +39,22 @@ def sample_problem() -> dict:
         "test_points": [{"args": ["1"], "expected": "999999999"}],
         "source_url": "https://example.invalid/answer",
     }
+
+
+def test_fresh_agent_prompts_match_single_shot_byte_for_byte():
+    assert SYSTEM_MESSAGES == SINGLE_SHOT_SYSTEM_MESSAGES
+    assert developer_instructions() == SINGLE_SHOT_SYSTEM_MESSAGES
+    problem = sample_problem()
+    assert initial_turn_prompt(problem) == problem["prompt"]
+
+    worker_source = (
+        Path(__file__).resolve().parents[1]
+        / "agent_eval"
+        / "runtime"
+        / "worker.py"
+    ).read_text()
+    assert "TURN_SUFFIX" not in worker_source
+    assert "AGENTS_TEXT" not in worker_source
 
 
 def test_manifest_contains_only_agent_safe_problem_fields():
