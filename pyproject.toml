@@ -27,7 +27,14 @@ build-backend = "hatchling.build"
 [tool.uv]
 package = false
 
+[tool.pytest.ini_options]
+pythonpath = ["."]
+
 [dependency-groups]
+agent-eval = [
+    "modal==1.5.3",
+    "openai-codex==0.144.4",
+]
 dev = [
     "pytest>=9.0.2",
 ]

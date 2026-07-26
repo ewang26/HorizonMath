@@ -3,7 +3,7 @@
 import json
 import math
 from pathlib import Path
-from typing import Iterator, Optional
+from typing import Callable, Iterator, Optional
 
 from .code_extraction import extract_proposed_solution, ExtractionStatus
 from .sandbox import execute_sandboxed, ExecutionStatus
@@ -47,6 +47,7 @@ def evaluate_single(
     problem_index: int,
     required_digits: int = DEFAULT_REQUIRED_DIGITS,
     timeout: int = 300,
+    executor: Callable = execute_sandboxed,
 ) -> EvaluationResult:
     """
     Evaluate a single LLM output against a problem.
@@ -108,7 +109,7 @@ def evaluate_single(
 
     if test_points:
         # Multi-point evaluation mode
-        execution = execute_sandboxed(extraction.code, timeout=timeout, test_points=test_points)
+        execution = executor(extraction.code, timeout=timeout, test_points=test_points)
         if not execution:
             return EvaluationResult(
                 problem_id=problem_id,
@@ -184,7 +185,7 @@ def evaluate_single(
     # Single-point evaluation mode (original behavior)
 
     # Step 2: Execute code
-    execution = execute_sandboxed(extraction.code, timeout=timeout)
+    execution = executor(extraction.code, timeout=timeout)
     if not execution:
         return EvaluationResult(
             problem_id=problem_id,
