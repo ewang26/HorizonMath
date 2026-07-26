@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
+import argparse
 import asyncio
 import json
 import os
-import subprocess
 import sys
 
 from openai_codex import AsyncCodex, CodexConfig
@@ -13,13 +13,16 @@ from openai_codex.client import _resolve_codex_bin
 from worker import (
     AUTH_ROOT,
     PERMISSION_PROFILE,
+    STATE_ROOT,
     WORK_ROOT,
+    atomic_json,
     run_sandbox_self_test,
+    sync_mount,
     validate_runtime,
 )
 
 
-async def preflight() -> dict:
+async def preflight(run_id: str | None = None) -> dict:
     os.environ["CODEX_HOME"] = str(AUTH_ROOT)
     os.environ["CODEX_SQLITE_HOME"] = str(AUTH_ROOT / "state")
     os.environ.pop("OPENAI_API_KEY", None)
@@ -68,13 +71,18 @@ async def preflight() -> dict:
         )
     ):
         raise RuntimeError(f"Preflight invariant failed: {report}")
-    subprocess.run(["sync", str(AUTH_ROOT)], check=True, timeout=120)
+    if run_id:
+        atomic_json(STATE_ROOT / "runs" / run_id / "preflight.json", report)
+        sync_mount(STATE_ROOT)
     return report
 
 
 def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--run-id")
+    args = parser.parse_args()
     try:
-        report = asyncio.run(preflight())
+        report = asyncio.run(preflight(args.run_id))
     except Exception as exc:
         print(
             json.dumps(
@@ -86,7 +94,11 @@ def main() -> int:
             )
         )
         return 1
-    print(json.dumps(report, sort_keys=True))
+    print(
+        "HORIZONMATH_PREFLIGHT_REPORT "
+        + json.dumps(report, sort_keys=True),
+        flush=True,
+    )
     return 0
 
 

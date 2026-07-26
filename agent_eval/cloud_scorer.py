@@ -15,7 +15,7 @@ from agent_eval.config import APP_NAME
 from agent_eval.modal_runner import (
     LOCAL_RESULTS_ROOT,
     REPO_ROOT,
-    get_volumes,
+    get_state_volume,
     read_volume_file,
     volume_file_exists,
 )
@@ -167,7 +167,7 @@ class ModalCandidateExecutor:
 
 
 def load_remote_responses(run_id: str) -> list[dict[str, Any]]:
-    _, state_volume = get_volumes()
+    state_volume = get_state_volume()
     remote_path = f"/runs/{run_id}/responses.jsonl"
     if not volume_file_exists(state_volume, remote_path):
         raise FileNotFoundError(

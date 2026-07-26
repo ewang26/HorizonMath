@@ -61,12 +61,13 @@ This separation means you can re-evaluate responses without re-prompting models,
 The repository also includes a verifier-free cloud runner that uses
 ChatGPT-managed Codex subscription authentication, one coding-agent thread per
 problem, local shell/Python tools, and a three-hour per-problem limit. It pins
-`gpt-5.6-sol` at `xhigh`, checkpoints to Modal Volumes, and evaluates candidate
-code in separate networkless Modal Sandboxes.
+`gpt-5.6-sol` at `xhigh`, checkpoints to a Modal Volume, and evaluates candidate
+code in separate networkless Modal Sandboxes. Authentication uses an
+interactive, one-time device login held only by the running ephemeral Sandbox;
+no local Codex credential is uploaded or persisted in Modal.
 
 See [`agent_eval/README.md`](agent_eval/README.md) for the threat model,
-authentication warning, preflight, launch, monitoring, recovery, and scoring
-commands.
+device-login flow, launch, monitoring, recovery, and scoring commands.
 
 ### Running with tmux (recommended)
 

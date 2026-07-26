@@ -1,0 +1,53 @@
+model = "gpt-5.6-sol"
+model_reasoning_effort = "xhigh"
+approval_policy = "never"
+web_search = "disabled"
+default_permissions = "horizonmath-agent"
+cli_auth_credentials_store = "file"
+check_for_update_on_startup = false
+
+[history]
+persistence = "save-all"
+
+[features]
+apps = false
+multi_agent = false
+memories = false
+remote_plugin = false
+skill_mcp_dependency_install = false
+web_search = false
+web_search_cached = false
+web_search_request = false
+
+[tools]
+view_image = false
+
+[shell_environment_policy]
+inherit = "core"
+exclude = [
+  "*API_KEY*",
+  "*ACCESS_TOKEN*",
+  "*AUTH*",
+  "*CREDENTIAL*",
+  "*SECRET*",
+  "*TOKEN*",
+  "CODEX_*",
+  "MODAL_*",
+]
+
+[permissions.horizonmath-agent]
+description = "Write only inside the active problem workspace; no network or evaluator access."
+
+[permissions.horizonmath-agent.filesystem]
+":minimal" = "read"
+"/codex-home" = "deny"
+"/state" = "deny"
+"/opt/horizonmath_agent_runtime" = "deny"
+"/forbidden" = "deny"
+
+[permissions.horizonmath-agent.filesystem.":workspace_roots"]
+"." = "write"
+"**/*.env" = "deny"
+
+[permissions.horizonmath-agent.network]
+enabled = false

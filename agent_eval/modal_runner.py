@@ -5,7 +5,6 @@ from __future__ import annotations
 import argparse
 import io
 import json
-import os
 import sys
 from datetime import UTC, datetime
 from pathlib import Path, PurePosixPath
@@ -16,7 +15,6 @@ from modal.types import FileEntryType
 
 from agent_eval.config import (
     APP_NAME,
-    AUTH_VOLUME_NAME,
     DEFAULT_CONCURRENCY,
     DEFAULT_EFFORT,
     DEFAULT_MODEL,
@@ -26,7 +24,6 @@ from agent_eval.config import (
     REMOTE_RUNTIME_ROOT,
     REMOTE_STATE_ROOT,
     STATE_VOLUME_NAME,
-    codex_config_toml,
     sandbox_timeout_seconds,
 )
 from agent_eval.manifest import (
@@ -99,18 +96,12 @@ def agent_image() -> modal.Image:
     )
 
 
-def get_volumes() -> tuple[modal.Volume, modal.Volume]:
-    auth = modal.Volume.from_name(
-        AUTH_VOLUME_NAME,
-        create_if_missing=True,
-        version=2,
-    )
-    state = modal.Volume.from_name(
+def get_state_volume() -> modal.Volume:
+    return modal.Volume.from_name(
         STATE_VOLUME_NAME,
         create_if_missing=True,
         version=2,
     )
-    return auth, state
 
 
 def volume_file_exists(volume: modal.Volume, remote_path: str) -> bool:
@@ -120,34 +111,6 @@ def volume_file_exists(volume: modal.Volume, remote_path: str) -> bool:
         if "not found" in str(exc).lower() or "no such" in str(exc).lower():
             return False
         raise
-
-
-def seed_codex_home(
-    auth_volume: modal.Volume,
-    *,
-    local_auth_path: Path,
-    force_auth: bool = False,
-) -> dict[str, Any]:
-    """Seed auth once and always refresh the non-secret runner configuration."""
-
-    auth = json.loads(local_auth_path.read_text())
-    if auth.get("auth_mode") != "chatgpt":
-        raise ValueError("Local Codex authentication is not ChatGPT-managed")
-    if not ((auth.get("tokens") or {}).get("refresh_token")):
-        raise ValueError("Local Codex authentication has no refresh token")
-
-    auth_exists = volume_file_exists(auth_volume, "/auth.json")
-    config_buffer = io.BytesIO(codex_config_toml().encode())
-    with auth_volume.batch_upload(force=True) as batch:
-        batch.put_file(config_buffer, "/config.toml", mode=0o600)
-        if force_auth or not auth_exists:
-            batch.put_file(local_auth_path, "/auth.json", mode=0o600)
-
-    return {
-        "auth_seeded": force_auth or not auth_exists,
-        "existing_auth_preserved": auth_exists and not force_auth,
-        "config_updated": True,
-    }
 
 
 def upload_manifest(
@@ -171,6 +134,25 @@ def write_local_launch(run_id: str, payload: dict[str, Any]) -> Path:
 
 def read_volume_file(volume: modal.Volume, remote_path: str) -> bytes:
     return b"".join(volume.read_file(remote_path))
+
+
+def stream_until_marker(
+    sandbox: modal.Sandbox,
+    marker: str,
+) -> str:
+    """Relay interactive device-auth output until the remote worker is ready."""
+
+    captured: list[str] = []
+    for chunk in sandbox.stdout:
+        captured.append(chunk)
+        print(chunk, end="", flush=True)
+        if marker in chunk:
+            return "".join(captured)
+    stderr = sandbox.stderr.read()
+    raise RuntimeError(
+        f"Modal Sandbox exited before {marker!r}. "
+        f"stdout={''.join(captured)[-4000:]!r} stderr={stderr[-4000:]!r}"
+    )
 
 
 def launch(args: argparse.Namespace) -> int:
@@ -198,24 +180,14 @@ def launch(args: argparse.Namespace) -> int:
         PROBLEM_TIMEOUT_SECONDS,
     )
 
-    local_auth_path = Path(
-        os.environ.get("CODEX_HOME", str(Path.home() / ".codex"))
-    ) / "auth.json"
-    if not local_auth_path.is_file():
-        raise FileNotFoundError(f"Codex auth file not found: {local_auth_path}")
-
     with modal.enable_output():
         app = modal.App.lookup(APP_NAME, create_if_missing=True)
-        auth_volume, state_volume = get_volumes()
-        seed_report = seed_codex_home(
-            auth_volume,
-            local_auth_path=local_auth_path,
-            force_auth=args.force_auth,
-        )
+        state_volume = get_state_volume()
         manifest_path = upload_manifest(state_volume, manifest)
         sandbox = modal.Sandbox.create(
             "python",
-            str(REMOTE_RUNTIME_ROOT / "worker.py"),
+            str(REMOTE_RUNTIME_ROOT / "entrypoint.py"),
+            "run",
             "--run-id",
             run_id,
             app=app,
@@ -236,21 +208,22 @@ def launch(args: argparse.Namespace) -> int:
             memory=(4096, 16384),
             outbound_domain_allowlist=list(OPENAI_EGRESS_ALLOWLIST),
             volumes={
-                str(REMOTE_AUTH_ROOT): auth_volume,
                 str(REMOTE_STATE_ROOT): state_volume,
             },
+            pty=True,
         )
         if sandbox.poll() is not None:
             raise RuntimeError("Modal Sandbox exited during startup")
-        sandbox.detach()
 
     launch_record = {
-        "schema_version": 1,
+        "schema_version": 2,
         "run_id": run_id,
         "launched_at": datetime.now(UTC).isoformat(),
+        "status": "awaiting_device_auth",
         "sandbox_id": sandbox.object_id,
         "app_name": APP_NAME,
-        "auth_volume": AUTH_VOLUME_NAME,
+        "auth_mode": "ephemeral_device_auth",
+        "auth_persisted": False,
         "state_volume": STATE_VOLUME_NAME,
         "manifest_path": manifest_path,
         "problem_indices": indices,
@@ -261,32 +234,41 @@ def launch(args: argparse.Namespace) -> int:
         "concurrency": args.concurrency,
         "outer_sandbox_timeout_seconds": outer_timeout,
         "egress_allowlist": list(OPENAI_EGRESS_ALLOWLIST),
-        "seed_report": seed_report,
     }
     launch_path = write_local_launch(run_id, launch_record)
-    print(json.dumps(launch_record, indent=2, sort_keys=True))
+    print(
+        json.dumps(
+            {
+                "run_id": run_id,
+                "sandbox_id": sandbox.object_id,
+                "status": "awaiting_device_auth",
+                "auth_mode": "ephemeral_device_auth",
+            },
+            indent=2,
+            sort_keys=True,
+        )
+    )
     print(f"Local launch record: {launch_path}")
+    try:
+        stream_until_marker(sandbox, "HORIZONMATH_WORKER_STARTED")
+    except BaseException:
+        sandbox.terminate(wait=False)
+        raise
+    launch_record["status"] = "running"
+    launch_record["worker_started_at"] = datetime.now(UTC).isoformat()
+    write_local_launch(run_id, launch_record)
+    sandbox.detach()
+    print(json.dumps(launch_record, indent=2, sort_keys=True))
     return 0
 
 
 def preflight(args: argparse.Namespace) -> int:
-    local_auth_path = Path(
-        os.environ.get("CODEX_HOME", str(Path.home() / ".codex"))
-    ) / "auth.json"
-    if not local_auth_path.is_file():
-        raise FileNotFoundError(f"Codex auth file not found: {local_auth_path}")
-
     with modal.enable_output():
         app = modal.App.lookup(APP_NAME, create_if_missing=True)
-        auth_volume, state_volume = get_volumes()
-        seed_report = seed_codex_home(
-            auth_volume,
-            local_auth_path=local_auth_path,
-            force_auth=args.force_auth,
-        )
         sandbox = modal.Sandbox.create(
             "python",
-            str(REMOTE_RUNTIME_ROOT / "preflight.py"),
+            str(REMOTE_RUNTIME_ROOT / "entrypoint.py"),
+            "preflight",
             app=app,
             name="horizonmath-codex-preflight",
             tags={"purpose": "preflight"},
@@ -300,28 +282,29 @@ def preflight(args: argparse.Namespace) -> int:
             cpu=1.0,
             memory=2048,
             outbound_domain_allowlist=list(OPENAI_EGRESS_ALLOWLIST),
-            volumes={
-                str(REMOTE_AUTH_ROOT): auth_volume,
-                str(REMOTE_STATE_ROOT): state_volume,
-            },
+            pty=True,
         )
-        sandbox.wait(raise_on_termination=False)
-        stdout = sandbox.stdout.read()
-        stderr = sandbox.stderr.read()
+        try:
+            stdout = stream_until_marker(sandbox, "HORIZONMATH_PREFLIGHT_OK")
+            sandbox.wait(raise_on_termination=False)
+        except BaseException:
+            sandbox.terminate(wait=False)
+            raise
 
     report = None
-    for line in reversed(stdout.splitlines()):
+    prefix = "HORIZONMATH_PREFLIGHT_REPORT "
+    for line in stdout.splitlines():
+        if not line.startswith(prefix):
+            continue
         try:
-            report = json.loads(line)
-            break
+            report = json.loads(line.removeprefix(prefix))
         except json.JSONDecodeError:
             continue
     if not isinstance(report, dict) or not report.get("ok"):
         raise RuntimeError(
             "Remote preflight failed. "
-            f"stdout={stdout[-4000:]!r} stderr={stderr[-4000:]!r}"
+            f"stdout={stdout[-4000:]!r}"
         )
-    report["seed_report"] = seed_report
     print(json.dumps(report, indent=2, sort_keys=True))
     return 0
 
@@ -339,9 +322,13 @@ def status(args: argparse.Namespace) -> int:
         launch_record.get("sandbox_id") if launch_record else None
     )
     with modal.enable_output():
-        _, state_volume = get_volumes()
+        state_volume = get_state_volume()
         result: dict[str, Any] = {"run_id": args.run_id}
-        for name in ("runner_status.json", "sandbox_self_test.json"):
+        for name in (
+            "preflight.json",
+            "runner_status.json",
+            "sandbox_self_test.json",
+        ):
             remote_path = f"/runs/{args.run_id}/{name}"
             if volume_file_exists(state_volume, remote_path):
                 result[name.removesuffix(".json")] = json.loads(
@@ -383,7 +370,7 @@ def download(args: argparse.Namespace) -> int:
     )
     destination.mkdir(parents=True, exist_ok=True)
     with modal.enable_output():
-        _, state_volume = get_volumes()
+        state_volume = get_state_volume()
         prefix = f"/runs/{args.run_id}"
         entries = state_volume.listdir(prefix, recursive=True)
         downloaded = []
@@ -430,15 +417,9 @@ def build_parser() -> argparse.ArgumentParser:
         type=int,
         default=DEFAULT_CONCURRENCY,
     )
-    launch_parser.add_argument(
-        "--force-auth",
-        action="store_true",
-        help="Replace the persisted refreshed auth file from the local seed",
-    )
     launch_parser.set_defaults(func=launch)
 
     preflight_parser = subparsers.add_parser("preflight")
-    preflight_parser.add_argument("--force-auth", action="store_true")
     preflight_parser.set_defaults(func=preflight)
 
     status_parser = subparsers.add_parser("status")

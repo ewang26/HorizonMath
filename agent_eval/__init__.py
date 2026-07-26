@@ -1,7 +1,6 @@
 """Long-horizon Codex agent evaluation on Modal."""
 
 from .config import (
-    AUTH_VOLUME_NAME,
     DEFAULT_CONCURRENCY,
     DEFAULT_EFFORT,
     DEFAULT_MODEL,
@@ -10,7 +9,6 @@ from .config import (
 )
 
 __all__ = [
-    "AUTH_VOLUME_NAME",
     "DEFAULT_CONCURRENCY",
     "DEFAULT_EFFORT",
     "DEFAULT_MODEL",
