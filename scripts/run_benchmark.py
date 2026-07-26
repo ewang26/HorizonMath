@@ -422,18 +422,26 @@ def call_anthropic(prompt: str, model: str = DEFAULT_ANTHROPIC_MODEL, system_mes
     Returns dict with 'content', optional 'thinking', 'usage', and 'stop_reason'.
     """
     client = anthropic.Anthropic()
-    response = client.messages.create(
+    # Stream: at max_tokens=32000 with always-on thinking, a Fable 5 turn can run
+    # past the SDK's ~10-minute non-streaming ceiling, which otherwise raises
+    # "Streaming is required for operations that may take longer than 10 minutes"
+    # before any request is sent. get_final_message() returns the same Message.
+    with client.messages.stream(
         model=model,
-        max_tokens=32000,
-        thinking={
-            "type": "enabled",
-            "budget_tokens": 25000,
-        },
+        # 128000 is Fable 5's output ceiling. Needed because always-on adaptive
+        # thinking can consume tens of thousands of tokens before the answer;
+        # a smaller cap truncates mid-thinking and yields an empty response.
+        max_tokens=128000,
+        # Adaptive thinking works across Opus 4.6/4.7/4.8 and Fable 5. The older
+        # {"type": "enabled", "budget_tokens": N} form is rejected with a 400 on
+        # Fable 5 and deprecated on Opus 4.6.
+        thinking={"type": "adaptive"},
         system=system_message,
         messages=[
             {"role": "user", "content": prompt},
         ],
-    )
+    ) as stream:
+        response = stream.get_final_message()
     result = {"content": ""}
     thinking_parts = []
     text_parts = []
@@ -452,7 +460,7 @@ def call_anthropic(prompt: str, model: str = DEFAULT_ANTHROPIC_MODEL, system_mes
         }
     if response.stop_reason == "max_tokens":
         result["truncated"] = True
-        print(f"  ⚠ Anthropic response truncated (hit max_tokens={32000})")
+        print(f"  ⚠ Anthropic response truncated (hit max_tokens={128000})")
     return result
 
 
@@ -557,6 +565,7 @@ def run_single_problem(
     container_id: Optional[str] = None,
     stream: bool = False,
     api_timeout_seconds: Optional[float] = DEFAULT_API_TIMEOUT_MINUTES * 60,
+    empty_retries: int = 1,
 ) -> dict:
     """Run LLM on a single problem and return the raw response."""
     prompt = problem["prompt"]
@@ -603,9 +612,11 @@ def run_single_problem(
     else:
         raise ValueError(f"Unknown provider: {provider}")
 
-    # Retry once on empty response
-    if not response or not response.strip():
-        print(f"    ⚠ Empty response for {problem['id']}, retrying once...")
+    # Retry on empty response up to empty_retries times
+    for attempt in range(empty_retries):
+        if response and response.strip():
+            break
+        print(f"    ⚠ Empty response for {problem['id']}, retrying (attempt {attempt + 1}/{empty_retries})...")
         sys.stdout.flush()
         if provider == "openai":
             result = call_openai_for_model(
@@ -754,6 +765,12 @@ def main():
             "none for OpenAI pro models and 75 for other models. Can also be set "
             "with OPENMATH_API_TIMEOUT_MINUTES."
         ),
+    )
+    parser.add_argument(
+        "--empty-retries",
+        type=int,
+        default=1,
+        help="Number of times to retry when the model returns an empty response (default: 1)",
     )
     parser.add_argument(
         "--debug",
@@ -994,6 +1011,7 @@ def main():
                 container_id=container_id,
                 stream=(args.parallel == 1),
                 api_timeout_seconds=api_timeout_seconds,
+                empty_retries=args.empty_retries,
             )
         finally:
             if container_queue is not None and container_id is not None:
