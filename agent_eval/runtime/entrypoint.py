@@ -42,11 +42,11 @@ def prepare_ephemeral_codex_home() -> None:
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("mode", choices=("run", "preflight"))
+    parser.add_argument("mode", choices=("run", "preflight", "review"))
     parser.add_argument("--run-id")
     args = parser.parse_args()
-    if args.mode == "run" and not args.run_id:
-        parser.error("run requires --run-id")
+    if args.mode in {"run", "review"} and not args.run_id:
+        parser.error(f"{args.mode} requires --run-id")
 
     prepare_ephemeral_codex_home()
     env = clean_environment()
@@ -76,7 +76,7 @@ def main() -> int:
         sys.executable,
         str(RUNTIME_ROOT / "preflight.py"),
     ]
-    if args.run_id:
+    if args.mode == "run" and args.run_id:
         preflight_command.extend(["--run-id", args.run_id])
     subprocess.run(preflight_command, check=True, env=env)
     print("HORIZONMATH_PREFLIGHT_OK", flush=True)
@@ -91,6 +91,7 @@ def main() -> int:
             str(RUNTIME_ROOT / "worker.py"),
             "--run-id",
             args.run_id,
+            *(["--review-only"] if args.mode == "review" else []),
         ],
         env,
     )

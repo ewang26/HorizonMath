@@ -10,14 +10,24 @@ from agent_eval.config import (
     AGENT_PERMISSION_PROFILE,
     DEFAULT_EFFORT,
     DEFAULT_MODEL,
+    PERMISSIBILITY_EFFORT,
+    PERMISSIBILITY_MODEL,
+    PERMISSIBILITY_ROUNDS,
     PROBLEM_TIMEOUT_SECONDS,
     codex_config_toml,
     sandbox_timeout_seconds,
 )
 from agent_eval.manifest import build_manifest, validate_manifest
-from agent_eval.modal_runner import developer_instructions
+from agent_eval.modal_runner import (
+    developer_instructions,
+    is_missing_volume_path_error,
+    permissibility_rubric,
+)
 from agent_eval.runtime.worker import (
+    aggregate_permissibility_rounds,
+    extract_proposed_solution_code,
     initial_turn_prompt,
+    parse_permissibility_response,
     validate_manifest as validate_runtime_manifest,
 )
 
@@ -63,6 +73,7 @@ def test_manifest_contains_only_agent_safe_problem_fields():
         [0],
         run_id="test-run",
         developer_instructions_by_mode=SYSTEM_MESSAGES,
+        permissibility_rubric=permissibility_rubric(),
     )
     encoded = json.dumps(manifest)
     problem = manifest["problems"][0]
@@ -70,6 +81,10 @@ def test_manifest_contains_only_agent_safe_problem_fields():
     assert manifest["model"] == DEFAULT_MODEL
     assert manifest["reasoning_effort"] == DEFAULT_EFFORT
     assert manifest["problem_timeout_seconds"] == 10800
+    assert manifest["permissibility"]["model"] == PERMISSIBILITY_MODEL
+    assert manifest["permissibility"]["reasoning_effort"] == PERMISSIBILITY_EFFORT
+    assert manifest["permissibility"]["rounds"] == PERMISSIBILITY_ROUNDS
+    assert manifest["permissibility"]["rubric"] == permissibility_rubric()
     assert set(problem) == {
         "problem_id",
         "problem_index",
@@ -90,6 +105,7 @@ def test_manifest_rejects_wrong_model_effort_or_timeout():
         [0],
         run_id="test-run",
         developer_instructions_by_mode=SYSTEM_MESSAGES,
+        permissibility_rubric=permissibility_rubric(),
     )
     for key, bad_value in (
         ("model", "not-sol"),
@@ -109,6 +125,7 @@ def test_manifest_rejects_path_traversal_identifiers():
             [0],
             run_id="../../escape",
             developer_instructions_by_mode=SYSTEM_MESSAGES,
+            permissibility_rubric=permissibility_rubric(),
         )
     problem = sample_problem()
     problem["id"] = "../answer"
@@ -118,6 +135,7 @@ def test_manifest_rejects_path_traversal_identifiers():
             [0],
             run_id="safe-run",
             developer_instructions_by_mode=SYSTEM_MESSAGES,
+            permissibility_rubric=permissibility_rubric(),
         )
 
 
@@ -163,7 +181,7 @@ def test_modal_auth_is_interactive_ephemeral_and_never_copied_from_local_disk():
 
 
 def test_first_ten_batch_fits_inside_modal_lifetime():
-    assert sandbox_timeout_seconds(10, 4, PROBLEM_TIMEOUT_SECONDS) == 34200
+    assert sandbox_timeout_seconds(10, 4, PROBLEM_TIMEOUT_SECONDS) == 37800
     with pytest.raises(ValueError):
         sandbox_timeout_seconds(113, 4, PROBLEM_TIMEOUT_SECONDS)
 
@@ -185,3 +203,70 @@ def test_expected_values_are_removed_from_both_execution_paths():
 
 def test_problem_timeout_is_exactly_three_hours():
     assert PROBLEM_TIMEOUT_SECONDS == 3 * 60 * 60
+
+
+@pytest.mark.parametrize(
+    "message",
+    [
+        "not found",
+        "No such file",
+        "Path does not exist",
+    ],
+)
+def test_modal_missing_volume_errors_are_recognized(message):
+    assert is_missing_volume_path_error(RuntimeError(message))
+
+
+def test_permissibility_review_extracts_and_parses_strict_json():
+    response = """
+Draft:
+```python
+def proposed_solution():
+    return 1
+```
+Final:
+```python
+def proposed_solution():
+    return 2
+```
+"""
+    assert "return 2" in extract_proposed_solution_code(response)
+    assert parse_permissibility_response(
+        '```json\n{"compliant": true, "reason": "exact closed form"}\n```'
+    ) == {
+        "compliant": True,
+        "reason": "exact closed form",
+    }
+
+
+def test_permissibility_vote_requires_a_strict_majority():
+    decision = aggregate_permissibility_rounds(
+        [
+            {"compliant": True, "reason": "valid"},
+            {"compliant": None, "error": "timeout"},
+            {"compliant": None, "error": "parse error"},
+        ]
+    )
+    assert decision["status"] == "indeterminate"
+    assert decision["compliant"] is None
+    assert decision["votes"] == {
+        "compliant": 1,
+        "non_compliant": 0,
+        "indeterminate": 2,
+        "total": 3,
+    }
+
+
+def test_worker_runs_terra_review_before_marking_batch_complete():
+    worker_source = (
+        Path(__file__).resolve().parents[1]
+        / "agent_eval"
+        / "runtime"
+        / "worker.py"
+    ).read_text()
+    reviewing = worker_source.index('runner_status["status"] = "reviewing"')
+    review_call = worker_source.index("compliance_status = await review_batch")
+    completed = worker_source.index('"status": "completed"', review_call)
+    assert reviewing < review_call < completed
+    assert 'PERMISSIBILITY_MODEL = "gpt-5.6-terra"' in worker_source
+    assert 'PERMISSIBILITY_EFFORT = "high"' in worker_source

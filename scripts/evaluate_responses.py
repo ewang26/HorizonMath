@@ -76,6 +76,7 @@ def evaluate_response(
     response: str,
     baselines: dict[str, dict],
     executor: Callable | None = None,
+    precomputed_compliance: dict | None = None,
 ) -> dict:
     """Evaluate an LLM response for a problem."""
     mode = determine_mode(problem, "auto")
@@ -145,23 +146,51 @@ def evaluate_response(
         if result.success:
             extraction = extract_proposed_solution(response)
             if extraction and extraction.code:
-                compliance = check_solution_compliance(
-                    extraction.code, problem_prompt=problem.get("prompt", "")
-                )
+                if precomputed_compliance is None:
+                    compliance = check_solution_compliance(
+                        extraction.code,
+                        problem_prompt=problem.get("prompt", ""),
+                    )
+                    compliant = compliance.compliant
+                    compliance_status = compliance.status
+                    compliance_reason = compliance.reason
+                    compliance_provider = compliance.provider
+                    compliance_model = compliance.model
+                else:
+                    compliant = precomputed_compliance.get("compliant")
+                    compliance_status = precomputed_compliance.get(
+                        "status",
+                        (
+                            "compliant"
+                            if compliant is True
+                            else "non_compliant"
+                            if compliant is False
+                            else "indeterminate"
+                        ),
+                    )
+                    compliance_reason = str(
+                        precomputed_compliance.get("reason", "")
+                    )
+                    compliance_provider = str(
+                        precomputed_compliance.get("provider", "")
+                    )
+                    compliance_model = str(
+                        precomputed_compliance.get("model", "")
+                    )
                 eval_dict["compliance_check"] = True
-                eval_dict["compliance_passed"] = compliance.compliant
-                eval_dict["compliance_status"] = compliance.status
-                eval_dict["compliance_reason"] = compliance.reason
-                eval_dict["compliance_provider"] = compliance.provider
-                eval_dict["compliance_model"] = compliance.model
-                if compliance.compliant is False:
+                eval_dict["compliance_passed"] = compliant
+                eval_dict["compliance_status"] = compliance_status
+                eval_dict["compliance_reason"] = compliance_reason
+                eval_dict["compliance_provider"] = compliance_provider
+                eval_dict["compliance_model"] = compliance_model
+                if compliant is False:
                     eval_dict["success"] = False
                     eval_dict["error_type"] = "compliance"
-                    eval_dict["error_message"] = compliance.reason
-                elif compliance.compliant is None:
+                    eval_dict["error_message"] = compliance_reason
+                elif compliant is None:
                     eval_dict["success"] = False
                     eval_dict["error_type"] = "compliance_indeterminate"
-                    eval_dict["error_message"] = compliance.reason
+                    eval_dict["error_message"] = compliance_reason
 
         return eval_dict
 

@@ -97,6 +97,11 @@ _COMPLIANCE_RESPONSE_SCHEMA = {
     "required": ["compliant", "reason"],
     "additionalProperties": False,
 }
+_GEMINI_COMPLIANCE_RESPONSE_SCHEMA = {
+    key: value
+    for key, value in _COMPLIANCE_RESPONSE_SCHEMA.items()
+    if key != "additionalProperties"
+}
 
 
 def _reviewer_config() -> tuple[str, str]:
@@ -172,7 +177,7 @@ def _single_compliance_check(
                         thinking_level=COMPLIANCE_THINKING_LEVEL
                     ),
                     response_mime_type="application/json",
-                    response_schema=_COMPLIANCE_RESPONSE_SCHEMA,
+                    response_schema=_GEMINI_COMPLIANCE_RESPONSE_SCHEMA,
                 ),
             )
             text = response.text

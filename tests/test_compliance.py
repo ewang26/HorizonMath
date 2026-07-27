@@ -53,6 +53,10 @@ def test_compliant_solution(mock_client_cls):
         == COMPLIANCE_THINKING_LEVEL
     )
     assert call.kwargs["config"].response_mime_type == "application/json"
+    assert (
+        "additionalProperties"
+        not in call.kwargs["config"].response_schema
+    )
 
 
 @patch.dict(

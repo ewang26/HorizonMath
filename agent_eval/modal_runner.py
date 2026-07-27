@@ -19,6 +19,9 @@ from agent_eval.config import (
     DEFAULT_EFFORT,
     DEFAULT_MODEL,
     OPENAI_EGRESS_ALLOWLIST,
+    PERMISSIBILITY_EFFORT,
+    PERMISSIBILITY_MODEL,
+    PERMISSIBILITY_ROUNDS,
     PROBLEM_TIMEOUT_SECONDS,
     REMOTE_AUTH_ROOT,
     REMOTE_RUNTIME_ROOT,
@@ -55,6 +58,17 @@ def developer_instructions() -> dict[str, str]:
     from benchmark_prompts import SYSTEM_MESSAGES
 
     return dict(SYSTEM_MESSAGES)
+
+
+def permissibility_rubric() -> str:
+    """Return the canonical integrated permissibility rubric."""
+
+    scripts_dir = REPO_ROOT / "scripts"
+    if str(scripts_dir) not in sys.path:
+        sys.path.insert(0, str(scripts_dir))
+    from evaluator.compliance import _COMPLIANCE_PROMPT
+
+    return _COMPLIANCE_PROMPT
 
 
 def agent_image() -> modal.Image:
@@ -116,11 +130,19 @@ def get_state_volume() -> modal.Volume:
     )
 
 
+def is_missing_volume_path_error(exc: Exception) -> bool:
+    message = str(exc).lower()
+    return any(
+        marker in message
+        for marker in ("not found", "no such", "does not exist")
+    )
+
+
 def volume_file_exists(volume: modal.Volume, remote_path: str) -> bool:
     try:
         return bool(volume.listdir(remote_path))
     except Exception as exc:
-        if "not found" in str(exc).lower() or "no such" in str(exc).lower():
+        if is_missing_volume_path_error(exc):
             return False
         raise
 
@@ -140,6 +162,14 @@ def write_local_launch(run_id: str, payload: dict[str, Any]) -> Path:
     run_dir = LOCAL_RESULTS_ROOT / f"modal_{run_id}"
     run_dir.mkdir(parents=True, exist_ok=True)
     path = run_dir / "launch.json"
+    path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
+    return path
+
+
+def write_local_review_launch(run_id: str, payload: dict[str, Any]) -> Path:
+    run_dir = LOCAL_RESULTS_ROOT / f"modal_{run_id}"
+    run_dir.mkdir(parents=True, exist_ok=True)
+    path = run_dir / "review_launch.json"
     path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
     return path
 
@@ -185,6 +215,7 @@ def launch(args: argparse.Namespace) -> int:
         effort=DEFAULT_EFFORT,
         concurrency=args.concurrency,
         timeout_seconds=PROBLEM_TIMEOUT_SECONDS,
+        permissibility_rubric=permissibility_rubric(),
     )
     outer_timeout = sandbox_timeout_seconds(
         len(indices),
@@ -274,6 +305,95 @@ def launch(args: argparse.Namespace) -> int:
     return 0
 
 
+def review(args: argparse.Namespace) -> int:
+    """Launch a subscription-authenticated Terra review for a completed run."""
+
+    with modal.enable_output():
+        app = modal.App.lookup(APP_NAME, create_if_missing=True)
+        state_volume = get_state_volume()
+        manifest_path = f"/runs/{args.run_id}/manifest.json"
+        if not volume_file_exists(state_volume, manifest_path):
+            raise FileNotFoundError(f"Run {args.run_id} has no manifest")
+        responses_path = f"/runs/{args.run_id}/responses.jsonl"
+        if not volume_file_exists(state_volume, responses_path):
+            raise FileNotFoundError(
+                f"Run {args.run_id} has no completed responses.jsonl"
+            )
+        status_path = f"/runs/{args.run_id}/compliance_status.json"
+        if volume_file_exists(state_volume, status_path) and not args.force:
+            existing = json.loads(read_volume_file(state_volume, status_path))
+            if existing.get("status") == "completed":
+                raise RuntimeError(
+                    "Permissibility review already completed; pass --force to rerun"
+                )
+
+        manifest = json.loads(read_volume_file(state_volume, manifest_path))
+        manifest["permissibility"] = {
+            "model": PERMISSIBILITY_MODEL,
+            "reasoning_effort": PERMISSIBILITY_EFFORT,
+            "rounds": PERMISSIBILITY_ROUNDS,
+            "rubric": permissibility_rubric(),
+        }
+        upload_manifest(state_volume, manifest)
+
+        sandbox = modal.Sandbox.create(
+            "python",
+            str(REMOTE_RUNTIME_ROOT / "entrypoint.py"),
+            "review",
+            "--run-id",
+            args.run_id,
+            app=app,
+            name=f"horizonmath-review-{args.run_id}"[:64],
+            tags={
+                "run_id": args.run_id,
+                "purpose": "permissibility-review",
+                "model": PERMISSIBILITY_MODEL,
+                "effort": PERMISSIBILITY_EFFORT,
+            },
+            image=agent_image(),
+            env={
+                "CODEX_HOME": str(REMOTE_AUTH_ROOT),
+                "CODEX_SQLITE_HOME": str(REMOTE_AUTH_ROOT / "state"),
+                "PYTHONUNBUFFERED": "1",
+            },
+            timeout=3 * 60 * 60,
+            cpu=(2.0, 8.0),
+            memory=(4096, 16384),
+            outbound_domain_allowlist=list(OPENAI_EGRESS_ALLOWLIST),
+            volumes={str(REMOTE_STATE_ROOT): state_volume},
+            pty=True,
+        )
+        if sandbox.poll() is not None:
+            raise RuntimeError("Modal review Sandbox exited during startup")
+
+    launch_record = {
+        "schema_version": 1,
+        "run_id": args.run_id,
+        "launched_at": datetime.now(UTC).isoformat(),
+        "status": "awaiting_device_auth",
+        "sandbox_id": sandbox.object_id,
+        "auth_mode": "ephemeral_device_auth",
+        "auth_persisted": False,
+        "model": PERMISSIBILITY_MODEL,
+        "reasoning_effort": PERMISSIBILITY_EFFORT,
+        "rounds": PERMISSIBILITY_ROUNDS,
+    }
+    launch_path = write_local_review_launch(args.run_id, launch_record)
+    print(json.dumps(launch_record, indent=2, sort_keys=True))
+    print(f"Local review launch record: {launch_path}")
+    try:
+        stream_until_marker(sandbox, "HORIZONMATH_REVIEW_STARTED")
+    except BaseException:
+        sandbox.terminate(wait=False)
+        raise
+    launch_record["status"] = "running"
+    launch_record["worker_started_at"] = datetime.now(UTC).isoformat()
+    write_local_review_launch(args.run_id, launch_record)
+    sandbox.detach()
+    print(json.dumps(launch_record, indent=2, sort_keys=True))
+    return 0
+
+
 def preflight(args: argparse.Namespace) -> int:
     with modal.enable_output():
         app = modal.App.lookup(APP_NAME, create_if_missing=True)
@@ -339,6 +459,7 @@ def status(args: argparse.Namespace) -> int:
         for name in (
             "preflight.json",
             "runner_status.json",
+            "compliance_status.json",
             "sandbox_self_test.json",
         ):
             remote_path = f"/runs/{args.run_id}/{name}"
@@ -352,7 +473,7 @@ def status(args: argparse.Namespace) -> int:
                 recursive=True,
             )
         except Exception as exc:
-            if "not found" in str(exc).lower() or "no such" in str(exc).lower():
+            if is_missing_volume_path_error(exc):
                 problem_entries = []
             else:
                 raise
@@ -364,6 +485,26 @@ def status(args: argparse.Namespace) -> int:
                 )
         result["problems"] = sorted(
             problem_statuses,
+            key=lambda item: item["problem_index"],
+        )
+        try:
+            compliance_entries = state_volume.listdir(
+                f"/runs/{args.run_id}/compliance",
+                recursive=True,
+            )
+        except Exception as exc:
+            if is_missing_volume_path_error(exc):
+                compliance_entries = []
+            else:
+                raise
+        compliance_results = []
+        for entry in compliance_entries:
+            if entry.path.endswith(".json"):
+                compliance_results.append(
+                    json.loads(read_volume_file(state_volume, entry.path))
+                )
+        result["permissibility"] = sorted(
+            compliance_results,
             key=lambda item: item["problem_index"],
         )
         if sandbox_id:
@@ -433,6 +574,11 @@ def build_parser() -> argparse.ArgumentParser:
 
     preflight_parser = subparsers.add_parser("preflight")
     preflight_parser.set_defaults(func=preflight)
+
+    review_parser = subparsers.add_parser("review")
+    review_parser.add_argument("--run-id", required=True)
+    review_parser.add_argument("--force", action="store_true")
+    review_parser.set_defaults(func=review)
 
     status_parser = subparsers.add_parser("status")
     status_parser.add_argument("--run-id", required=True)

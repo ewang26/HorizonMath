@@ -22,7 +22,8 @@ sanitized manifest containing only:
 
 - problem id and index;
 - the public problem prompt and evaluation mode;
-- benchmark/agent instructions; and
+- benchmark/agent instructions;
+- the public integrated permissibility rubric and pinned reviewer settings;
 - a hash of the public prompt.
 
 Numeric answers, hidden test points, baselines, source URLs, validators,
@@ -57,6 +58,13 @@ Candidate solutions are scored separately. `cloud_scorer.py` sends only code
 and public function arguments to a fresh `block_network=True` Modal Sandbox.
 Expected values remain in the trusted scorer. Validators and ground truth are
 never mounted into candidate execution.
+
+After the final generation agent finishes, the same ephemeral ChatGPT session
+automatically runs three independent GPT-5.6 Terra reviews at `high` effort for
+every submitted `proposed_solution`. These permissibility reviewers run on
+Modal with the integrated rubric but no validators, expected values, baselines,
+or source notes. Their strict-majority decisions are checkpointed before the
+generation Sandbox exits.
 
 ## Authentication
 
@@ -108,6 +116,9 @@ uv run --group agent-eval python -m agent_eval.modal_runner status \
   --run-id <run-id>
 ```
 
+Status includes generation and automatic permissibility checkpoints. A run
+moves from `running` to `reviewing` and finally `completed`.
+
 Download checkpoints and responses:
 
 ```bash
@@ -122,12 +133,17 @@ uv run --group agent-eval python -m agent_eval.cloud_scorer \
   --run-id <run-id>
 ```
 
-The trusted scorer loads the project-local `.env` file. Numerically correct
-solutions are reviewed three times against the integrated compliance rubric
-using GPT-5.6 Terra with high reasoning by default, so set `OPENAI_API_KEY`
-before scoring. Set `COMPLIANCE_PROVIDER=gemini` and
-`COMPLIANCE_MODEL=gemini-3.6-flash` to use the optional Gemini high-thinking
-reviewer instead.
+The trusted scorer reuses the automatic subscription-authenticated Terra
+decisions, so it does not need an API key for permissibility review. It applies
+those decisions only after numerical validation passes.
+
+To backfill or rerun permissibility review for a run created by an older
+version, use a fresh ephemeral device authorization:
+
+```bash
+uv run --group agent-eval python -m agent_eval.modal_runner review \
+  --run-id <run-id>
+```
 
 ## Full dataset and recovery
 
@@ -148,7 +164,7 @@ thread ids. Failed entries remain visible for deliberate retry or diagnosis.
 GOOGLE_API_KEY=dummy uv run --group agent-eval --group dev pytest -q
 ```
 
-Tests enforce the exact model, `xhigh` effort, three-hour problem limit,
-sanitized manifest schema, permission policy, Modal lifetime calculation, and
-removal of expected values from both local and cloud candidate-execution
-payloads.
+Tests enforce the exact generation model, `xhigh` effort, three-hour problem
+limit, automatic GPT-5.6 Terra/high permissibility review, sanitized manifest
+schema, permission policy, Modal lifetime calculation, and removal of expected
+values from both local and cloud candidate-execution payloads.

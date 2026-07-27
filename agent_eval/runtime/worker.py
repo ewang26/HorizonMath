@@ -42,6 +42,16 @@ FORBIDDEN_TERMS = {
     "source_url",
 }
 IDENTIFIER_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,79}$")
+PERMISSIBILITY_MODEL = "gpt-5.6-terra"
+PERMISSIBILITY_EFFORT = "high"
+PERMISSIBILITY_ROUNDS = 3
+PERMISSIBILITY_CONCURRENCY = 8
+PERMISSIBILITY_TIMEOUT_SECONDS = 20 * 60
+REVIEWER_DEVELOPER_INSTRUCTIONS = (
+    "You are a strict mathematical permissibility reviewer. Apply the supplied "
+    "rubric to the submitted proposed_solution. Return only the requested JSON "
+    "object, without markdown or additional commentary."
+)
 
 
 def utc_now() -> str:
@@ -84,6 +94,17 @@ def validate_manifest(manifest: dict[str, Any]) -> None:
         raise ValueError("Unexpected problem timeout")
     if not IDENTIFIER_RE.fullmatch(str(manifest.get("run_id", ""))):
         raise ValueError("Unsafe run id")
+    permissibility = manifest.get("permissibility")
+    if not isinstance(permissibility, dict):
+        raise ValueError("Manifest has no permissibility configuration")
+    if permissibility.get("model") != PERMISSIBILITY_MODEL:
+        raise ValueError("Unexpected permissibility model")
+    if permissibility.get("reasoning_effort") != PERMISSIBILITY_EFFORT:
+        raise ValueError("Unexpected permissibility effort")
+    if permissibility.get("rounds") != PERMISSIBILITY_ROUNDS:
+        raise ValueError("Unexpected permissibility rounds")
+    if not isinstance(permissibility.get("rubric"), str):
+        raise ValueError("Manifest has no permissibility rubric")
     problems = manifest.get("problems")
     if not isinstance(problems, list) or not problems:
         raise ValueError("Manifest has no problems")
@@ -207,6 +228,286 @@ def serialize_items(items: list[Any]) -> list[Any]:
         else:
             serialized.append(str(item))
     return serialized
+
+
+def extract_proposed_solution_code(response: str) -> str:
+    """Extract the last Python code block containing proposed_solution."""
+
+    blocks = re.findall(r"```(?:python|py|python3)?\s*\n?(.*?)```", response, re.DOTALL)
+    candidates = [block.strip() for block in blocks if "def proposed_solution" in block]
+    if candidates:
+        return candidates[-1]
+    if "def proposed_solution" in response:
+        return response.strip()
+    return ""
+
+
+def parse_permissibility_response(text: str) -> dict[str, Any]:
+    """Parse one strict reviewer response."""
+
+    value = (text or "").strip()
+    if value.startswith("```"):
+        value = re.sub(r"^```\w*\n?", "", value)
+        value = re.sub(r"\n?```$", "", value).strip()
+    payload = json.loads(value)
+    if not isinstance(payload, dict):
+        raise ValueError("Reviewer response is not a JSON object")
+    if not isinstance(payload.get("compliant"), bool):
+        raise ValueError("Reviewer response has no boolean compliant field")
+    if not isinstance(payload.get("reason"), str) or not payload["reason"].strip():
+        raise ValueError("Reviewer response has no non-empty reason")
+    return {
+        "compliant": payload["compliant"],
+        "reason": payload["reason"].strip(),
+    }
+
+
+def aggregate_permissibility_rounds(rounds: list[dict[str, Any]]) -> dict[str, Any]:
+    """Apply a strict-majority decision without treating errors as passes."""
+
+    compliant_count = sum(item.get("compliant") is True for item in rounds)
+    non_compliant_count = sum(item.get("compliant") is False for item in rounds)
+    indeterminate_count = len(rounds) - compliant_count - non_compliant_count
+    if compliant_count > len(rounds) / 2:
+        compliant: bool | None = True
+        reason = next(item["reason"] for item in rounds if item.get("compliant") is True)
+        status = "compliant"
+    elif non_compliant_count > len(rounds) / 2:
+        compliant = False
+        reason = next(item["reason"] for item in rounds if item.get("compliant") is False)
+        status = "non_compliant"
+    else:
+        compliant = None
+        status = "indeterminate"
+        errors = [item.get("error") for item in rounds if item.get("error")]
+        reason = "No strict permissibility majority was reached."
+        if errors:
+            reason += f" {errors[0]}"
+    return {
+        "status": status,
+        "compliant": compliant,
+        "reason": reason,
+        "votes": {
+            "compliant": compliant_count,
+            "non_compliant": non_compliant_count,
+            "indeterminate": indeterminate_count,
+            "total": len(rounds),
+        },
+    }
+
+
+def permissibility_prompt(manifest: dict[str, Any], problem: dict[str, Any], code: str) -> str:
+    problem_context = (
+        "The problem being solved is described below. Pay close attention to any "
+        "problem-specific restrictions — these are additional rules that MUST be "
+        "enforced on top of the general rules above.\n\n"
+        f"**Problem description:**\n{problem['prompt']}\n\n"
+    )
+    return manifest["permissibility"]["rubric"].format(
+        code=code,
+        problem_context=problem_context,
+    )
+
+
+def review_workspace(run_id: str, problem_index: int, round_index: int) -> Path:
+    workspace = (
+        WORK_ROOT
+        / run_id
+        / "_permissibility"
+        / f"{problem_index:03d}"
+        / f"round_{round_index}"
+    )
+    workspace.mkdir(parents=True, exist_ok=True)
+    return workspace
+
+
+async def run_permissibility_round(
+    codex: AsyncCodex,
+    manifest: dict[str, Any],
+    problem: dict[str, Any],
+    code: str,
+    round_index: int,
+    semaphore: asyncio.Semaphore,
+) -> dict[str, Any]:
+    async with semaphore:
+        workspace = review_workspace(
+            manifest["run_id"],
+            problem["problem_index"],
+            round_index,
+        )
+        started = time.monotonic()
+        thread = None
+        turn = None
+        try:
+            thread = await codex.thread_start(
+                approval_mode=ApprovalMode.deny_all,
+                cwd=str(workspace),
+                developer_instructions=REVIEWER_DEVELOPER_INSTRUCTIONS,
+                ephemeral=True,
+                model=PERMISSIBILITY_MODEL,
+            )
+            turn = await thread.turn(
+                permissibility_prompt(manifest, problem, code),
+                approval_mode=ApprovalMode.deny_all,
+                cwd=str(workspace),
+                effort=PERMISSIBILITY_EFFORT,
+                model=PERMISSIBILITY_MODEL,
+            )
+            result = await asyncio.wait_for(
+                turn.run(),
+                timeout=PERMISSIBILITY_TIMEOUT_SECONDS,
+            )
+            parsed = parse_permissibility_response(result.final_response or "")
+            return {
+                "round": round_index,
+                **parsed,
+                "thread_id": thread.id,
+                "turn_id": turn.id,
+                "duration_seconds": round(time.monotonic() - started, 3),
+                "usage": serialize_usage(result.usage),
+            }
+        except TimeoutError:
+            if turn is not None:
+                try:
+                    await turn.interrupt()
+                except Exception:
+                    pass
+            return {
+                "round": round_index,
+                "compliant": None,
+                "error": "Permissibility review timed out",
+                "duration_seconds": round(time.monotonic() - started, 3),
+            }
+        except Exception as exc:
+            return {
+                "round": round_index,
+                "compliant": None,
+                "error": f"{type(exc).__name__}: {exc}",
+                "duration_seconds": round(time.monotonic() - started, 3),
+            }
+
+
+async def review_problem(
+    codex: AsyncCodex,
+    manifest: dict[str, Any],
+    problem: dict[str, Any],
+    response: dict[str, Any],
+    run_dir: Path,
+    semaphore: asyncio.Semaphore,
+) -> dict[str, Any]:
+    result_path = (
+        run_dir
+        / "compliance"
+        / f"{problem['problem_index']:03d}_{problem['problem_id']}.json"
+    )
+    code = extract_proposed_solution_code(response.get("response", ""))
+    if response.get("status") != "completed" or not code:
+        result = {
+            "schema_version": 1,
+            "problem_id": problem["problem_id"],
+            "problem_index": problem["problem_index"],
+            "status": "indeterminate",
+            "compliant": None,
+            "reason": "No completed proposed_solution was available for review.",
+            "provider": "codex-chatgpt-subscription",
+            "model": PERMISSIBILITY_MODEL,
+            "reasoning_effort": PERMISSIBILITY_EFFORT,
+            "rounds": [],
+        }
+    else:
+        rounds = await asyncio.gather(
+            *[
+                run_permissibility_round(
+                    codex,
+                    manifest,
+                    problem,
+                    code,
+                    round_index,
+                    semaphore,
+                )
+                for round_index in range(1, PERMISSIBILITY_ROUNDS + 1)
+            ]
+        )
+        decision = aggregate_permissibility_rounds(rounds)
+        result = {
+            "schema_version": 1,
+            "problem_id": problem["problem_id"],
+            "problem_index": problem["problem_index"],
+            **decision,
+            "provider": "codex-chatgpt-subscription",
+            "model": PERMISSIBILITY_MODEL,
+            "reasoning_effort": PERMISSIBILITY_EFFORT,
+            "rounds": rounds,
+        }
+    atomic_json(result_path, result)
+    sync_mount(STATE_ROOT)
+    print(
+        json.dumps(
+            {
+                "event": "permissibility_finished",
+                "problem_id": problem["problem_id"],
+                "status": result["status"],
+            }
+        ),
+        flush=True,
+    )
+    return result
+
+
+async def review_batch(
+    codex: AsyncCodex,
+    manifest: dict[str, Any],
+    responses: list[dict[str, Any]],
+    run_dir: Path,
+) -> dict[str, Any]:
+    started_at = utc_now()
+    status_path = run_dir / "compliance_status.json"
+    status = {
+        "schema_version": 1,
+        "run_id": manifest["run_id"],
+        "status": "running",
+        "started_at": started_at,
+        "provider": "codex-chatgpt-subscription",
+        "model": PERMISSIBILITY_MODEL,
+        "reasoning_effort": PERMISSIBILITY_EFFORT,
+        "rounds_per_problem": PERMISSIBILITY_ROUNDS,
+    }
+    atomic_json(status_path, status)
+    sync_mount(STATE_ROOT)
+
+    response_by_id = {item["problem_id"]: item for item in responses}
+    semaphore = asyncio.Semaphore(PERMISSIBILITY_CONCURRENCY)
+    results = await asyncio.gather(
+        *[
+            review_problem(
+                codex,
+                manifest,
+                problem,
+                response_by_id.get(problem["problem_id"], {}),
+                run_dir,
+                semaphore,
+            )
+            for problem in manifest["problems"]
+        ]
+    )
+    ordered = sorted(results, key=lambda item: item["problem_index"])
+    with (run_dir / "compliance.jsonl").open("w") as handle:
+        for result in ordered:
+            handle.write(json.dumps(result, sort_keys=True) + "\n")
+    counts = {
+        state: sum(result["status"] == state for result in ordered)
+        for state in ("compliant", "non_compliant", "indeterminate")
+    }
+    status.update(
+        {
+            "status": "completed",
+            "completed_at": utc_now(),
+            "counts": counts,
+        }
+    )
+    atomic_json(status_path, status)
+    sync_mount(STATE_ROOT)
+    return status
 
 
 async def solve_problem(
@@ -357,6 +658,43 @@ async def solve_problem(
         return status
 
 
+def response_entries(results: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    return [
+        {
+            "problem_id": result["problem_id"],
+            "problem_index": result["problem_index"],
+            "provider": "codex-chatgpt-subscription",
+            "model": result["model"],
+            "reasoning_effort": result["reasoning_effort"],
+            "response": result.get("response", ""),
+            "status": result["status"],
+            "thread_id": result.get("thread_id"),
+            "turn_id": result.get("turn_id"),
+            "duration_seconds": result.get("duration_seconds"),
+            "usage": result.get("usage"),
+        }
+        for result in sorted(results, key=lambda item: item["problem_index"])
+    ]
+
+
+def write_responses(run_dir: Path, responses: list[dict[str, Any]]) -> None:
+    with (run_dir / "responses.jsonl").open("w") as handle:
+        for response in responses:
+            handle.write(json.dumps(response, sort_keys=True) + "\n")
+    sync_mount(STATE_ROOT)
+
+
+def load_responses(run_dir: Path) -> list[dict[str, Any]]:
+    path = run_dir / "responses.jsonl"
+    if not path.is_file():
+        raise FileNotFoundError(f"No completed responses exist at {path}")
+    return [
+        json.loads(line)
+        for line in path.read_text().splitlines()
+        if line.strip()
+    ]
+
+
 async def run(args: argparse.Namespace) -> int:
     os.environ["CODEX_HOME"] = str(AUTH_ROOT)
     os.environ["CODEX_SQLITE_HOME"] = str(AUTH_ROOT / "state")
@@ -399,6 +737,26 @@ async def run(args: argparse.Namespace) -> int:
     self_test = run_sandbox_self_test(codex_bin, probe_workspace)
     atomic_json(run_dir / "sandbox_self_test.json", self_test)
 
+    if args.review_only:
+        responses = load_responses(run_dir)
+        async with AsyncCodex(config=codex_config) as codex:
+            account = await codex.account(refresh_token=False)
+            account_dump = account.model_dump(mode="json")
+            if not account_dump.get("account"):
+                raise RuntimeError(
+                    "Codex app-server did not report a logged-in account"
+                )
+            print(
+                f"HORIZONMATH_REVIEW_STARTED {args.run_id}",
+                flush=True,
+            )
+            await review_batch(codex, manifest, responses, run_dir)
+            print(
+                f"HORIZONMATH_REVIEW_COMPLETED {args.run_id}",
+                flush=True,
+            )
+        return 0
+
     runner_status = {
         "schema_version": 1,
         "run_id": args.run_id,
@@ -432,6 +790,21 @@ async def run(args: argparse.Namespace) -> int:
                     for problem in manifest["problems"]
                 ]
             )
+            responses = response_entries(results)
+            write_responses(run_dir, responses)
+            runner_status["status"] = "reviewing"
+            atomic_json(run_dir / "runner_status.json", runner_status)
+            sync_mount(STATE_ROOT)
+            compliance_status = await review_batch(
+                codex,
+                manifest,
+                responses,
+                run_dir,
+            )
+            print(
+                f"HORIZONMATH_REVIEW_COMPLETED {args.run_id}",
+                flush=True,
+            )
     except Exception:
         runner_status.update(
             {
@@ -445,29 +818,6 @@ async def run(args: argparse.Namespace) -> int:
         raise
 
     ordered = sorted(results, key=lambda item: item["problem_index"])
-    responses_path = run_dir / "responses.jsonl"
-    with responses_path.open("w") as handle:
-        for result in ordered:
-            handle.write(
-                json.dumps(
-                    {
-                        "problem_id": result["problem_id"],
-                        "problem_index": result["problem_index"],
-                        "provider": "codex-chatgpt-subscription",
-                        "model": result["model"],
-                        "reasoning_effort": result["reasoning_effort"],
-                        "response": result.get("response", ""),
-                        "status": result["status"],
-                        "thread_id": result.get("thread_id"),
-                        "turn_id": result.get("turn_id"),
-                        "duration_seconds": result.get("duration_seconds"),
-                        "usage": result.get("usage"),
-                    },
-                    sort_keys=True,
-                )
-                + "\n"
-            )
-
     runner_status.update(
         {
             "status": "completed",
@@ -476,6 +826,7 @@ async def run(args: argparse.Namespace) -> int:
                 state: sum(result["status"] == state for result in ordered)
                 for state in ("completed", "failed", "timed_out")
             },
+            "permissibility_counts": compliance_status["counts"],
         }
     )
     atomic_json(run_dir / "runner_status.json", runner_status)
@@ -486,6 +837,7 @@ async def run(args: argparse.Namespace) -> int:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--run-id", required=True)
+    parser.add_argument("--review-only", action="store_true")
     args = parser.parse_args()
     return asyncio.run(run(args))
 

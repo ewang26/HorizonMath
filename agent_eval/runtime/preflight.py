@@ -59,6 +59,8 @@ async def preflight(run_id: str | None = None) -> dict:
         "ok": True,
         "chatgpt_account_present": bool(account.get("account")),
         "gpt_5_6_sol_available": "gpt-5.6-sol" in model_json,
+        "gpt_5_6_terra_available": "gpt-5.6-terra" in model_json,
+        "high_advertised": "high" in model_json,
         "xhigh_advertised": "xhigh" in model_json,
         "sandbox_self_test": sandbox_report,
         "api_key_present": bool(
@@ -69,6 +71,8 @@ async def preflight(run_id: str | None = None) -> dict:
         (
             report["chatgpt_account_present"],
             report["gpt_5_6_sol_available"],
+            report["gpt_5_6_terra_available"],
+            report["high_advertised"],
             report["xhigh_advertised"],
             report["sandbox_self_test"]["ok"],
             not report["api_key_present"],

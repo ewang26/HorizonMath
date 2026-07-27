@@ -14,6 +14,9 @@ from agent_eval.config import (
     DEFAULT_CONCURRENCY,
     DEFAULT_EFFORT,
     DEFAULT_MODEL,
+    PERMISSIBILITY_EFFORT,
+    PERMISSIBILITY_MODEL,
+    PERMISSIBILITY_ROUNDS,
     PROBLEM_TIMEOUT_SECONDS,
 )
 
@@ -86,6 +89,7 @@ def build_manifest(
     effort: str = DEFAULT_EFFORT,
     concurrency: int = DEFAULT_CONCURRENCY,
     timeout_seconds: int = PROBLEM_TIMEOUT_SECONDS,
+    permissibility_rubric: str,
 ) -> dict[str, Any]:
     if timeout_seconds != PROBLEM_TIMEOUT_SECONDS:
         raise ValueError(
@@ -93,6 +97,8 @@ def build_manifest(
         )
     if concurrency < 1:
         raise ValueError("concurrency must be positive")
+    if not isinstance(permissibility_rubric, str) or not permissibility_rubric:
+        raise ValueError("Permissibility rubric must be a non-empty string")
 
     safe_problems: list[dict[str, Any]] = []
     for index in indices:
@@ -128,6 +134,12 @@ def build_manifest(
         "reasoning_effort": effort,
         "concurrency": concurrency,
         "problem_timeout_seconds": timeout_seconds,
+        "permissibility": {
+            "model": PERMISSIBILITY_MODEL,
+            "reasoning_effort": PERMISSIBILITY_EFFORT,
+            "rounds": PERMISSIBILITY_ROUNDS,
+            "rubric": permissibility_rubric,
+        },
         "problems": safe_problems,
     }
     validate_manifest(manifest)
@@ -144,6 +156,18 @@ def validate_manifest(manifest: dict[str, Any]) -> None:
     if manifest.get("problem_timeout_seconds") != PROBLEM_TIMEOUT_SECONDS:
         raise ValueError("Problem timeout must be exactly three hours")
     validate_identifier(manifest.get("run_id"), "run id")
+    permissibility = manifest.get("permissibility")
+    if not isinstance(permissibility, dict):
+        raise ValueError("Manifest has no permissibility configuration")
+    if permissibility.get("model") != PERMISSIBILITY_MODEL:
+        raise ValueError("Unexpected permissibility model")
+    if permissibility.get("reasoning_effort") != PERMISSIBILITY_EFFORT:
+        raise ValueError("Unexpected permissibility reasoning effort")
+    if permissibility.get("rounds") != PERMISSIBILITY_ROUNDS:
+        raise ValueError("Unexpected permissibility round count")
+    rubric = permissibility.get("rubric")
+    if not isinstance(rubric, str) or not rubric:
+        raise ValueError("Manifest has no permissibility rubric")
 
     problems = manifest.get("problems")
     if not isinstance(problems, list) or not problems:

@@ -180,6 +180,24 @@ def load_remote_responses(run_id: str) -> list[dict[str, Any]]:
     ]
 
 
+def load_remote_permissibility(run_id: str) -> dict[str, dict[str, Any]]:
+    state_volume = get_state_volume()
+    remote_path = f"/runs/{run_id}/compliance.jsonl"
+    if not volume_file_exists(state_volume, remote_path):
+        return {}
+    return {
+        item["problem_id"]: item
+        for item in (
+            json.loads(line)
+            for line in read_volume_file(
+                state_volume,
+                remote_path,
+            ).decode().splitlines()
+            if line.strip()
+        )
+    }
+
+
 def score_run(args: argparse.Namespace) -> int:
     scripts_dir = REPO_ROOT / "scripts"
     if str(scripts_dir) not in sys.path:
@@ -202,6 +220,7 @@ def score_run(args: argparse.Namespace) -> int:
     with modal.enable_output():
         app = modal.App.lookup(APP_NAME, create_if_missing=True)
         responses = load_remote_responses(args.run_id)
+        permissibility = load_remote_permissibility(args.run_id)
         executor = ModalCandidateExecutor(app)
         evaluations = []
         for response_entry in responses:
@@ -213,6 +232,7 @@ def score_run(args: argparse.Namespace) -> int:
                 response_entry.get("response", ""),
                 baselines,
                 executor=executor,
+                precomputed_compliance=permissibility.get(problem_id),
             )
             evaluations.append(evaluation)
             print(
@@ -241,6 +261,11 @@ def score_run(args: argparse.Namespace) -> int:
             for item in evaluations
         ),
         "candidate_execution": "networkless-modal-sandbox",
+        "permissibility_source": (
+            "subscription-terra-modal"
+            if permissibility
+            else "configured-api-reviewer"
+        ),
         "evaluations_path": str(output_path),
     }
     (destination / "evaluation_summary.json").write_text(
