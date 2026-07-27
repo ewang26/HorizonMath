@@ -416,17 +416,18 @@ def call_gemini_with_code_execution(prompt: str, model: str = DEFAULT_GEMINI_MOD
     return result
 
 
-def call_anthropic(prompt: str, model: str = DEFAULT_ANTHROPIC_MODEL, system_message: str = "") -> dict:
+def call_anthropic(
+    prompt: str,
+    model: str = DEFAULT_ANTHROPIC_MODEL,
+    system_message: str = "",
+    reasoning_effort: str = DEFAULT_REASONING_EFFORT,
+) -> dict:
     """Call Anthropic API with extended thinking.
 
     Returns dict with 'content', optional 'thinking', 'usage', and 'stop_reason'.
     """
     client = anthropic.Anthropic()
-    # Stream: at max_tokens=32000 with always-on thinking, a Fable 5 turn can run
-    # past the SDK's ~10-minute non-streaming ceiling, which otherwise raises
-    # "Streaming is required for operations that may take longer than 10 minutes"
-    # before any request is sent. get_final_message() returns the same Message.
-    with client.messages.stream(
+    kwargs = dict(
         model=model,
         # 128000 is Fable 5's output ceiling. Needed because always-on adaptive
         # thinking can consume tens of thousands of tokens before the answer;
@@ -440,7 +441,18 @@ def call_anthropic(prompt: str, model: str = DEFAULT_ANTHROPIC_MODEL, system_mes
         messages=[
             {"role": "user", "content": prompt},
         ],
-    ) as stream:
+    )
+    # effort bounds how much the model thinks. Lower effort leaves room for the
+    # answer within max_tokens on problems where thinking would otherwise
+    # exhaust the whole budget and truncate to an empty response. "none" is not
+    # a valid Anthropic effort level, so treat it as "leave at the API default".
+    if reasoning_effort and reasoning_effort != "none":
+        kwargs["output_config"] = {"effort": reasoning_effort}
+    # Stream: with always-on thinking, a Fable 5 turn can run past the SDK's
+    # ~10-minute non-streaming ceiling, which otherwise raises "Streaming is
+    # required for operations that may take longer than 10 minutes" before any
+    # request is sent. get_final_message() returns the same Message.
+    with client.messages.stream(**kwargs) as stream:
         response = stream.get_final_message()
     result = {"content": ""}
     thinking_parts = []
@@ -605,7 +617,9 @@ def run_single_problem(
         response = result["content"]
         usage = result.get("usage")
     elif provider == "anthropic":
-        result = retry_api_call(call_anthropic, prompt, model, system_message)
+        result = retry_api_call(
+            call_anthropic, prompt, model, system_message, reasoning_effort
+        )
         response = result["content"]
         reasoning_details = result.get("thinking")
         usage = result.get("usage")
@@ -649,7 +663,9 @@ def run_single_problem(
             response = result["content"]
             usage = result.get("usage")
         elif provider == "anthropic":
-            result = retry_api_call(call_anthropic, prompt, model, system_message)
+            result = retry_api_call(
+                call_anthropic, prompt, model, system_message, reasoning_effort
+            )
             response = result["content"]
             reasoning_details = result.get("thinking")
             usage = result.get("usage")
@@ -663,7 +679,7 @@ def run_single_problem(
         "response": response,
         "timestamp": datetime.now().isoformat(),
     }
-    if provider in {"openai", "openrouter"}:
+    if provider in {"openai", "openrouter", "anthropic"}:
         data["reasoning_effort"] = reasoning_effort
     if reasoning_details:
         data["reasoning_details"] = reasoning_details
@@ -723,7 +739,9 @@ def main():
         choices=REASONING_EFFORTS,
         default=DEFAULT_REASONING_EFFORT,
         help=(
-            "Reasoning effort for OpenAI and OpenRouter requests "
+            "Reasoning effort for OpenAI, OpenRouter, and Anthropic requests. "
+            "For Anthropic, this sets output_config effort to bound thinking "
+            "depth ('none' leaves the API default). "
             f"(default: {DEFAULT_REASONING_EFFORT})"
         ),
     )
@@ -906,7 +924,7 @@ def main():
 
     print(f"Provider: {args.provider}")
     print(f"Model: {args.model}")
-    if args.provider in {"openai", "openrouter"}:
+    if args.provider in {"openai", "openrouter", "anthropic"}:
         print(f"Reasoning effort: {args.reasoning_effort}")
     print(f"Problems: {len(problems)}")
     print(f"Parallel: {args.parallel}")
