@@ -23,6 +23,10 @@ from agent_eval.modal_runner import (
     is_missing_volume_path_error,
     permissibility_rubric,
 )
+from agent_eval.full_report import (
+    passed_after_all_gates,
+    passed_before_compliance,
+)
 from agent_eval.runtime.worker import (
     aggregate_permissibility_rounds,
     extract_proposed_solution_code,
@@ -36,6 +40,7 @@ if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 
 from benchmark_prompts import SYSTEM_MESSAGES
+from evaluate_responses import apply_compliance_gate
 from evaluator.sandbox import strip_expected_values
 from run_benchmark import SYSTEM_MESSAGES as SINGLE_SHOT_SYSTEM_MESSAGES
 
@@ -270,3 +275,64 @@ def test_worker_runs_terra_review_before_marking_batch_complete():
     assert reviewing < review_call < completed
     assert 'PERMISSIBILITY_MODEL = "gpt-5.6-terra"' in worker_source
     assert 'PERMISSIBILITY_EFFORT = "high"' in worker_source
+
+
+def test_launcher_starts_separate_automatic_trusted_scorer():
+    repo_root = Path(__file__).resolve().parents[1]
+    launcher = (repo_root / "agent_eval" / "modal_runner.py").read_text()
+    scorer = (repo_root / "agent_eval" / "trusted_scorer.py").read_text()
+
+    assert "deploy_and_spawn(run_id)" in launcher
+    assert '"scoring_status.json"' in launcher
+    assert "watch_and_score" in scorer
+    assert "score_problem.starmap" in scorer
+    assert "block_network=True" in scorer
+    assert "restrict_modal_access=True" in scorer
+    assert "single_use_containers=True" in scorer
+    assert 'LOCAL_REPO_ROOT / "validators"' in scorer
+    assert "candidate_runtime" in scorer
+
+
+@pytest.mark.parametrize("pass_key", ["success", "valid"])
+def test_permissibility_gates_every_passing_evaluation_mode(pass_key):
+    evaluation = {pass_key: True, "error_type": None, "error_message": None}
+    gated = apply_compliance_gate(
+        evaluation,
+        pass_key=pass_key,
+        response="```python\ndef proposed_solution():\n    return 1\n```",
+        problem_prompt="Return an exact expression.",
+        precomputed_compliance={
+            "status": "non_compliant",
+            "compliant": False,
+            "reason": "Uses a forbidden numerical procedure.",
+            "provider": "codex-chatgpt-subscription",
+            "model": "gpt-5.6-terra",
+        },
+    )
+    assert gated[pass_key] is False
+    assert gated["error_type"] == "compliance"
+    assert gated["compliance_passed"] is False
+
+
+def test_full_report_uses_strict_benchmark_and_raw_compliance_semantics():
+    assert passed_after_all_gates(
+        {
+            "mode": "benchmark",
+            "valid": True,
+            "baseline_comparison": {"result": "beats_baseline"},
+        }
+    )
+    assert not passed_after_all_gates(
+        {
+            "mode": "benchmark",
+            "valid": True,
+            "baseline_comparison": {"result": "matches_baseline"},
+        }
+    )
+    assert passed_before_compliance(
+        {
+            "mode": "numeric",
+            "success": False,
+            "error_type": "compliance",
+        }
+    )

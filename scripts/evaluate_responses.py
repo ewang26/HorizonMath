@@ -47,6 +47,65 @@ from evaluator import extract_proposed_solution, check_solution_compliance
 from baseline_comparator import load_baselines
 
 
+def apply_compliance_gate(
+    eval_dict: dict,
+    *,
+    pass_key: str,
+    response: str,
+    problem_prompt: str,
+    precomputed_compliance: dict | None,
+) -> dict:
+    """Apply permissibility consistently after any evaluation mode passes."""
+
+    if not eval_dict.get(pass_key):
+        return eval_dict
+    extraction = extract_proposed_solution(response)
+    if not extraction or not extraction.code:
+        return eval_dict
+
+    if precomputed_compliance is None:
+        compliance = check_solution_compliance(
+            extraction.code,
+            problem_prompt=problem_prompt,
+        )
+        compliant = compliance.compliant
+        compliance_status = compliance.status
+        compliance_reason = compliance.reason
+        compliance_provider = compliance.provider
+        compliance_model = compliance.model
+    else:
+        compliant = precomputed_compliance.get("compliant")
+        compliance_status = precomputed_compliance.get(
+            "status",
+            (
+                "compliant"
+                if compliant is True
+                else "non_compliant"
+                if compliant is False
+                else "indeterminate"
+            ),
+        )
+        compliance_reason = str(precomputed_compliance.get("reason", ""))
+        compliance_provider = str(precomputed_compliance.get("provider", ""))
+        compliance_model = str(precomputed_compliance.get("model", ""))
+
+    eval_dict["compliance_check"] = True
+    eval_dict["compliance_passed"] = compliant
+    eval_dict["compliance_status"] = compliance_status
+    eval_dict["compliance_reason"] = compliance_reason
+    eval_dict["compliance_provider"] = compliance_provider
+    eval_dict["compliance_model"] = compliance_model
+    if compliant is False:
+        eval_dict[pass_key] = False
+        eval_dict["error_type"] = "compliance"
+        eval_dict["error_message"] = compliance_reason
+    elif compliant is None:
+        eval_dict[pass_key] = False
+        eval_dict["error_type"] = "compliance_indeterminate"
+        eval_dict["error_message"] = compliance_reason
+    return eval_dict
+
+
 def _sanitize_for_json(obj):
     """Recursively convert numpy/non-native types to JSON-serializable Python types."""
     if isinstance(obj, dict):
@@ -89,7 +148,7 @@ def evaluate_response(
             response,
             **executor_kwargs,
         )
-        return {
+        eval_dict = {
             "problem_id": result.problem_id,
             "problem_index": result.problem_index,
             "problem_title": result.problem_title,
@@ -100,6 +159,13 @@ def evaluate_response(
             "error_type": result.error_type,
             "error_message": result.error_message,
         }
+        return apply_compliance_gate(
+            eval_dict,
+            pass_key="valid",
+            response=response,
+            problem_prompt=problem.get("prompt", ""),
+            precomputed_compliance=precomputed_compliance,
+        )
     elif mode == "benchmark":
         result = evaluate_benchmark_problem(
             problem,
@@ -108,7 +174,7 @@ def evaluate_response(
             baselines,
             **executor_kwargs,
         )
-        return {
+        eval_dict = {
             "problem_id": result.problem_id,
             "problem_index": result.problem_index,
             "problem_title": result.problem_title,
@@ -121,6 +187,13 @@ def evaluate_response(
             "error_type": result.error_type,
             "error_message": result.error_message,
         }
+        return apply_compliance_gate(
+            eval_dict,
+            pass_key="valid",
+            response=response,
+            problem_prompt=problem.get("prompt", ""),
+            precomputed_compliance=precomputed_compliance,
+        )
     else:
         result = evaluate_problem(
             problem,
@@ -142,57 +215,13 @@ def evaluate_response(
             "error_message": result.error_message,
         }
 
-        # Run compliance check on passing numeric solutions
-        if result.success:
-            extraction = extract_proposed_solution(response)
-            if extraction and extraction.code:
-                if precomputed_compliance is None:
-                    compliance = check_solution_compliance(
-                        extraction.code,
-                        problem_prompt=problem.get("prompt", ""),
-                    )
-                    compliant = compliance.compliant
-                    compliance_status = compliance.status
-                    compliance_reason = compliance.reason
-                    compliance_provider = compliance.provider
-                    compliance_model = compliance.model
-                else:
-                    compliant = precomputed_compliance.get("compliant")
-                    compliance_status = precomputed_compliance.get(
-                        "status",
-                        (
-                            "compliant"
-                            if compliant is True
-                            else "non_compliant"
-                            if compliant is False
-                            else "indeterminate"
-                        ),
-                    )
-                    compliance_reason = str(
-                        precomputed_compliance.get("reason", "")
-                    )
-                    compliance_provider = str(
-                        precomputed_compliance.get("provider", "")
-                    )
-                    compliance_model = str(
-                        precomputed_compliance.get("model", "")
-                    )
-                eval_dict["compliance_check"] = True
-                eval_dict["compliance_passed"] = compliant
-                eval_dict["compliance_status"] = compliance_status
-                eval_dict["compliance_reason"] = compliance_reason
-                eval_dict["compliance_provider"] = compliance_provider
-                eval_dict["compliance_model"] = compliance_model
-                if compliant is False:
-                    eval_dict["success"] = False
-                    eval_dict["error_type"] = "compliance"
-                    eval_dict["error_message"] = compliance_reason
-                elif compliant is None:
-                    eval_dict["success"] = False
-                    eval_dict["error_type"] = "compliance_indeterminate"
-                    eval_dict["error_message"] = compliance_reason
-
-        return eval_dict
+        return apply_compliance_gate(
+            eval_dict,
+            pass_key="success",
+            response=response,
+            problem_prompt=problem.get("prompt", ""),
+            precomputed_compliance=precomputed_compliance,
+        )
 
 
 def format_summary_line(index: int, total: int, problem: dict, eval_result: dict) -> str:

@@ -227,35 +227,47 @@ def launch(args: argparse.Namespace) -> int:
         app = modal.App.lookup(APP_NAME, create_if_missing=True)
         state_volume = get_state_volume()
         manifest_path = upload_manifest(state_volume, manifest)
-        sandbox = modal.Sandbox.create(
-            "python",
-            str(REMOTE_RUNTIME_ROOT / "entrypoint.py"),
-            "run",
-            "--run-id",
-            run_id,
-            app=app,
-            name=f"horizonmath-{run_id}"[:64],
-            tags={
-                "run_id": run_id,
-                "model": DEFAULT_MODEL,
-                "effort": DEFAULT_EFFORT,
-            },
-            image=agent_image(),
-            env={
-                "CODEX_HOME": str(REMOTE_AUTH_ROOT),
-                "CODEX_SQLITE_HOME": str(REMOTE_AUTH_ROOT / "state"),
-                "PYTHONUNBUFFERED": "1",
-            },
-            timeout=outer_timeout,
-            cpu=(2.0, 8.0),
-            memory=(4096, 16384),
-            outbound_domain_allowlist=list(OPENAI_EGRESS_ALLOWLIST),
-            volumes={
-                str(REMOTE_STATE_ROOT): state_volume,
-            },
-            pty=True,
-        )
+        from agent_eval.trusted_scorer import deploy_and_spawn
+
+        scorer_call_id = deploy_and_spawn(run_id)
+        try:
+            sandbox = modal.Sandbox.create(
+                "python",
+                str(REMOTE_RUNTIME_ROOT / "entrypoint.py"),
+                "run",
+                "--run-id",
+                run_id,
+                app=app,
+                name=f"horizonmath-{run_id}"[:64],
+                tags={
+                    "run_id": run_id,
+                    "model": DEFAULT_MODEL,
+                    "effort": DEFAULT_EFFORT,
+                },
+                image=agent_image(),
+                env={
+                    "CODEX_HOME": str(REMOTE_AUTH_ROOT),
+                    "CODEX_SQLITE_HOME": str(REMOTE_AUTH_ROOT / "state"),
+                    "PYTHONUNBUFFERED": "1",
+                },
+                timeout=outer_timeout,
+                cpu=(2.0, 8.0),
+                memory=(4096, 16384),
+                outbound_domain_allowlist=list(OPENAI_EGRESS_ALLOWLIST),
+                volumes={
+                    str(REMOTE_STATE_ROOT): state_volume,
+                },
+                pty=True,
+            )
+        except BaseException:
+            modal.FunctionCall.from_id(scorer_call_id).cancel(
+                terminate_containers=True
+            )
+            raise
         if sandbox.poll() is not None:
+            modal.FunctionCall.from_id(scorer_call_id).cancel(
+                terminate_containers=True
+            )
             raise RuntimeError("Modal Sandbox exited during startup")
 
     launch_record = {
@@ -269,6 +281,7 @@ def launch(args: argparse.Namespace) -> int:
         "auth_persisted": False,
         "state_volume": STATE_VOLUME_NAME,
         "manifest_path": manifest_path,
+        "trusted_scorer_call_id": scorer_call_id,
         "problem_indices": indices,
         "problem_ids": [problems[index]["id"] for index in indices],
         "model": DEFAULT_MODEL,
@@ -296,6 +309,9 @@ def launch(args: argparse.Namespace) -> int:
         stream_until_marker(sandbox, "HORIZONMATH_WORKER_STARTED")
     except BaseException:
         sandbox.terminate(wait=False)
+        modal.FunctionCall.from_id(scorer_call_id).cancel(
+            terminate_containers=True
+        )
         raise
     launch_record["status"] = "running"
     launch_record["worker_started_at"] = datetime.now(UTC).isoformat()
@@ -460,6 +476,8 @@ def status(args: argparse.Namespace) -> int:
             "preflight.json",
             "runner_status.json",
             "compliance_status.json",
+            "scoring_status.json",
+            "evaluation_summary.json",
             "sandbox_self_test.json",
         ):
             remote_path = f"/runs/{args.run_id}/{name}"

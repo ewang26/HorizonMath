@@ -66,6 +66,14 @@ Modal with the integrated rubric but no validators, expected values, baselines,
 or source notes. Their strict-majority decisions are checkpointed before the
 generation Sandbox exits.
 
+At launch time, the CLI also deploys and starts a separate trusted Modal scorer.
+It waits in the cloud for generation and permissibility review to finish, then
+evaluates all saved answers automatically. Validator code and benchmark answers
+exist only in trusted scorer containers. Candidate code is forwarded to
+single-use `block_network=True`, `restrict_modal_access=True` Modal functions
+that contain no validators, benchmark data, volumes, credentials, or network
+access.
+
 ## Authentication
 
 Install the evaluation dependencies:
@@ -116,8 +124,10 @@ uv run --group agent-eval python -m agent_eval.modal_runner status \
   --run-id <run-id>
 ```
 
-Status includes generation and automatic permissibility checkpoints. A run
-moves from `running` to `reviewing` and finally `completed`.
+Status includes generation, automatic permissibility, and trusted-scoring
+checkpoints. Generation moves from `running` to `reviewing` and finally
+`completed`; scoring independently moves from `waiting_for_generation` to
+`scoring` and `completed`.
 
 Download checkpoints and responses:
 
@@ -126,16 +136,18 @@ uv run --group agent-eval python -m agent_eval.modal_runner download \
   --run-id <run-id>
 ```
 
-Score a completed run with networkless Modal candidate execution:
+Automatic trusted scoring writes `evaluations.jsonl`, `evaluation_summary.json`,
+and `scoring_status.json` to the run directory on the Modal Volume. The manual
+command remains available for legacy runs or deliberate rescoring:
 
 ```bash
 uv run --group agent-eval python -m agent_eval.cloud_scorer \
   --run-id <run-id>
 ```
 
-The trusted scorer reuses the automatic subscription-authenticated Terra
-decisions, so it does not need an API key for permissibility review. It applies
-those decisions only after numerical validation passes.
+Both automatic and manual trusted scoring reuse the subscription-authenticated
+Terra decisions, so they do not need an API key for permissibility review. They
+apply those decisions only after numerical validation passes.
 
 To backfill or rerun permissibility review for a run created by an older
 version, use a fresh ephemeral device authorization:
@@ -165,6 +177,7 @@ GOOGLE_API_KEY=dummy uv run --group agent-eval --group dev pytest -q
 ```
 
 Tests enforce the exact generation model, `xhigh` effort, three-hour problem
-limit, automatic GPT-5.6 Terra/high permissibility review, sanitized manifest
-schema, permission policy, Modal lifetime calculation, and removal of expected
-values from both local and cloud candidate-execution payloads.
+limit, automatic GPT-5.6 Terra/high permissibility review, automatic separate
+trusted scoring, sanitized manifest schema, permission policy, Modal lifetime
+calculation, and removal of expected values from both local and cloud
+candidate-execution payloads.

@@ -4,8 +4,10 @@ from __future__ import annotations
 
 import argparse
 import json
+import multiprocessing
 import sys
 import time
+from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import Any
 
@@ -125,6 +127,12 @@ class ModalCandidateExecutor:
                 error_message=f"Modal candidate Sandbox failed: {type(exc).__name__}: {exc}",
                 execution_time_ms=int((time.monotonic() - started) * 1000),
             )
+        except BaseException:
+            try:
+                sandbox.terminate()
+            except Exception:
+                pass
+            raise
 
         parsed = None
         for line in reversed(stdout.splitlines()):
@@ -198,6 +206,70 @@ def load_remote_permissibility(run_id: str) -> dict[str, dict[str, Any]]:
     }
 
 
+_WORKER_PROBLEM_BY_ID: dict[str, tuple[int, dict[str, Any]]] = {}
+_WORKER_BASELINES: dict[str, dict[str, Any]] = {}
+_WORKER_PERMISSIBILITY: dict[str, dict[str, Any]] = {}
+_WORKER_EXECUTOR: ModalCandidateExecutor | None = None
+
+
+def evaluation_passed(evaluation: dict[str, Any]) -> bool:
+    mode = evaluation.get("mode")
+    if mode == "numeric":
+        return bool(evaluation.get("success"))
+    if mode == "construction":
+        return bool(evaluation.get("valid"))
+    if mode == "benchmark":
+        if not evaluation.get("valid"):
+            return False
+        comparison = evaluation.get("baseline_comparison") or {}
+        return comparison.get("result", "no_baseline") in {
+            "beats_baseline",
+            "no_baseline",
+        }
+    return False
+
+
+def initialize_score_worker(
+    problem_by_id: dict[str, tuple[int, dict[str, Any]]],
+    baselines: dict[str, dict[str, Any]],
+    permissibility: dict[str, dict[str, Any]],
+) -> None:
+    """Initialize isolated scorer state once in each local worker process."""
+
+    global _WORKER_PROBLEM_BY_ID
+    global _WORKER_BASELINES
+    global _WORKER_PERMISSIBILITY
+    global _WORKER_EXECUTOR
+
+    scripts_dir = REPO_ROOT / "scripts"
+    if str(scripts_dir) not in sys.path:
+        sys.path.insert(0, str(scripts_dir))
+    app = modal.App.lookup(APP_NAME, create_if_missing=True)
+    _WORKER_PROBLEM_BY_ID = problem_by_id
+    _WORKER_BASELINES = baselines
+    _WORKER_PERMISSIBILITY = permissibility
+    _WORKER_EXECUTOR = ModalCandidateExecutor(app)
+
+
+def score_response_worker(response_entry: dict[str, Any]) -> dict[str, Any]:
+    """Score one response in an isolated local process and remote candidate Sandbox."""
+
+    from evaluate_responses import evaluate_response
+
+    if _WORKER_EXECUTOR is None:
+        raise RuntimeError("Scorer worker was not initialized")
+    problem_id = response_entry["problem_id"]
+    problem_index, problem = _WORKER_PROBLEM_BY_ID[problem_id]
+    return evaluate_response(
+        problem,
+        problem_index,
+        response_entry.get("response", ""),
+        _WORKER_BASELINES,
+        executor=_WORKER_EXECUTOR,
+        precomputed_compliance=_WORKER_PERMISSIBILITY.get(problem_id),
+    )
+
+
 def score_run(args: argparse.Namespace) -> int:
     scripts_dir = REPO_ROOT / "scripts"
     if str(scripts_dir) not in sys.path:
@@ -205,8 +277,6 @@ def score_run(args: argparse.Namespace) -> int:
 
     from baseline_comparator import load_baselines
     from evaluate import load_problems
-    from evaluate_responses import evaluate_response
-
     problems = load_problems(REPO_ROOT / "data" / "problems_full.json")
     problem_by_id = {
         problem["id"]: (index, problem)
@@ -218,36 +288,38 @@ def score_run(args: argparse.Namespace) -> int:
     destination.mkdir(parents=True, exist_ok=True)
 
     with modal.enable_output():
-        app = modal.App.lookup(APP_NAME, create_if_missing=True)
         responses = load_remote_responses(args.run_id)
         permissibility = load_remote_permissibility(args.run_id)
-        executor = ModalCandidateExecutor(app)
-        evaluations = []
-        for response_entry in responses:
-            problem_id = response_entry["problem_id"]
-            problem_index, problem = problem_by_id[problem_id]
-            evaluation = evaluate_response(
-                problem,
-                problem_index,
-                response_entry.get("response", ""),
-                baselines,
-                executor=executor,
-                precomputed_compliance=permissibility.get(problem_id),
-            )
+    if args.concurrency < 1:
+        raise ValueError("--concurrency must be positive")
+
+    evaluations = []
+    spawn_context = multiprocessing.get_context("spawn")
+    with ProcessPoolExecutor(
+        max_workers=args.concurrency,
+        mp_context=spawn_context,
+        initializer=initialize_score_worker,
+        initargs=(problem_by_id, baselines, permissibility),
+    ) as pool:
+        futures = {
+            pool.submit(score_response_worker, response): response["problem_id"]
+            for response in responses
+        }
+        for future in as_completed(futures):
+            problem_id = futures[future]
+            evaluation = future.result()
             evaluations.append(evaluation)
             print(
                 json.dumps(
                     {
                         "problem_id": problem_id,
                         "mode": evaluation.get("mode"),
-                        "passed": evaluation.get(
-                            "success",
-                            evaluation.get("valid", False),
-                        ),
+                        "passed": evaluation_passed(evaluation),
                     }
                 ),
                 flush=True,
             )
+    evaluations.sort(key=lambda item: item["problem_index"])
 
     output_path = destination / "evaluations.jsonl"
     with output_path.open("w") as handle:
@@ -256,10 +328,7 @@ def score_run(args: argparse.Namespace) -> int:
     summary = {
         "run_id": args.run_id,
         "evaluated": len(evaluations),
-        "passed": sum(
-            bool(item.get("success", item.get("valid", False)))
-            for item in evaluations
-        ),
+        "passed": sum(evaluation_passed(item) for item in evaluations),
         "candidate_execution": "networkless-modal-sandbox",
         "permissibility_source": (
             "subscription-terra-modal"
@@ -278,6 +347,7 @@ def score_run(args: argparse.Namespace) -> int:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--run-id", required=True)
+    parser.add_argument("--concurrency", type=int, default=8)
     return score_run(parser.parse_args())
 
 

@@ -64,7 +64,9 @@ problem, local shell/Python tools, and a three-hour per-problem limit. It pins
 `gpt-5.6-sol` at `xhigh`, checkpoints to a Modal Volume, and evaluates candidate
 code in separate networkless Modal Sandboxes. After generation completes, it
 automatically runs three subscription-authenticated GPT-5.6 Terra/high
-permissibility reviews per answer on Modal. Authentication uses an
+permissibility reviews per answer on Modal, then invokes a separately deployed
+trusted scorer whose validators call single-use networkless candidate
+containers. Authentication uses an
 interactive, one-time device login held only by the running ephemeral Sandbox;
 no local Codex credential is uploaded or persisted in Modal.
 
