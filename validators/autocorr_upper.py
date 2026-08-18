@@ -6,7 +6,7 @@ The autocorrelation constant C is defined as:
     C = inf_f max_t (f*f)(t) / (∫f)^2
 where f is non-negative and supported on [-1/4, 1/4].
 
-Current best bounds: 1.2748 ≤ C ≤ 1.50286.
+Current benchmark bounds: 1.28 ≤ C ≤ 1.5028503020710076.
 
 The model provides a step function as a list of non-negative values on
 N equal-width subintervals of [-1/4, 1/4]. The validator computes the
@@ -26,7 +26,7 @@ from scipy.signal import fftconvolve
 from . import ValidationResult, load_solution, output_result, success, failure
 
 
-BEST_KNOWN_UPPER = 1.50286
+BEST_KNOWN_UPPER = 1.5028503020710076
 LOWER_BOUND = 1.28
 MIN_INTERVALS = 10
 MAX_INTERVALS = 1_000_000
@@ -128,7 +128,7 @@ def validate(solution: Any) -> ValidationResult:
         num_intervals=n,
         autoconvolution_ratio=ratio,
         best_known_upper=BEST_KNOWN_UPPER,
-        improves_bound=ratio < BEST_KNOWN_UPPER
+        improves_bound=bool(ratio < BEST_KNOWN_UPPER)
     )
 
 

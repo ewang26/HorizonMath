@@ -81,7 +81,7 @@ Respond with ONLY a JSON object (no markdown fences) with two fields:
 """
 
 
-DEFAULT_COMPLIANCE_ROUNDS = 3
+DEFAULT_COMPLIANCE_ROUNDS = 5
 DEFAULT_COMPLIANCE_PROVIDER = "gemini"
 COMPLIANCE_MODEL = "gemini-3.6-flash"
 COMPLIANCE_THINKING_LEVEL = types.ThinkingLevel.HIGH
@@ -234,7 +234,7 @@ def check_solution_compliance(
         problem_prompt: Optional problem prompt text. If provided, any
             problem-specific restrictions (e.g. forbidden functions) are
             included in the compliance check so the reviewer can enforce them.
-        n: Number of compliance check rounds (default 3). Majority vote
+        n: Number of compliance check rounds (default 5). Majority vote
             determines the final result.
 
     Returns:
