@@ -5,15 +5,14 @@ The autocorrelation constant C is defined as:
     C = inf_f max_t (f*f)(t) / (∫f)^2
 where f is non-negative and supported on [-1/4, 1/4].
 
-Current best bounds:
-    1.2748 ≤ C ≤ 1.50992
+Current benchmark bounds:
+    1.28 ≤ C ≤ 1.5028503020710076
 
-Upper bound: Matolcsi & Vinuesa (2010), arXiv:1002.3298
-Lower bound: Cloninger & Steinerberger (2014), arXiv:1205.0626
+The upper bound is represented by the fixed benchmark certificate archived at
+reports/gpt56_pro_final_solutions/certificates/autocorr_upper.json.
 
-The best known upper bound of 1.50992 comes from an optimized construction
-by Matolcsi & Vinuesa. A simple indicator function f = 1_{[-1/4, 1/4]}
-gives ratio 2.0, which is far from optimal.
+A simple indicator function f = 1_{[-1/4, 1/4]} gives ratio 2.0, which is far
+from the archived certificate value.
 """
 from mpmath import mp, mpf
 
@@ -24,11 +23,10 @@ def compute():
     """
     Return the best known upper bound on the autocorrelation constant C.
 
-    The best known construction (Matolcsi & Vinuesa, 2010) achieves
-    max_t (f*f)(t) / (∫f)^2 ≈ 1.50992.
+    The fixed benchmark certificate achieves
+    max_t (f*f)(t) / (∫f)^2 ≈ 1.5028503020710076.
     """
-    # Best known upper bound from Matolcsi & Vinuesa (2010)
-    best_known_upper = mpf("1.50992")
+    best_known_upper = mpf("1.5028503020710076")
     return best_known_upper
 
 

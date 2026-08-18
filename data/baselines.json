@@ -1145,41 +1145,24 @@
   {
     "problem_id": "autocorr_signed_upper",
     "baseline": {
-      "value": 1.4557,
+      "value": "1.4545548626983325",
       "direction": "minimize",
       "metric": "Signed Autocorrelation Constant C' Upper Bound",
       "metric_key": "autoconvolution_ratio",
       "source": {
-        "title": "AlphaEvolve: A coding agent for scientific and algorithmic discovery",
+        "title": "New State-of-the-Art on the Third Autocorrelation Inequality",
         "authors": [
-          "Alexander Novikov",
-          "Ngân Vũ",
-          "Marvin Eisenberger",
-          "Emilien Dupont",
-          "Po-Sen Huang",
-          "Adam Zsolt Wagner",
-          "Sergey Shirobokov",
-          "Borislav Kozlovskii",
-          "Francisco J. R. Ruiz",
-          "Abbas Mehrabian",
-          "M. Pawan Kumar",
-          "Abigail See",
-          "Swarat Chaudhuri",
-          "George Holland",
-          "Alex Davies",
-          "Sebastian Nowozin",
-          "Pushmeet Kohli",
-          "Matej Balog"
+          "Together AI"
         ],
-        "year": 2025,
-        "venue": "arXiv",
-        "arxiv_id": "2506.13131",
+        "year": 2026,
+        "venue": "GitHub",
+        "arxiv_id": null,
         "doi": null,
-        "theorem_reference": "Section B.3. Third autocorrelation inequality",
-        "url": "https://arxiv.org/abs/2506.13131"
+        "theorem_reference": "third-autocorrelation/solutions/ours_2026.py; local frozen copy: reports/gpt56_pro_final_solutions/certificates/autocorr_signed_upper.json",
+        "url": "https://github.com/togethercomputer/EinsteinArena-new-SOTA/blob/main/third-autocorrelation/solutions/ours_2026.py"
       },
       "result_type": "computational",
-      "notes": "AlphaEvolve found a step function with 400 equally-spaced intervals on [-1/4, 1/4] that gives this upper bound."
+      "notes": "A fixed 400-step certificate achieves the one-sided signed-autoconvolution ratio 1.4545548626983325. It predates the evaluated model response and is excluded from model-originated discovery credit."
     },
     "secondary_bounds": [
       {
@@ -1201,7 +1184,8 @@
       }
     ],
     "verification_status": "confirmed",
-    "search_notes": "Initial search for 'Signed Autocorrelation Constant C' upper bound' led to a GitHub page referencing AlphaEvolve. Further search for 'AlphaEvolve signed autocorrelation constant 1.4557' led to the AlphaEvolve paper on arXiv. The paper explicitly discusses 'Third autocorrelation inequality' (C3) which matches the problem description of 'f not restricted to be non-negative' and provides the upper bound of 1.4557. The previous best upper bound of 1.45810 was also noted in the AlphaEvolve paper."
+    "verification_date": "2026-08-15",
+    "search_notes": "The archived 400-step certificate was independently re-evaluated with the repository validator. Its objective is max(convolve(values, values)), not max(abs(convolve(values, values)))."
   },
   {
     "problem_id": "merit_factor_6_5",
@@ -1473,25 +1457,22 @@
   {
     "problem_id": "autocorr_upper",
     "baseline": {
-      "value": "1.50992",
+      "value": "1.5028503020710076",
       "direction": "minimize",
       "metric": "Autoconvolution Ratio Upper Bound",
       "metric_key": "autoconvolution_ratio",
       "source": {
-        "title": "Improved bounds on the supremum of autoconvolutions",
-        "authors": [
-          "Máté Matolcsi",
-          "Carlos Vinuesa"
-        ],
-        "year": 2010,
-        "venue": "Journal of Mathematical Analysis and Applications",
-        "arxiv_id": "0907.1379",
-        "doi": "10.1016/j.jmaa.2010.07.030",
-        "theorem_reference": "Main result (explicit construction)",
-        "url": "https://arxiv.org/abs/0907.1379"
+        "title": "EinsteinArena First Autocorrelation Inequality certificate",
+        "authors": [],
+        "year": 2026,
+        "venue": "EinsteinArena",
+        "arxiv_id": null,
+        "doi": null,
+        "theorem_reference": "Submission 2363 (Hyra); local frozen copy: reports/gpt56_pro_final_solutions/certificates/autocorr_upper.json",
+        "url": "https://einsteinarena.com/problems/first-autocorrelation-inequality"
       },
       "result_type": "computational",
-      "notes": "Explicit construction of a non-negative function on [-1/4, 1/4] achieving autoconvolution ratio 1.50992. This upper bound has not been improved by any subsequent work, human or AI, as of February 2026."
+      "notes": "A fixed 90,000-step nonnegative certificate achieves autoconvolution ratio 1.5028503020710076. It predates the evaluated model response and is excluded from model-originated discovery credit."
     },
     "secondary_bounds": [
       {
@@ -1530,7 +1511,8 @@
       }
     ],
     "verification_status": "confirmed",
-    "search_notes": "The upper bound C <= 1.50992 from Matolcsi & Vinuesa (2010) remains the best known as of Feb 2026. The lower bound was improved from 1.2748 (Matolcsi & Vinuesa, 2010) to 1.28 (Cloninger & Steinerberger, 2017, Proc. AMS 145(8):3191-3200). No AI systems (AlphaEvolve, FunSearch) have addressed this specific problem. The gap [1.28, 1.50992] remains open."
+    "verification_date": "2026-08-15",
+    "search_notes": "The archived 90,000-step certificate was independently re-evaluated with the repository validator and retained as the benchmark baseline for reproducibility."
   },
   {
     "problem_id": "spherical_9_design_s2",

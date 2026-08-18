@@ -7,7 +7,7 @@ The signed autocorrelation constant C' is defined as:
 where f may be positive or negative (not restricted to be non-negative)
 and is supported on [-1/4, 1/4].
 
-The current best upper bound is C' ≤ 1.4557 (AlphaEvolve, 2025).
+The current benchmark upper bound is C' ≤ 1.4545548626983325.
 
 The model provides a step function as a list of real values on N equal-width
 subintervals of [-1/4, 1/4]. The validator computes the autoconvolution ratio
@@ -27,7 +27,7 @@ from scipy.signal import fftconvolve
 from . import ValidationResult, load_solution, output_result, success, failure
 
 
-BEST_KNOWN_UPPER = 1.4557
+BEST_KNOWN_UPPER = 1.4545548626983325
 MIN_INTERVALS = 10
 MAX_INTERVALS = 1_000_000
 
@@ -123,7 +123,7 @@ def validate(solution: Any) -> ValidationResult:
         num_intervals=n,
         autoconvolution_ratio=ratio,
         best_known_upper=BEST_KNOWN_UPPER,
-        improves_bound=ratio < BEST_KNOWN_UPPER
+        improves_bound=bool(ratio < BEST_KNOWN_UPPER)
     )
 
 
