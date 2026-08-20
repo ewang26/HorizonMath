@@ -28,7 +28,12 @@ from dataclasses import dataclass, asdict
 from pathlib import Path
 from typing import Optional
 
-from evaluator import extract_proposed_solution, execute_sandboxed, evaluate_single
+from evaluator import (
+    extract_proposed_solution,
+    execute_sandboxed,
+    evaluate_single,
+    load_json_result,
+)
 
 # Default precision settings
 DEFAULT_PRECISION_DIGITS = 20  # Number of digits that must match
@@ -252,8 +257,8 @@ def evaluate_benchmark_problem(
 
     # Parse the JSON result
     try:
-        solution = json.loads(execution.output)
-    except json.JSONDecodeError as e:
+        solution = load_json_result(execution.output)
+    except (json.JSONDecodeError, TypeError, ValueError) as e:
         return BenchmarkEvaluationResult(
             problem_id=problem_id,
             problem_index=problem_index,
@@ -378,8 +383,8 @@ def evaluate_construction_problem(
         )
 
     try:
-        solution = json.loads(execution.output)
-    except json.JSONDecodeError as e:
+        solution = load_json_result(execution.output)
+    except (json.JSONDecodeError, TypeError, ValueError) as e:
         return ConstructionEvaluationResult(
             problem_id=problem_id,
             problem_index=problem_index,

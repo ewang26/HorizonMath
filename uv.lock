@@ -1180,6 +1180,7 @@ dependencies = [
     { name = "scipy" },
     { name = "snappy" },
     { name = "snappy-manifolds" },
+    { name = "sympy" },
     { name = "torch" },
 ]
 
@@ -1203,6 +1204,7 @@ requires-dist = [
     { name = "scipy", specifier = ">=1.17.0" },
     { name = "snappy", specifier = ">=3.3" },
     { name = "snappy-manifolds", specifier = ">=1.4" },
+    { name = "sympy", specifier = ">=1.14.0" },
     { name = "torch", specifier = ">=2.10.0" },
 ]
 
