@@ -38,12 +38,14 @@ GEMINI_API_KEY=AIza...
 
 ## Problem Taxonomy
 
-The benchmark contains **113 problems** across 8 domains, classified by four fields in `data/problems_full.json`:
+The benchmark contains **136 problems** across 8 domains, classified by four fields in `data/problems_full.json`:
 
-- **`domain`** (problem area): number_theory (20), special_functions (19), statistical_mechanics (15), discrete_geometry (15), combinatorics (13), spectral_theory (12), continuum_physics (10), coding_theory (9)
-- **`solvability`** (difficulty level): 0 (calibration, 10), 1 (likely solvable, 29), 2 (challenging, 66), 3 (possibly unsolvable, 8)
-- **`output_type`** (artifact type): constant (56), function (15), formula_discovery (3), construction (39)
-- **`evaluation_mode`** (how answers are checked): ground_truth_computable (71), benchmark_best_known (33), new_construction (9)
+- **`domain`** (problem area): combinatorics (28), number_theory (27), special_functions (19), discrete_geometry (16), statistical_mechanics (15), spectral_theory (12), continuum_physics (10), coding_theory (9)
+- **`solvability`** (difficulty level): 0 (calibration, 10), 1 (likely solvable, 29), 2 (challenging, 66), 3 (possibly unsolvable, 31)
+- **`output_type`** (artifact type): constant (56), function (15), formula_discovery (3), construction (62)
+- **`evaluation_mode`** (how answers are checked): ground_truth_computable (71), benchmark_best_known (33), new_construction (32)
+
+The 23 newest construction problems are grouped together as the final 23 records in `data/problems_full.json` (indices 113–135). They were imported from [Kalyan0821/HorizonMath](https://github.com/Kalyan0821/HorizonMath) together with their exact verifiers.
 
 Solvability 0 problems have known solutions and serve as a verification step for the evaluation pipeline and a calibration for models.
 
@@ -147,7 +149,7 @@ You can split a benchmark across parallel jobs using `--range` (0-based inclusiv
 
 ```bash
 uv run scripts/run_benchmark.py --range 0-49 --provider openai --model gpt-5.2-pro
-uv run scripts/run_benchmark.py --range 50-112 --provider openai --model gpt-5.2-pro
+uv run scripts/run_benchmark.py --range 50-135 --provider openai --model gpt-5.2-pro
 ```
 
 Then merge the result directories into a single report:
