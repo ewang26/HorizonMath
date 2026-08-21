@@ -27,6 +27,19 @@ from pathlib import Path
 _project_root = Path(__file__).parent.parent
 from dotenv import load_dotenv
 load_dotenv(_project_root / ".env")
+for _key in (
+    "OPENROUTER_API_KEY",
+    "OPENAI_API_KEY",
+    "GEMINI_API_KEY",
+    "GOOGLE_API_KEY",
+    "ANTHROPIC_API_KEY",
+    "COMPLIANCE_PROVIDER",
+    "COMPLIANCE_MODEL",
+    "COMPLIANCE_REASONING_EFFORT",
+):
+    _value = os.getenv(_key)
+    if _value:
+        os.environ[_key] = _value.strip()
 if os.getenv("GEMINI_API_KEY") and not os.getenv("GOOGLE_API_KEY"):
     os.environ["GOOGLE_API_KEY"] = os.environ["GEMINI_API_KEY"]
 

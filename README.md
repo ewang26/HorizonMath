@@ -115,13 +115,19 @@ uv run scripts/evaluate_responses.py results/<run_dir>/ --force    # Re-evaluate
 ```
 
 The compliance reviewer uses Gemini 3.6 Flash with high thinking by default.
-To use GPT-5.6 Terra with high reasoning instead, set these values in the
-project-local `.env` file:
+To use GPT-5.6 Terra with high reasoning instead, or an OpenRouter model such
+as stealth/ox-alpha, set these values in the project-local `.env` file:
 
 ```bash
 COMPLIANCE_PROVIDER=openai
 COMPLIANCE_MODEL=gpt-5.6-terra
 COMPLIANCE_REASONING_EFFORT=high
+```
+
+```bash
+COMPLIANCE_PROVIDER=openrouter
+COMPLIANCE_MODEL=stealth/ox-alpha
+COMPLIANCE_REASONING_EFFORT=max
 ```
 
 The selected provider requires its corresponding API key. Missing keys, API
