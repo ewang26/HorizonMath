@@ -219,7 +219,7 @@ def _openrouter_compliance_text(prompt: str, model: str) -> str:
     larger than the OpenAI reviewer because reasoning tokens share the
     completion budget on many OpenRouter models.
     """
-    api_key = os.getenv("OPENROUTER_API_KEY")
+    api_key = (os.getenv("OPENROUTER_API_KEY") or "").strip()
     if not api_key:
         raise ValueError("OPENROUTER_API_KEY environment variable is not set")
 

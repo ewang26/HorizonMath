@@ -52,6 +52,19 @@ from dotenv import load_dotenv
 _project_root = Path(__file__).parent.parent
 load_dotenv(_project_root / ".env")
 
+# Secrets injected via env files sometimes include a trailing newline, which
+# httpx rejects as an illegal Authorization header value.
+for _key in (
+    "OPENROUTER_API_KEY",
+    "OPENAI_API_KEY",
+    "GEMINI_API_KEY",
+    "GOOGLE_API_KEY",
+    "ANTHROPIC_API_KEY",
+):
+    _value = os.getenv(_key)
+    if _value:
+        os.environ[_key] = _value.strip()
+
 # Handle GEMINI_API_KEY -> GOOGLE_API_KEY mapping
 if os.getenv("GEMINI_API_KEY") and not os.getenv("GOOGLE_API_KEY"):
     os.environ["GOOGLE_API_KEY"] = os.environ["GEMINI_API_KEY"]
@@ -344,7 +357,7 @@ def call_openrouter(
 
     Returns dict with 'content' and optional 'reasoning_details'.
     """
-    api_key = os.getenv("OPENROUTER_API_KEY")
+    api_key = (os.getenv("OPENROUTER_API_KEY") or "").strip()
     if not api_key:
         raise ValueError("OPENROUTER_API_KEY environment variable is not set")
 
@@ -476,6 +489,40 @@ def call_anthropic(
     return result
 
 
+def check_openrouter_model_available(model: str) -> None:
+    """Fail fast if the OpenRouter account cannot route to the requested model."""
+    api_key = (os.getenv("OPENROUTER_API_KEY") or "").strip()
+    if not api_key:
+        raise ValueError("OPENROUTER_API_KEY environment variable is not set")
+
+    # /models is the public catalog. /models/user is filtered by this
+    # account's privacy settings and guardrails.
+    try:
+        import httpx
+
+        response = httpx.get(
+            "https://openrouter.ai/api/v1/models/user",
+            headers={"Authorization": f"Bearer {api_key}"},
+            timeout=30,
+        )
+        response.raise_for_status()
+        available = {item.get("id") for item in response.json().get("data", [])}
+    except Exception as exc:
+        print(f"Warning: could not list account-visible OpenRouter models: {exc}")
+        return
+
+    if model in available:
+        return
+
+    raise RuntimeError(
+        f"OpenRouter model {model!r} is not available under this API key's "
+        "guardrail/data-policy settings. The catalog lists the model, but "
+        "/models/user does not. Enable the Stealth/free-model data-retention "
+        "toggles at https://openrouter.ai/settings/privacy (and accept the "
+        "Stealth Model Terms), or use a key whose guardrails allow this model."
+    )
+
+
 def create_run_folder(provider: str, model: str, base_dir: Path) -> Path:
     """Create a timestamped output folder for the run."""
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -502,6 +549,25 @@ def get_completed_problems(responses_path: Path) -> set[str]:
     return completed
 
 
+def _is_retryable_api_error(exc: Exception) -> bool:
+    """Retry transient transport/server failures, not client configuration errors."""
+    if isinstance(
+        exc,
+        (
+            openai.NotFoundError,
+            openai.AuthenticationError,
+            openai.PermissionDeniedError,
+            openai.BadRequestError,
+            anthropic.BadRequestError,
+            anthropic.AuthenticationError,
+            anthropic.PermissionDeniedError,
+            anthropic.NotFoundError,
+        ),
+    ):
+        return False
+    return True
+
+
 def retry_api_call(fn, *args, max_retries=3, **kwargs):
     """Retry an API call with exponential backoff on transient errors."""
     from google.genai import errors as genai_errors
@@ -523,7 +589,7 @@ def retry_api_call(fn, *args, max_retries=3, **kwargs):
             TimeoutError,
         ) as e:
             last_exception = e
-            if attempt < max_retries:
+            if attempt < max_retries and _is_retryable_api_error(e):
                 delay = backoff_seconds[min(attempt, len(backoff_seconds) - 1)]
                 print(f"    ⚠ API error (attempt {attempt + 1}/{max_retries + 1}): "
                       f"{type(e).__name__}: {str(e)[:80]}")
@@ -820,6 +886,13 @@ def main():
         print(str(exc), file=sys.stderr)
         sys.exit(1)
     api_timeout_seconds = None if api_timeout_minutes is None else api_timeout_minutes * 60
+
+    if args.provider == "openrouter" and not args.debug:
+        try:
+            check_openrouter_model_available(args.model)
+        except RuntimeError as exc:
+            print(f"Error: {exc}", file=sys.stderr)
+            sys.exit(1)
 
     # Paths
     project_root = Path(__file__).parent.parent
