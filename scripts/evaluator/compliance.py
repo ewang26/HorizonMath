@@ -3,7 +3,8 @@
 Verifies that model solutions use genuine closed-form expressions rather than
 forbidden numerical techniques (numerical integration, truncated series,
 numerical root-finding, etc.). Uses Gemini 3.6 Flash with high thinking by
-default, with GPT-5.6 Terra at high reasoning available as an alternative.
+default. GPT-5.6 Terra (OpenAI) and OpenRouter models such as stealth/ox-alpha
+are available as alternative reviewers.
 """
 
 import json
@@ -87,6 +88,19 @@ COMPLIANCE_MODEL = "gemini-3.6-flash"
 COMPLIANCE_THINKING_LEVEL = types.ThinkingLevel.HIGH
 OPENAI_COMPLIANCE_MODEL = "gpt-5.6-terra"
 OPENAI_COMPLIANCE_REASONING_EFFORT = "high"
+OPENROUTER_COMPLIANCE_MODEL = "stealth/ox-alpha"
+OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
+
+_PROVIDER_DEFAULT_MODELS = {
+    "gemini": COMPLIANCE_MODEL,
+    "openai": OPENAI_COMPLIANCE_MODEL,
+    "openrouter": OPENROUTER_COMPLIANCE_MODEL,
+}
+_PROVIDER_API_KEYS = {
+    "gemini": "GOOGLE_API_KEY",
+    "openai": "OPENAI_API_KEY",
+    "openrouter": "OPENROUTER_API_KEY",
+}
 
 _COMPLIANCE_RESPONSE_SCHEMA = {
     "type": "object",
@@ -106,18 +120,23 @@ def _reviewer_config() -> tuple[str, str]:
     ).strip().lower()
     if provider == "google":
         provider = "gemini"
-    if provider == "gemini":
-        default_model = COMPLIANCE_MODEL
-    elif provider == "openai":
-        default_model = OPENAI_COMPLIANCE_MODEL
-    else:
+    if provider not in _PROVIDER_DEFAULT_MODELS:
         raise ValueError(
-            "COMPLIANCE_PROVIDER must be either 'gemini' or 'openai'"
+            "COMPLIANCE_PROVIDER must be one of 'gemini', 'openai', or 'openrouter'"
         )
-    model = os.environ.get("COMPLIANCE_MODEL", default_model).strip()
+    model = os.environ.get(
+        "COMPLIANCE_MODEL", _PROVIDER_DEFAULT_MODELS[provider]
+    ).strip()
     if not model:
         raise ValueError("COMPLIANCE_MODEL must not be empty")
     return provider, model
+
+
+def _reasoning_effort() -> str:
+    return os.environ.get(
+        "COMPLIANCE_REASONING_EFFORT",
+        OPENAI_COMPLIANCE_REASONING_EFFORT,
+    ).strip().lower()
 
 
 def _parse_compliance_response(
@@ -155,6 +174,79 @@ def _parse_compliance_response(
     )
 
 
+def _gemini_compliance_text(prompt: str, model: str) -> str:
+    client = genai.Client()
+    response = client.models.generate_content(
+        model=model,
+        contents=prompt,
+        config=types.GenerateContentConfig(
+            thinking_config=types.ThinkingConfig(
+                thinking_level=COMPLIANCE_THINKING_LEVEL
+            ),
+            response_mime_type="application/json",
+            response_schema=_COMPLIANCE_RESPONSE_SCHEMA,
+        ),
+    )
+    return response.text
+
+
+def _openai_compliance_text(prompt: str, model: str) -> str:
+    client = openai.OpenAI(timeout=10 * 60)
+    response = client.responses.create(
+        model=model,
+        input=prompt,
+        reasoning={"effort": _reasoning_effort()},
+        max_output_tokens=2000,
+        store=False,
+        text={
+            "format": {
+                "type": "json_schema",
+                "name": "compliance_result",
+                "strict": True,
+                "schema": _COMPLIANCE_RESPONSE_SCHEMA,
+            },
+        },
+    )
+    return response.output_text
+
+
+def _openrouter_compliance_text(prompt: str, model: str) -> str:
+    """Call OpenRouter chat completions for a compliance verdict.
+
+    Uses the same chat-completions + extra_body reasoning path as
+    run_benchmark.py. Structured JSON is requested in the prompt; the
+    existing parser already accepts markdown-fenced objects. max_tokens is
+    larger than the OpenAI reviewer because reasoning tokens share the
+    completion budget on many OpenRouter models.
+    """
+    api_key = os.getenv("OPENROUTER_API_KEY")
+    if not api_key:
+        raise ValueError("OPENROUTER_API_KEY environment variable is not set")
+
+    reasoning_effort = _reasoning_effort()
+    client = openai.OpenAI(
+        base_url=OPENROUTER_BASE_URL,
+        api_key=api_key,
+        timeout=10 * 60,
+    )
+    response = client.chat.completions.create(
+        model=model,
+        messages=[{"role": "user", "content": prompt}],
+        max_tokens=32000,
+        extra_body={
+            "reasoning": {
+                "enabled": reasoning_effort != "none",
+                "effort": reasoning_effort,
+            }
+        },
+    )
+    message = response.choices[0].message
+    text = message.content
+    if not text:
+        raise ValueError("OpenRouter reviewer returned an empty message content")
+    return text
+
+
 def _single_compliance_check(
     prompt: str,
     provider: str,
@@ -163,41 +255,11 @@ def _single_compliance_check(
     """Run a single compliance check against the configured reviewer."""
     try:
         if provider == "gemini":
-            client = genai.Client()
-            response = client.models.generate_content(
-                model=model,
-                contents=prompt,
-                config=types.GenerateContentConfig(
-                    thinking_config=types.ThinkingConfig(
-                        thinking_level=COMPLIANCE_THINKING_LEVEL
-                    ),
-                    response_mime_type="application/json",
-                    response_schema=_COMPLIANCE_RESPONSE_SCHEMA,
-                ),
-            )
-            text = response.text
+            text = _gemini_compliance_text(prompt, model)
+        elif provider == "openrouter":
+            text = _openrouter_compliance_text(prompt, model)
         else:
-            reasoning_effort = os.environ.get(
-                "COMPLIANCE_REASONING_EFFORT",
-                OPENAI_COMPLIANCE_REASONING_EFFORT,
-            ).strip().lower()
-            client = openai.OpenAI(timeout=10 * 60)
-            response = client.responses.create(
-                model=model,
-                input=prompt,
-                reasoning={"effort": reasoning_effort},
-                max_output_tokens=2000,
-                store=False,
-                text={
-                    "format": {
-                        "type": "json_schema",
-                        "name": "compliance_result",
-                        "strict": True,
-                        "schema": _COMPLIANCE_RESPONSE_SCHEMA,
-                    },
-                },
-            )
-            text = response.output_text
+            text = _openai_compliance_text(prompt, model)
         return _parse_compliance_response(text, provider, model)
     except (json.JSONDecodeError, KeyError, TypeError, ValueError) as e:
         return ComplianceResult(
@@ -251,7 +313,7 @@ def check_solution_compliance(
             reason=f"Compliance check indeterminate due to configuration error: {e}",
         )
 
-    api_key_name = "GOOGLE_API_KEY" if provider == "gemini" else "OPENAI_API_KEY"
+    api_key_name = _PROVIDER_API_KEYS[provider]
     if not os.environ.get(api_key_name):
         return ComplianceResult(
             compliant=None,

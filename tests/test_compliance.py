@@ -16,9 +16,18 @@ from evaluator.compliance import (
     COMPLIANCE_MODEL,
     COMPLIANCE_THINKING_LEVEL,
     DEFAULT_COMPLIANCE_ROUNDS,
+    OPENROUTER_COMPLIANCE_MODEL,
     check_solution_compliance,
     ComplianceResult,
 )
+
+
+def _mock_openrouter_response(text: str):
+    """Create a mock OpenRouter chat-completions response."""
+    mock_response = MagicMock()
+    mock_response.choices = [MagicMock()]
+    mock_response.choices[0].message.content = text
+    return mock_response
 
 
 def _mock_genai_response(text: str):
@@ -149,6 +158,52 @@ def test_no_strict_majority_is_indeterminate(mock_client_cls):
     assert "no strict majority" in result.reason.lower()
     assert "1/3 compliant" in result.reason
     assert "2/3 indeterminate" in result.reason
+
+
+@patch.dict(
+    os.environ,
+    {
+        "COMPLIANCE_PROVIDER": "openrouter",
+        "COMPLIANCE_MODEL": "stealth/ox-alpha",
+        "COMPLIANCE_REASONING_EFFORT": "max",
+        "OPENROUTER_API_KEY": "test-openrouter-key",
+    },
+    clear=True,
+)
+@patch("evaluator.compliance.openai.OpenAI")
+def test_openrouter_reviewer_uses_chat_completions(mock_openai_cls):
+    mock_client = MagicMock()
+    mock_client.chat.completions.create.return_value = _mock_openrouter_response(
+        '{"compliant": true, "reason": "independent closed-form expression"}'
+    )
+    mock_openai_cls.return_value = mock_client
+
+    result = check_solution_compliance("def proposed_solution():\n    return mp.pi")
+    assert result.compliant is True
+    assert result.provider == "openrouter"
+    assert result.model == "stealth/ox-alpha"
+    mock_openai_cls.assert_called_with(
+        base_url="https://openrouter.ai/api/v1",
+        api_key="test-openrouter-key",
+        timeout=10 * 60,
+    )
+    call = mock_client.chat.completions.create.call_args
+    assert call.kwargs["model"] == OPENROUTER_COMPLIANCE_MODEL == "stealth/ox-alpha"
+    assert call.kwargs["extra_body"]["reasoning"]["effort"] == "max"
+    assert call.kwargs["extra_body"]["reasoning"]["enabled"] is True
+
+
+@patch.dict(
+    os.environ,
+    {"COMPLIANCE_PROVIDER": "openrouter"},
+    clear=True,
+)
+def test_missing_openrouter_api_key_is_indeterminate():
+    result = check_solution_compliance("def proposed_solution():\n    return mp.pi")
+    assert result.compliant is None
+    assert result.status == "indeterminate"
+    assert "openrouter_api_key is not set" in result.reason.lower()
+    assert result.model == OPENROUTER_COMPLIANCE_MODEL
 
 
 def test_default_compliance_review_uses_five_rounds():
