@@ -172,7 +172,7 @@ def _single_compliance_check(
                         thinking_level=COMPLIANCE_THINKING_LEVEL
                     ),
                     response_mime_type="application/json",
-                    response_schema=_COMPLIANCE_RESPONSE_SCHEMA,
+                    response_json_schema=_COMPLIANCE_RESPONSE_SCHEMA,
                 ),
             )
             text = response.text
