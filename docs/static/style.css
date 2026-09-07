@@ -449,3 +449,18 @@ footer a:hover { color: var(--fg); }
   .stats-row { gap: 2rem; }
   .stat-number { font-size: 2rem; }
 }
+
+/* August 2026 results and evaluation modes */
+.key-results-table { min-width: 660px; }
+caption { text-align: left; color: var(--fg-2); font-size: 0.875rem; padding: 0.75rem 0; }
+.results-note { font-size: 0.875rem; margin-top: 1.25rem; }
+.verification-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.5rem; margin: 1.5rem 0; }
+.verification-grid h3 { color: var(--fg); }
+.discovery, .verification-grid > div { min-width: 0; }
+.discovery p, .example-body p { font-size: 1rem; }
+a:focus-visible, summary:focus-visible, .table-wrapper:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+@media (max-width: 640px) {
+  .verification-grid { grid-template-columns: 1fr; gap: 0.5rem; }
+  .abstract-text { text-align: left; }
+  .hero .authors span { white-space: normal; }
+}

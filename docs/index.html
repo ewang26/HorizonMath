@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>HorizonMath: Measuring AI Progress Toward Mathematical Discovery</title>
-  <meta name="description" content="HorizonMath is a benchmark of 100+ unsolved mathematical problems with automated verification for measuring AI progress toward mathematical discovery.">
+  <meta name="description" content="HorizonMath is a benchmark of 113 predominantly unsolved problems across eight mathematical domains, with automated verification and six research discoveries reported in the August 2026 draft.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
@@ -20,24 +20,29 @@
     <p class="subtitle">Measuring AI Progress Toward Mathematical Discovery with Automatic Verification</p>
     <div class="authors">
       <span><a href="https://erikyw.com/">Erik Y. Wang</a><sup>1,2,*</sup></span>
-      <span><a href="https://sumeetmotwani.com/">Sumeet Motwani</a><sup>1,*</sup></span>
-      <span><a href="https://www.jamesroggeveen.com/">James V. Roggeveen</a><sup>3</sup></span>
-      <span><a href="https://www.eliothodges.com/">Eliot Hodges</a><sup>4</sup></span>
-      <span><a href="https://dulhanjayalath.com/">Dulhan Jayalath</a><sup>1</sup></span>
-      <span><a href="https://le-big-mac.github.io/">Charles London</a><sup>1</sup></span>
-      <span><a href="#">Kalyan Ramakrishnan</a><sup>1</sup></span>
-      <span><a href="#">Flaviu Cipcigan</a><sup>5</sup></span>
-      <span><a href="https://torrvision.com/">Philip Torr</a><sup>1</sup></span>
-      <span><a href="https://www.cs.ox.ac.uk/people/alessandro.abate/home.html">Alessandro Abate</a><sup>1</sup></span>
+      <span><a href="https://sumeetmotwani.com/">Sumeet Ramesh Motwani</a><sup>3,*</sup></span>
+      <span><a href="https://www.jamesroggeveen.com/">James V. Roggeveen</a><sup>4</sup></span>
+      <span><a href="https://www.eliothodges.com/">Eliot Hodges</a><sup>5</sup></span>
+      <span><a href="https://dulhanjayalath.com/">Dulhan Jayalath</a><sup>3</sup></span>
+      <span><a href="https://le-big-mac.github.io/">Charles London</a><sup>3</sup></span>
+      <span>Kalyan Ramakrishnan<sup>3</sup></span>
+      <span>Cheng Zhang<sup>6</sup></span>
+      <span>Flaviu Cipcigan<sup>6</sup></span>
+      <span><a href="https://torrvision.com/">Philip Torr</a><sup>3</sup></span>
+      <span><a href="https://www.cs.ox.ac.uk/people/alessandro.abate/home.html">Alessandro Abate</a><sup>3</sup></span>
     </div>
     <p class="affiliations">
-      <sup>1</sup>University of Oxford &nbsp;
+      <sup>1</sup>Stanford University &nbsp;
       <sup>2</sup>Benchmark &nbsp;
-      <sup>3</sup>Harvard University &nbsp;
-      <sup>4</sup>Princeton University &nbsp;
-      <sup>5</sup>Ellison Institute of Technology
+      <sup>3</sup>University of Oxford &nbsp;
+      <sup>4</sup>Harvard University &nbsp;
+      <sup>5</sup>Princeton University &nbsp;
+      <sup>6</sup>Ellison Institute of Technology
     </p>
-    <p class="note"><sup>*</sup>Corresponding authors</p>
+    <p class="note"><sup>*</sup>Joint-first authors. Correspondence:
+      <a href="mailto:erikwang@stanford.edu">Erik Y. Wang</a> and
+      <a href="mailto:sumeet.motwani@eng.ox.ac.uk">Sumeet Ramesh Motwani</a>.
+    </p>
     <div class="links">
       <a href="https://arxiv.org/abs/2603.15617" class="btn">Paper</a>
       <a href="https://github.com/ewang26/HorizonMath" class="btn">Code</a>
@@ -48,9 +53,9 @@
 <!-- Abstract -->
 <section id="abstract" class="section">
   <div class="container">
-    <h2>Abstract</h2>
+    <h2>Overview</h2>
     <p class="abstract-text">
-      Can AI make progress on important, unsolved mathematical problems? Large language models are now capable of sophisticated mathematical and scientific reasoning, but whether they can perform novel research is still widely debated and underexplored. We introduce <strong>HorizonMath</strong>, a benchmark of over 100 problems spanning 8 domains from computational and applied mathematics research that are predominantly unsolved, paired with an open-source evaluation framework for automated verification. Our benchmark targets a class of problems where discovery is hard, requiring meaningful mathematical insight, but verification is computationally efficient and simple. Because these solutions are unknown, HorizonMath is <strong>immune to data contamination</strong>, and state-of-the-art models score near 0%. With this platform, we find two problems for which GPT 5.4 Pro proposes novel solutions that potentially improve on the best-known baseline results published in the literature. We release this benchmark as an <strong>open challenge</strong> where solutions to even a single problem would constitute a novel result in the mathematical literature.
+      Can AI make progress on important, unsolved mathematical problems? We introduce <strong>HorizonMath</strong>, a benchmark of <strong>113 predominantly unsolved problems across eight domains</strong> in mathematics and the mathematical sciences, paired with an open-source evaluation framework. It targets the <strong>generator-verifier gap</strong>: problems where discovery requires mathematical insight, but candidate answers can be checked by straightforward computation. Unknown solutions make the benchmark resistant to data contamination. Across nine model configurations from seven frontier model families, most score below 10%. We report <strong>six distinct research discoveries</strong>: GPT-5.4 Pro finds three, and GPT-5.6 Sol Max reproduces these and finds three additional solutions. HorizonMath is an open challenge and growing community resource, where each verified solution is a candidate contribution to the mathematical literature.
     </p>
   </div>
 </section>
@@ -59,11 +64,11 @@
 <section id="benchmark" class="section">
   <div class="container">
     <h2>Benchmark Overview</h2>
-    <p>101 problems across 8 mathematical domains. Problems without known solutions cannot exist in any training corpus&mdash;any correct solution signals true reasoning and autonomous discovery.</p>
+    <p>The August 2026 paper evaluates a snapshot of 113 problems: 10 solved calibration problems and 103 problems in the unsolved tiers at benchmark assembly. The public dataset continues to grow beyond this evaluated snapshot.</p>
 
     <div class="stats-row">
       <div class="stat">
-        <span class="stat-number">101</span>
+        <span class="stat-number">113</span>
         <span class="stat-label">Problems</span>
       </div>
       <div class="stat">
@@ -71,8 +76,8 @@
         <span class="stat-label">Domains</span>
       </div>
       <div class="stat">
-        <span class="stat-number">91</span>
-        <span class="stat-label">Unsolved</span>
+        <span class="stat-number">103</span>
+        <span class="stat-label">Unsolved-tier problems</span>
       </div>
       <div class="stat">
         <span class="stat-number">3</span>
@@ -87,8 +92,8 @@
           <thead><tr><th>Level</th><th>Description</th><th>Count</th></tr></thead>
           <tbody>
             <tr><td>0</td><td>Calibration (solved)</td><td>10</td></tr>
-            <tr><td>1</td><td>Likely solvable</td><td>23</td></tr>
-            <tr><td>2</td><td>Challenging</td><td>60</td></tr>
+            <tr><td>1</td><td>Likely solvable</td><td>29</td></tr>
+            <tr><td>2</td><td>Challenging</td><td>66</td></tr>
             <tr><td>3</td><td>Likely unsolvable</td><td>8</td></tr>
           </tbody>
         </table>
@@ -98,14 +103,14 @@
         <table>
           <thead><tr><th>Domain</th><th>Count</th></tr></thead>
           <tbody>
-            <tr><td>Number Theory</td><td>17</td></tr>
+            <tr><td>Number Theory</td><td>20</td></tr>
+            <tr><td>Special Functions</td><td>19</td></tr>
+            <tr><td>Statistical Mechanics</td><td>15</td></tr>
             <tr><td>Discrete Geometry</td><td>15</td></tr>
-            <tr><td>Lattice Models</td><td>15</td></tr>
-            <tr><td>Continuum Physics</td><td>13</td></tr>
-            <tr><td>Combinatorics</td><td>12</td></tr>
-            <tr><td>Integrals</td><td>11</td></tr>
+            <tr><td>Combinatorics</td><td>13</td></tr>
+            <tr><td>Spectral Theory</td><td>12</td></tr>
+            <tr><td>Continuum Physics</td><td>10</td></tr>
             <tr><td>Coding Theory</td><td>9</td></tr>
-            <tr><td>Mathematical Constants</td><td>9</td></tr>
           </tbody>
         </table>
       </div>
@@ -113,55 +118,74 @@
   </div>
 </section>
 
-<!-- Key Results -->
+<!-- Key Results: August draft, Figure 4 and Section 6 -->
 <section id="key-results" class="section">
   <div class="container">
     <h2>Key Results</h2>
-    <p>We evaluate three frontier models on 101 research-level math problems. State-of-the-art models score near 0%, but <strong>GPT 5.4 Pro produces 2 potentially novel mathematical results</strong> that improve on published baselines.</p>
-
-    <table class="key-results-table">
-      <thead>
-        <tr>
-          <th>Model</th>
-          <th>Full Dataset</th>
-          <th>Level 0 (Calibration)</th>
-          <th>Novel Solutions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr class="highlight-row">
-          <td>GPT 5.4 Pro</td>
-          <td>7%</td>
-          <td>50%</td>
-          <td><strong>2</strong></td>
-        </tr>
-        <tr>
-          <td>Claude Opus 4.6</td>
-          <td>3%</td>
-          <td>30%</td>
-          <td>0</td>
-        </tr>
-        <tr>
-          <td>Gemini 3.1 Pro</td>
-          <td>3%</td>
-          <td>30%</td>
-          <td>0</td>
-        </tr>
-      </tbody>
-    </table>
-
+    <p><strong>Six distinct discoveries across the unsolved tiers.</strong> GPT-5.6 Sol Max leads with 13 accepted solutions out of 113 problems (11.5%), including seven calibration problems and six unsolved-tier problems.</p>
+    <div class="table-wrapper" role="region" aria-label="Model results" tabindex="0">
+      <table class="key-results-table">
+        <caption>August 2026 draft &middot; Figure 4 &middot; 113-problem evaluation snapshot</caption>
+        <thead><tr><th scope="col">Model / configuration</th><th scope="col">Full dataset</th><th scope="col">Calibration</th><th scope="col">Unsolved-tier solutions</th></tr></thead>
+        <tbody>
+          <tr class="highlight-row"><td>GPT-5.6 Sol Max</td><td>13/113 (11.5%)</td><td>7/10 (70%)</td><td>6</td></tr>
+          <tr><td>GPT-5.6 Sol xhigh (Codex)</td><td>10/113 (8.8%)</td><td>6/10 (60%)</td><td>4</td></tr>
+          <tr><td>GPT-5.4 Pro</td><td>8/113 (7.1%)</td><td>5/10 (50%)</td><td>3</td></tr>
+          <tr><td>Claude Opus 4.6</td><td>3/113 (2.7%)</td><td>3/10 (30%)</td><td>0</td></tr>
+          <tr><td>Gemini 3.1 Pro</td><td>3/113 (2.7%)</td><td>3/10 (30%)</td><td>0</td></tr>
+          <tr><td>DeepSeek V4 Pro</td><td>3/113 (2.7%)</td><td>3/10 (30%)</td><td>0</td></tr>
+          <tr><td>Kimi K3</td><td>3/113 (2.7%)</td><td>3/10 (30%)</td><td>0</td></tr>
+          <tr><td>GLM 5.1</td><td>2/113 (1.8%)</td><td>2/10 (20%)</td><td>0</td></tr>
+          <tr><td>Kimi K2.6</td><td>1/113 (0.9%)</td><td>1/10 (10%)</td><td>0</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="results-note">Evaluations use pass@1. For GPT-5.4 Pro problems with a verified first-attempt solution, one additional query explored further improvements. Counts in the last column overlap across models; they represent six distinct problems, not thirteen separate discoveries.</p>
     <div class="discoveries">
       <div class="discovery">
-        <div class="discovery-badge">Novel Result</div>
-        <h3>Asymptotic Upper Bound for Diagonal Ramsey Numbers</h3>
-        <p>GPT 5.4 Pro achieved <span class="math">c \approx 3.7296</span>, improving on the best-known <span class="math">c \approx 3.7992</span> in <span class="math">R(k,k) \le c^{k+o(k)}</span> by tuning the correction polynomial and piecewise-constant functions within the Gupta&ndash;Ndiaye&ndash;Norin&ndash;Wei framework.</p>
+        <div class="discovery-badge">Bound improvement</div>
+        <h3>Diagonal Ramsey Numbers</h3>
+        <p>Improves the exponential base in <span class="math">R(k,k) \le c^{k+o(k)}</span> from approximately <strong>3.7992 to 3.6961</strong>, a 2.71% reduction, using a quintic correction and a verified certificate in the Gupta&ndash;Ndiaye&ndash;Norin&ndash;Wei framework.</p>
       </div>
       <div class="discovery">
-        <div class="discovery-badge">Novel Result</div>
+        <div class="discovery-badge">Bound improvement</div>
         <h3>Thin-Triangle Kakeya (128 slopes)</h3>
-        <p>Reduced the union area by approximately <strong>8.44%</strong> over the Keich baseline using a Haar-style overlap pattern with locally optimized block coefficients.</p>
+        <p>Reduces union area from approximately <strong>0.1148103 to 0.1091480</strong>, a 4.93% improvement over the AlphaEvolve baseline. A deterministic piecewise-linear area calculation validates the construction.</p>
+      </div>
+      <div class="discovery">
+        <div class="discovery-badge">Closed-form discovery</div>
+        <h3>Spinor Norm Elliptic Integral</h3>
+        <p>Expresses the integral in terms of gamma values at one quarter and three quarters. The expression matches the numerical reference to <strong>140 digits</strong>. This is the third result found by GPT-5.4 Pro and reproduced by GPT-5.6 Sol Max.</p>
+      </div>
+      <div class="discovery">
+        <div class="discovery-badge">Closed-form candidate</div>
+        <h3>Fifth Moment of the Airy Function</h3>
+        <p>GPT-5.6 Sol Max proposes a symbolic expression for <span class="math">a_5</span> that passes the compliance check and matches the high-precision reference for this Level 2 problem.</p>
+      </div>
+      <div class="discovery">
+        <div class="discovery-badge">Closed-form candidate</div>
+        <h3>Equal-Power TE+TM Spherical-Mode Quality Factor</h3>
+        <p>One of three additional Level 2 results from GPT-5.6 Sol Max: a symbolic expression that passes the compliance check and matches the high-precision reference.</p>
+      </div>
+      <div class="discovery">
+        <div class="discovery-badge">Closed-form candidate</div>
+        <h3>Non-Resonant TM/TE Spherical-Mode Quality Factor</h3>
+        <p>GPT-5.6 Sol Max also produces an admissible symbolic expression for this Level 2 problem, matching the corresponding high-precision reference.</p>
       </div>
     </div>
+  </div>
+</section>
+
+<section id="verification" class="section">
+  <div class="container">
+    <h2>How Verification Works</h2>
+    <p>Models submit self-contained Python functions. The framework executes candidates in a sandbox, checks correctness, and uses an LLM-based compliance checker to screen for forbidden operations.</p>
+    <div class="verification-grid">
+      <div><h3>Closed forms</h3><p>Compare an admissible symbolic expression against a high-precision reference to <span class="math">\min(20,D)</span> decimal digits, where <span class="math">D</span> is the number of verified reference digits.</p></div>
+      <div><h3>Bound improvements</h3><p>Check a construction with a problem-specific validator and require strict improvement over the published baseline.</p></div>
+      <div><h3>New constructions</h3><p>Check every required property of a proposed object deterministically, with pass/fail scoring and no baseline comparison.</p></div>
+    </div>
+    <p>Closed-form answers must use finite expressions built from permitted constants and functions. Numerical quadrature, root-finding, infinite series, and fitted numerical constants are disallowed. The compliance checker is imperfect, so automated evaluation reduces the need for expert review without replacing it.</p>
   </div>
 </section>
 
@@ -169,58 +193,22 @@
 <section id="examples" class="section">
   <div class="container">
     <h2>Example Problems</h2>
-    <p>HorizonMath targets problems where discovery is hard but verification is efficient. Here are three representative problems illustrating the range of domains and evaluation modes.</p>
+    <p>These examples from Section 5 of the draft cover all three evaluation modes: closed-form discovery, bound improvement, and new construction.</p>
 
     <div class="example">
       <div class="example-header">
-        <div class="example-meta">
-          <span class="tag">Constant Discovery</span>
-          <span class="tag">Solvability 2</span>
-          <span class="tag">ground_truth_computable</span>
-        </div>
-        <h3>Fifth Moment of the Airy Function (<span class="math">a_5</span>)</h3>
-        <p class="example-source">Laurenzi, B. J. (1993). <em>Moment integrals of powers of Airy functions.</em> Z. angew. Math. Phys., 44, 891&ndash;908.</p>
+        <div class="example-meta"><span class="tag">Special Functions</span><span class="tag">Solvability 1</span><span class="tag">Closed form</span></div>
+        <h3>Spinor Norm Elliptic Integral (<span class="math">I_0</span>)</h3>
       </div>
       <div class="example-body">
-        <p>The Airy power moments are defined by:</p>
-        <div class="math-block math-display">a_n = \int_0^\infty \mathrm{Ai}(x)^n \, dx</div>
-        <p>Closed forms are known for small <span class="math">n</span>, but the fifth moment <span class="math">a_5 \approx 0.001349358983\dots</span> lacks a known symbolic expression. The model must find a closed-form expression that matches the ground truth to at least 20 decimal digits.</p>
-        <details>
-          <summary>Show expected output format</summary>
-          <pre><code>def proposed_solution():
+        <p>Let <span class="math">K(m)</span> and <span class="math">E(m)</span> be complete elliptic integrals in the parameter convention. Find a closed-form expression for:</p>
+        <div class="math-block math-display">I_0 = \frac{4\sqrt{2}}{\pi}\int_0^1 \frac{1+\sqrt{z}}{(1+z)^3}\left(2E(z)-(1-z)K(z)\right)\,dz</div>
+        <p>The value is approximately <span class="math">1.77425\ldots</span>. Answers must use permitted symbolic operations without quadrature, infinite series, root-finding, or hard-coded numerical approximations. The draft reports a discovered expression for this benchmark problem.</p>
+        <details><summary>Show expected output format</summary><pre><code>def proposed_solution():
     from mpmath import mp
     mp.dps = 100
-    # Use only mpmath constants and special functions
-    result = ...  # symbolic closed-form expression
-    return result</code></pre>
-        </details>
-      </div>
-    </div>
-
-    <div class="example">
-      <div class="example-header">
-        <div class="example-meta">
-          <span class="tag">Function Discovery</span>
-          <span class="tag">Solvability 2</span>
-          <span class="tag">ground_truth_computable</span>
-        </div>
-        <h3>Angular Prolate Spheroidal Eigenvalues (order <span class="math">m = 0</span>)</h3>
-        <p class="example-source">Falloon, P. E., Abbott, P. C., &amp; Wang, J. B. (2003). <em>Theory and computation of spheroidal wavefunctions.</em> J. Phys. A, 36(20), 5477&ndash;5495.</p>
-      </div>
-      <div class="example-body">
-        <p>Let <span class="math">c \ge 0</span> be a real parameter. Consider the Sturm&ndash;Liouville eigenvalue problem on <span class="math">(-1,1)</span>:</p>
-        <div class="math-block math-display">-\frac{d}{dx}\left((1-x^2)\frac{dy}{dx}\right) + c^2 x^2 \, y(x) = \lambda \, y(x), \qquad -1 < x < 1</div>
-        <p>with the boundary condition that <span class="math">y(x)</span> remains bounded as <span class="math">x \to \pm 1</span>. The spectrum is discrete and real:</p>
-        <div class="math-block math-display">0 \le \lambda_0(c) < \lambda_1(c) < \lambda_2(c) < \cdots</div>
-        <p>and <span class="math">\lambda_n(0) = n(n+1)</span>. General symbolic closed forms remain undiscovered. <strong>Task:</strong> Find a symbolic closed-form expression for <span class="math">\lambda_n(c)</span> valid for general integer <span class="math">n \ge 0</span> and real <span class="math">c \ge 0</span>.</p>
-        <details>
-          <summary>Show expected output format</summary>
-          <pre><code>def proposed_solution(n, c):
-    from mpmath import mp
-    mp.dps = 100
-    result = ...  # closed-form for lambda_n(c)
-    return result</code></pre>
-        </details>
+    result = ...  # finite symbolic expression
+    return result</code></pre></details>
       </div>
     </div>
 
@@ -229,7 +217,7 @@
         <div class="example-meta">
           <span class="tag">Construction</span>
           <span class="tag">Solvability 1</span>
-          <span class="tag">benchmark_best_known</span>
+          <span class="tag">Bound improvement</span>
         </div>
         <h3>Minimum-Scope Difference Triangle Set <span class="math">(7,5)</span></h3>
         <p class="example-source">Shehadeh, M., Kingsford, W., &amp; Kschischang, F. R. (2026). <em>New Difference Triangle Sets by an FPGA-Based Search Technique.</em> J. Combin. Des., 34(1).</p>
@@ -253,6 +241,19 @@
         </details>
       </div>
     </div>
+    <div class="example">
+      <div class="example-header">
+        <div class="example-meta"><span class="tag">Coding Theory</span><span class="tag">Solvability 1</span><span class="tag">New construction</span></div>
+        <h3>Three Mutually Orthogonal Latin Squares of Order 10</h3>
+      </div>
+      <div class="example-body">
+        <p>Construct three <span class="math">10\times10</span> Latin squares over <span class="math">\{0,1,\ldots,9\}</span>, with each symbol appearing exactly once in every row and column. Every pair of squares must contain each of the 100 ordered pairs exactly once when superimposed.</p>
+        <p>The validator checks the Latin-square conditions and all three pairwise orthogonality conditions exactly.</p>
+        <details><summary>Show expected output format</summary><pre><code>def proposed_solution():
+    # Each L is a 10-by-10 integer array with entries 0 through 9.
+    return {"squares": [L1, L2, L3]}</code></pre></details>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -260,6 +261,7 @@
 <section id="comparison" class="section">
   <div class="container">
     <h2>Comparison with Existing Benchmarks</h2>
+    <p>Comparison as reported in Table 1 of the August 2026 draft.</p>
     <div class="table-wrapper">
       <table class="comparison-table">
         <thead>
@@ -272,13 +274,14 @@
           </tr>
         </thead>
         <tbody>
+          <tr><td>FrontierMath</td><td>300+</td><td>&cross;</td><td>&cross;</td><td>&check;</td></tr>
           <tr><td>FrontierMath: Open Problems</td><td>14</td><td>&check;</td><td>&cross;</td><td>&check;</td></tr>
           <tr><td>IMProofBench</td><td>39</td><td>&cross;</td><td>&cross;</td><td>&cross;</td></tr>
           <tr><td>First Proof</td><td>10</td><td>&cross;</td><td>&cross;</td><td>&cross;</td></tr>
           <tr><td>Erd&#337;s Problems</td><td>1,000+</td><td>&check;</td><td>&cross;</td><td>&cross;</td></tr>
           <tr><td>IMO-AnswerBench</td><td>400</td><td>&cross;</td><td>&check;</td><td>&check;</td></tr>
-          <tr><td>Optimization Constants</td><td>96</td><td>&check;</td><td>&cross;</td><td>&check;</td></tr>
-          <tr class="ours-row"><td><strong>HorizonMath</strong></td><td><strong>101</strong></td><td><strong>&check;</strong></td><td><strong>&check;</strong></td><td><strong>&check;</strong></td></tr>
+          <tr><td>Optimization Constants</td><td>96</td><td>&check;</td><td>&cross;</td><td>&cross;</td></tr>
+          <tr class="ours-row"><td><strong>HorizonMath</strong></td><td><strong>113</strong></td><td><strong>&check;</strong></td><td><strong>&check;</strong></td><td><strong>&check;</strong></td></tr>
         </tbody>
       </table>
     </div>
@@ -291,7 +294,7 @@
     <h2>BibTeX</h2>
     <pre class="bibtex"><code>@article{wang2026horizonmathmeasuringaiprogress,
       title={HorizonMath: Measuring AI Progress Toward Mathematical Discovery with Automatic Verification},
-      author={Erik Y. Wang and Sumeet Motwani and James V. Roggeveen and Eliot Hodges and Dulhan Jayalath and Charles London and Kalyan Ramakrishnan and Flaviu Cipcigan and Philip Torr and Alessandro Abate},
+      author={Erik Y. Wang and Sumeet Ramesh Motwani and James V. Roggeveen and Eliot Hodges and Dulhan Jayalath and Charles London and Kalyan Ramakrishnan and Cheng Zhang and Flaviu Cipcigan and Philip Torr and Alessandro Abate},
       year={2026},
       eprint={2603.15617},
       archivePrefix={arXiv},
@@ -311,6 +314,7 @@
 <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
+  if (typeof katex === "undefined") return;
   // Render inline math: <span class="math">...</span>
   document.querySelectorAll('.math').forEach(function(el) {
     katex.render(el.textContent, el, { throwOnError: false });
