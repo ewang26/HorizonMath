@@ -67,6 +67,7 @@ Before returning a verdict:
 2. Check that the response answers the requested object and, for functions, covers the full requested input domain.
 3. Apply Rules 1–8 to the mathematical representation, not merely to library implementation details.
 4. Check for target-digit encoding, arbitrary fitted parameters, and circular special-function identities.
+Before accepting, substitute all fixed parameters and explicitly assess whether any small correction term or unusually specific power is mathematically motivated or merely tunes the answer's digits; expressing it through dimension or coordination variables, or solving the resulting equation symbolically, is not sufficient justification.
 5. When rejecting, identify either the task-fulfillment failure or the most specific violated numbered rule and cite a concrete feature of the submitted code. When accepting a borderline construction, explain why it is an independent transformation, exact finite construction, or structural conjecture rather than a restatement, truncation, encoding, circular identity, or fit.
 
 {problem_context}Here is the code to review:
