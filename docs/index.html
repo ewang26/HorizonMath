@@ -40,8 +40,8 @@
       <sup>6</sup>Ellison Institute of Technology
     </p>
     <p class="note"><sup>*</sup>Joint-first authors. Correspondence:
-      <a href="mailto:erikwang@stanford.edu">Erik Y. Wang</a> and
-      <a href="mailto:sumeet.motwani@eng.ox.ac.uk">Sumeet Ramesh Motwani</a>.
+      <a href="mailto:erikwang@stanford.edu">erikwang@stanford.edu</a> and
+      <a href="mailto:sumeet.motwani@eng.ox.ac.uk">sumeet.motwani@eng.ox.ac.uk</a>.
     </p>
     <div class="links">
       <a href="https://arxiv.org/abs/2603.15617" class="btn">Paper</a>
@@ -123,6 +123,14 @@
   <div class="container">
     <h2>Key Results</h2>
     <p><strong>Six distinct discoveries across the unsolved tiers.</strong> GPT-5.6 Sol Max leads with 13 accepted solutions out of 113 problems (11.5%), including seven calibration problems and six unsolved-tier problems.</p>
+    <figure class="performance-figure">
+      <a href="static/model-performance.png" target="_blank" rel="noopener" aria-label="Open model performance figure at full resolution">
+        <img src="static/model-performance.png" width="2130" height="700" alt="Figure 4 from the paper: solve rates across nine model configurations on all 113 problems, the ten calibration problems, and the unsolved tiers. GPT-5.6 Sol Max leads at 11.5% overall, 70% on calibration, and six unsolved-tier solutions. Full values are available in the results table below.">
+      </a>
+      <figcaption>Figure 4. Model performance on HorizonMath: the full benchmark (left), ten calibration problems (center), and accepted solutions on the unsolved tiers (right). Select the figure to view it at full resolution.</figcaption>
+    </figure>
+    <details class="performance-data">
+      <summary>View results as a table</summary>
     <div class="table-wrapper" role="region" aria-label="Model results" tabindex="0">
       <table class="key-results-table">
         <caption>August 2026 draft &middot; Figure 4 &middot; 113-problem evaluation snapshot</caption>
@@ -140,6 +148,7 @@
         </tbody>
       </table>
     </div>
+    </details>
     <p class="results-note">Evaluations use pass@1. For GPT-5.4 Pro problems with a verified first-attempt solution, one additional query explored further improvements. Counts in the last column overlap across models; they represent six distinct problems, not thirteen separate discoveries.</p>
     <div class="discoveries">
       <div class="discovery">

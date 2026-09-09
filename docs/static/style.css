@@ -464,3 +464,10 @@ a:focus-visible, summary:focus-visible, .table-wrapper:focus-visible { outline: 
   .abstract-text { text-align: left; }
   .hero .authors span { white-space: normal; }
 }
+
+/* Paper performance figure, with the data table available on demand. */
+.performance-figure { margin: 1.5rem 0; }
+.performance-figure a { display: block; }
+.performance-figure img { display: block; width: 100%; height: auto; }
+.performance-figure figcaption { margin-top: 0.75rem; font-size: 0.875rem; color: var(--fg-2); }
+.hero .note a { overflow-wrap: anywhere; }
