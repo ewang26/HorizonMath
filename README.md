@@ -248,3 +248,17 @@ For `benchmark_best_known` problems, provide a baseline entry for `data/baseline
 - `direction`: `"minimize"` or `"maximize"` — whether lower or higher values are better.
 - `metric_key`: which key from the validator's returned metrics to compare against the baseline.
 - Include a source citation for the baseline value.
+
+### Anonymous Review Materials
+
+An anonymized, encrypted PDF containing three additional novel solutions is available at [`three_genuinely_novel_solutions_encrypted.pdf`](three_genuinely_novel_solutions_encrypted.pdf).
+
+The PDF contains closed-form solutions for:
+
+- **Fifth Moment of the Airy Function (a5)**
+- **Equal-Power TE+TM Spherical-Mode Quality Factor**
+- **Non-Resonant TM/TE Spherical-Mode Quality Factor**
+
+These solutions and their derivations have been verified by mathematicians on our team and, to the best of our knowledge, have not previously appeared in the literature.
+
+For the review process, the PDF can be unlocked with the password `horizonmath27`.
