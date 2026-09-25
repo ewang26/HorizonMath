@@ -1,0 +1,250 @@
+<h1 align="center">Mathematical Discovery Benchmark</h1>
+
+## Setup
+
+```bash
+uv sync
+```
+
+Some validators require [SageMath](https://www.sagemath.org/). Install it separately (`brew install sage` on macOS, `sudo apt-get install -y sagemath` on Debian/Ubuntu). If Sage is not on your PATH, set `SAGE_CMD=/path/to/sage`.
+
+Create a `.env` file with your API keys:
+
+```bash
+OPENAI_API_KEY=sk-...
+GEMINI_API_KEY=AIza...
+```
+
+## Problem Taxonomy
+
+The benchmark contains **113 problems** across 8 domains, classified by four fields in `data/problems_full.json`:
+
+- **`domain`** (problem area): number_theory (20), special_functions (19), statistical_mechanics (15), discrete_geometry (15), combinatorics (13), spectral_theory (12), continuum_physics (10), coding_theory (9)
+- **`solvability`** (difficulty level): 0 (calibration, 10), 1 (likely solvable, 29), 2 (challenging, 66), 3 (possibly unsolvable, 8)
+- **`output_type`** (artifact type): constant (56), function (15), formula_discovery (3), construction (39)
+- **`evaluation_mode`** (how answers are checked): ground_truth_computable (71), benchmark_best_known (33), new_construction (9)
+
+Solvability 0 problems have known solutions and serve as a verification step for the evaluation pipeline and a calibration for models.
+
+## Running the Benchmark
+
+The benchmark has a two-phase pipeline:
+
+1. **Phase 1 — Generate responses** (`run_benchmark.py`): Prompts models and saves raw responses to `responses.jsonl`.
+2. **Phase 2 — Evaluate responses** (`evaluate_responses.py`): Evaluates saved responses against ground truths, validators, and baselines.
+
+This separation means you can re-evaluate responses without re-prompting models, and long-running generation survives interruptions via `--resume`.
+
+### Running with tmux (recommended)
+
+The `tmux_run.sh` wrapper runs both phases in a detached tmux session, so benchmark runs survive SSH disconnects. Output is logged to `results/tmux_run_<timestamp>.log`.
+
+```bash
+# Full benchmark with defaults (OpenRouter gpt-5.2, 5 parallel)
+./scripts/tmux_run.sh
+
+# Specify provider and model
+./scripts/tmux_run.sh --provider openai --model gpt-5.2-pro
+
+# GPT-5.6 Sol with max reasoning
+./scripts/tmux_run.sh --provider openai --model gpt-5.6-sol --reasoning-effort max
+
+# Single problem
+./scripts/tmux_run.sh --problem diff_basis_upper
+
+# Resume an interrupted run
+./scripts/tmux_run.sh --resume results/openrouter_openai-gpt-5.2_20260205_143022/
+
+# Run only generation or evaluation
+./scripts/tmux_run.sh --phase generate --provider openai --model gpt-5.2
+./scripts/tmux_run.sh --phase evaluate --resume results/openrouter_openai-gpt-5.2_20260205_143022/
+```
+
+```bash
+tmux attach -t openmath       # Attach to see live output
+# Ctrl-b d                    # Detach without stopping
+tmux kill-session -t openmath # Abort the run
+```
+
+### Running each phase manually
+
+**Phase 1 — Generate responses:**
+
+```bash
+uv run scripts/run_benchmark.py                                    # Full benchmark (OpenRouter gpt-5.2)
+uv run scripts/run_benchmark.py --provider openai --model gpt-5.2-pro  # Use OpenAI directly
+uv run scripts/run_benchmark.py --provider openai --model gpt-5.6-sol --reasoning-effort max
+uv run scripts/run_benchmark.py --problem w4_watson_integral       # Single problem
+uv run scripts/run_benchmark.py --parallel 10                      # Parallel generation
+uv run scripts/run_benchmark.py --resume results/<run_dir>/        # Resume interrupted run
+```
+
+OpenAI GPT-5.6 models available to the runner are `gpt-5.6-sol`,
+`gpt-5.6-terra`, and `gpt-5.6-luna`. For OpenAI and OpenRouter requests,
+`--reasoning-effort` accepts `none`, `low`, `medium`, `high`, `xhigh`, or `max`.
+The default remains `high` for compatibility with existing benchmark runs.
+
+**Phase 2 — Evaluate responses:**
+
+```bash
+uv run scripts/evaluate_responses.py results/<run_dir>/            # Evaluate all responses
+uv run scripts/evaluate_responses.py results/<run_dir>/ --force    # Re-evaluate from scratch
+```
+
+The compliance reviewer uses Gemini 3.6 Flash with high thinking by default.
+To use GPT-5.6 Terra with high reasoning instead, set these values in the
+project-local `.env` file:
+
+```bash
+COMPLIANCE_PROVIDER=openai
+COMPLIANCE_MODEL=gpt-5.6-terra
+COMPLIANCE_REASONING_EFFORT=high
+```
+
+The selected provider requires its corresponding API key. Missing keys, API
+failures, invalid responses, and inconclusive votes are recorded as
+`indeterminate`, never as compliant.
+
+### Output Structure
+
+Results are saved to timestamped folders in `results/`:
+
+```
+results/openai_gpt-5.2_20260205_143022/
+├── config.json          # Run configuration
+├── prompts.jsonl        # Problem prompts (saved before API calls)
+├── responses.jsonl      # Raw LLM responses (Phase 1 output)
+├── evaluation.jsonl     # Per-problem evaluation results (Phase 2 output)
+└── summary.json         # Detailed statistics
+```
+
+Both scripts support additional options — run with `--help` for full details.
+
+### Aggregating split runs
+
+You can split a benchmark across parallel jobs using `--range` (0-based inclusive indices):
+
+```bash
+uv run scripts/run_benchmark.py --range 0-49 --provider openai --model gpt-5.2-pro
+uv run scripts/run_benchmark.py --range 50-112 --provider openai --model gpt-5.2-pro
+```
+
+Then merge the result directories into a single report:
+
+```bash
+uv run scripts/aggregate_results.py results/openai_gpt-5.2-pro_*/ -o results/gpt-5.2-pro_combined/
+```
+
+## Evaluating Individual Solutions
+
+The evaluation script (`scripts/evaluate.py`) can evaluate a single LLM solution file. The mode is auto-detected from the problem's `evaluation_mode`:
+
+- **Numeric** (`ground_truth_computable`): compares returned digits against the ground truth.
+- **Benchmark** (`benchmark_best_known`): validates the construction and compares metrics against baselines.
+- **Construction** (`new_construction`): validates the construction (pass/fail, no baseline comparison).
+
+```bash
+uv run python scripts/evaluate.py --llm-output solution.txt --problem-index 34
+uv run python scripts/evaluate.py --llm-output solution.txt --problem-id diff_basis_upper --json
+uv run python scripts/evaluate.py --list-problems --mode benchmark
+```
+
+### LLM Output Format
+
+LLMs should output a `proposed_solution()` function:
+
+```python
+def proposed_solution():
+    # For numeric problems: return a number
+    # For benchmark/construction problems: return a JSON-serializable dict/list
+    return {"n": 10, "basis": [0, 1, 2, 6, 9]}
+```
+
+Each validator documents its expected input format in its docstring.
+
+## Contributing Problems
+
+We welcome new problem contributions! To propose a problem, open a GitHub issue with the following:
+
+1. **Problem description** — a clear mathematical statement, including the source (paper, Math Stack Exchange, etc.)
+2. **Classification** — the proposed `output_type`, `domain`, `evaluation_mode`, and `solvability` level (see [Problem Taxonomy](#problem-taxonomy))
+3. **Full implementation** — depending on the evaluation mode, include:
+
+| Evaluation Mode | What to provide |
+|---|---|
+| `ground_truth_computable` | A numerics script that computes the answer to at least 50 digits of precision, or a reliable academic source providing a pre-computed numerical value |
+| `benchmark_best_known` | A validator script **and** a baseline value with source citation |
+| `new_construction` | A validator script |
+
+You must also provide a justification of the numerics or validator script that you provide below, explaining the method(s) used.
+
+### Numerics scripts
+
+A numerics script computes the ground-truth value to high precision. It should be a standalone Python file:
+
+```python
+from mpmath import mp
+mp.dps = 110  # at least 100 digits of precision
+
+def compute():
+    # Your computation here
+    return result
+
+if __name__ == "__main__":
+    print(str(compute()))
+```
+
+### Validators
+
+A validator checks whether a proposed construction is mathematically valid and returns metrics. It should export a single `validate(solution)` function:
+
+```python
+from . import ValidationResult, success, failure
+
+def validate(solution):
+    """
+    Expected input format:
+        {"basis": [b0, b1, b2, ...]}
+    """
+    # 1. Parse the input
+    if isinstance(solution, dict) and 'basis' in solution:
+        basis = solution['basis']
+    else:
+        return failure("Expected dict with 'basis' key")
+
+    # 2. Check mathematical validity
+    if not all_differences_covered(basis):
+        return failure("Not all differences covered", basis_size=len(basis))
+
+    # 3. Return success with metrics
+    return success(
+        f"Valid basis of size {len(basis)}",
+        basis_size=len(basis),
+        ratio=len(basis)**2 / n
+    )
+```
+
+- `success(message, **metrics)` and `failure(message, **metrics)` are the only return types needed.
+- Document the expected input format in the docstring.
+- For benchmark problems, return **metrics** as keyword arguments — one of these is compared against the baseline.
+- Helper utilities available from the `validators` package: `parse_integer`, `parse_rational`, `load_solution`, `run_sage_script`.
+
+### Baselines (benchmark problems only)
+
+For `benchmark_best_known` problems, provide a baseline entry for `data/baselines.json`:
+
+```json
+{
+  "problem_id": "diff_basis_upper",
+  "baseline": {
+    "value": "2.6390",
+    "direction": "minimize",
+    "metric": "ratio |B|^2/n for a difference basis of [1, n-1]",
+    "metric_key": "ratio"
+  }
+}
+```
+
+- `direction`: `"minimize"` or `"maximize"` — whether lower or higher values are better.
+- `metric_key`: which key from the validator's returned metrics to compare against the baseline.
+- Include a source citation for the baseline value.
