@@ -251,9 +251,7 @@ For `benchmark_best_known` problems, provide a baseline entry for `data/baseline
 
 ### Anonymous Review Materials
 
-An anonymized, encrypted PDF containing three additional novel solutions is available at [`three_genuinely_novel_solutions_encrypted.pdf`](three_genuinely_novel_solutions_encrypted.pdf).
-
-The PDF contains closed-form solutions for:
+An anonymized, encrypted PDF containing three additional novel solutions is available at [`three_novel_solutions_encrypted.pdf`](three_novel_solutions_encrypted.pdf). The PDF contains closed-form solutions for:
 
 - **Fifth Moment of the Airy Function (a5)**
 - **Equal-Power TE+TM Spherical-Mode Quality Factor**
