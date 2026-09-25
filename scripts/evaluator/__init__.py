@@ -1,12 +1,7 @@
 """Evaluation harness for OpenMath LLM solutions."""
 
 from .code_extraction import extract_proposed_solution, ExtractionResult, ExtractionStatus
-from .sandbox import (
-    execute_sandboxed,
-    load_json_result,
-    ExecutionResult,
-    ExecutionStatus,
-)
+from .sandbox import execute_sandboxed, ExecutionResult, ExecutionStatus
 from .scoring import compute_score, Score, OverallGrade
 from .results import EvaluationResult, BatchResults
 from .batch import load_llm_outputs, evaluate_single, evaluate_batch
@@ -19,7 +14,6 @@ __all__ = [
     "ExtractionStatus",
     # Sandbox execution
     "execute_sandboxed",
-    "load_json_result",
     "ExecutionResult",
     "ExecutionStatus",
     # Scoring
