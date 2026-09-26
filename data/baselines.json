@@ -1595,7 +1595,7 @@
         "url": "https://arxiv.org/abs/2506.13131"
       },
       "result_type": "computational",
-      "notes": "The AlphaEvolve triangles conv{(x_i, 0), (x_i + i/128, 0), (x_i + (i+1)/128, 1)} map exactly to our triangles conv{(0, b_i - 1/128), (0, b_i), (1, b_i + i/128)} by swapping coordinates (x, y) ↦ (y, x) and setting b_i = x_i + i/128, an area-preserving transformation."
+      "notes": "The AlphaEvolve triangles conv{(x_i, 0), (x_i + 1/128, 0), (x_i + (i+1)/128, 1)} map exactly to our triangles conv{(0, b_i - 1/128), (0, b_i), (1, b_i + i/128)} by swapping coordinates (x, y) ↦ (y, x) and setting b_i = x_i + 1/128, an area-preserving transformation."
     },
     "verification_status": "verified",
     "search_notes": "Baseline from AlphaEvolve (Google DeepMind, 2025, arXiv:2506.13131). Improves on Keich (1999) Theorem 1 construction (area ≈ 0.11921)."

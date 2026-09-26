@@ -898,7 +898,7 @@
     "evaluation_mode": "benchmark_best_known",
     "solvability": 1,
     "source_url": "https://arxiv.org/abs/2506.13131",
-    "source_note": "Baseline from AlphaEvolve (Google DeepMind, 2025). The AlphaEvolve triangles conv{(x_i, 0), (x_i + i/128, 0), (x_i + (i+1)/128, 1)} map exactly to our triangles conv{(0, b_i - 1/128), (0, b_i), (1, b_i + i/128)} by swapping coordinates (x, y) → (y, x) and setting b_i = x_i + i/128, an area-preserving transformation."
+    "source_note": "Baseline from AlphaEvolve (Google DeepMind, 2025). The AlphaEvolve triangles conv{(x_i, 0), (x_i + 1/128, 0), (x_i + (i+1)/128, 1)} map exactly to our triangles conv{(0, b_i - 1/128), (0, b_i), (1, b_i + i/128)} by swapping coordinates (x, y) → (y, x) and setting b_i = x_i + 1/128, an area-preserving transformation."
   },
   {
     "id": "tammes_n15",
