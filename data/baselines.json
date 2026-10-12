@@ -170,41 +170,27 @@
   {
     "problem_id": "kissing_number_dim11",
     "baseline": {
-      "value": 593,
+      "value": 604,
       "direction": "maximize",
       "metric": "kissing number",
       "metric_key": "num_points",
       "source": {
-        "title": "AlphaEvolve: A coding agent for scientific and algorithmic discovery",
+        "title": "… the Collective Intelligence of AI Agents in the Wild for New Discoveries",
         "authors": [
-          "Alexander Novikov",
-          "Ngân Vũ",
-          "Marvin Eisenberger",
-          "Emilien Dupont",
-          "Po-Sen Huang",
-          "Adam Zsolt Wagner",
-          "Sergey Shirobokov",
-          "Borislav Kozlovskii",
-          "Francisco J. R. Ruiz",
-          "Abbas Mehrabian",
-          "M. Pawan Kumar",
-          "Abigail See",
-          "Swarat Chaudhuri",
-          "George Holland",
-          "Alex Davies",
-          "Sebastian Nowozin",
-          "Pushmeet Kohli",
-          "Matej Balog"
+          "Federico Bianchi",
+          "Yongchan Kwon",
+          "Aneesh Pappu",
+          "James Zou"
         ],
-        "year": 2025,
-        "venue": "arXiv preprint arXiv:2506.13131",
-        "arxiv_id": "2506.13131",
-        "doi": "10.48550/arXiv.2506.13131",
-        "theorem_reference": "Section B.11, Page 42",
-        "url": "https://arxiv.org/abs/2506.13131"
+        "year": 2026,
+        "venue": "arXiv",
+        "arxiv_id": "2606.10402",
+        "doi": null,
+        "theorem_reference": "Abstract",
+        "url": "https://arxiv.org/abs/2606.10402"
       },
-      "result_type": "proven",
-      "notes": "AlphaEvolve improved the lower bound for the kissing number in 11 dimensions from 592 to 593 by finding 593 many 11-dimensional non-zero points with integral coordinates."
+      "result_type": "computational",
+      "notes": "Superseded. arXiv:2606.10402 (2026-06-09) states the kissing number lower bound in dimension 11 was improved from 593 to 604; arXiv:2608.23691 (2026-08-24) also reports exact 604-point configurations. To beat the baseline requires 605 points. Previous pinned value 593 (see secondary_bounds, type previous_baseline)."
     },
     "secondary_bounds": [
       {
@@ -239,6 +225,40 @@
           "theorem_reference": "Table 1.2",
           "url": null
         }
+      },
+      {
+        "type": "previous_baseline",
+        "value": 593,
+        "source": {
+          "title": "AlphaEvolve: A coding agent for scientific and algorithmic discovery",
+          "authors": [
+            "Alexander Novikov",
+            "Ngân Vũ",
+            "Marvin Eisenberger",
+            "Emilien Dupont",
+            "Po-Sen Huang",
+            "Adam Zsolt Wagner",
+            "Sergey Shirobokov",
+            "Borislav Kozlovskii",
+            "Francisco J. R. Ruiz",
+            "Abbas Mehrabian",
+            "M. Pawan Kumar",
+            "Abigail See",
+            "Swarat Chaudhuri",
+            "George Holland",
+            "Alex Davies",
+            "Sebastian Nowozin",
+            "Pushmeet Kohli",
+            "Matej Balog"
+          ],
+          "year": 2025,
+          "venue": "arXiv:2506.13131",
+          "arxiv_id": "2506.13131",
+          "doi": "10.48550/arXiv.2506.13131",
+          "theorem_reference": "Section B.11, Page 42",
+          "url": "https://arxiv.org/abs/2506.13131"
+        },
+        "superseded_by": "… the Collective Intelligence of AI Agents in the Wild for New Discoveries"
       }
     ],
     "verification_status": "confirmed",
@@ -265,7 +285,7 @@
         "url": "https://arxiv.org/abs/1609.01048"
       },
       "result_type": "proven",
-      "notes": "Baseline value 0.2107 is the asymptotic leading coefficient of the best-known construction size (0.2107·q³). The validator returns density = size/p³, so density < 0.2107 ⟺ size < 0.2107·p³. Slightly conservative for small primes where actual baseline density is higher due to lower-order terms."
+      "notes": "Baseline value 0.2107 is the asymptotic leading coefficient of the best-known construction size (0.2107·q³). The validator returns density = size/p³, so density < 0.2107 ⟺ size < 0.2107·p³. Slightly conservative for small primes where actual baseline density is higher due to lower-order terms. AUDIT NOTE: the pinned 0.2107 is the leading coefficient of a proven LOWER bound on Kakeya set size (Lund-Saraf-Wolf, Theorem 1.1, listed in secondary_bounds as lower_bound 0.2107*q^3), yet direction is 'minimize' and a density below it is the target. A construction below a proven lower bound would contradict the theorem, so the target is not a scoreable best-known upper bound. Suggested fix: pin a published construction density (an upper bound) as the baseline."
     },
     "secondary_bounds": [
       {
@@ -425,7 +445,7 @@
         "url": "https://arxiv.org/abs/2501.11736"
       },
       "result_type": "proven",
-      "notes": "Baseline is parametric: (2·ceil(sqrt(n)))²/n, computed per test case inside the validator. The validator fails if no test case beats this per-n baseline (beats_baseline_count == 0). External comparison uses beats_baseline_count > 0 (the SOTA's own count against itself is 0)."
+      "notes": "Baseline is parametric: (2·ceil(sqrt(n)))²/n, computed per test case inside the validator. The validator fails if no test case beats this per-n baseline (beats_baseline_count == 0). External comparison uses beats_baseline_count > 0 (the SOTA's own count against itself is 0). AUDIT NOTE: the value '0' is a count of test cases that beat a per-n baseline (metric_key beats_baseline_count), not a best-known quantity; the metric text describes efficiency |Delta(n)|^2/n. Suggested fix: pin a numeric efficiency record or document explicitly that the value is a pass-count threshold."
     },
     "secondary_bounds": [
       {
@@ -470,7 +490,7 @@
         "url": "https://arxiv.org/abs/2403.16874"
       },
       "result_type": "computational",
-      "notes": "Baseline is parametric (Kerdock codes): N = 2^(4k) + 2^(2k+1) in d = 2^(2k) for k=2..5. The validator checks each test case against the Kerdock baseline for that dimension and fails if none beat it (beats_baseline_count == 0). External comparison uses beats_baseline_count > 0 (Kerdock's own count against itself is 0)."
+      "notes": "Baseline is parametric (Kerdock codes): N = 2^(4k) + 2^(2k+1) in d = 2^(2k) for k=2..5. The validator checks each test case against the Kerdock baseline for that dimension and fails if none beat it (beats_baseline_count == 0). External comparison uses beats_baseline_count > 0 (Kerdock's own count against itself is 0). AUDIT NOTE: the value '0' is a count of test cases that beat the per-dimension Kerdock baseline (metric_key beats_baseline_count), not a best-known quantity. Suggested fix: as for general_diff_basis_algo."
     },
     "secondary_bounds": [
       {
@@ -500,26 +520,35 @@
   {
     "problem_id": "ramsey_asymptotic",
     "baseline": {
-      "value": "3.7992",
+      "value": "3.6960839126",
       "direction": "minimize",
       "metric": "Asymptotic growth base c in R(k,k) <= c^{k+o(k)}",
       "metric_key": "growth_base_c",
       "source": {
-        "title": "Optimizing the CGMS Upper Bound on Ramsey Numbers",
+        "title": "Measuring Progress in Reasoning Toward Mathematical Discovery with Automatic Verification",
         "authors": [
-          "Parth Gupta",
-          "Ndiame Ndiaye",
-          "Sergey Norin",
-          "Louis Wei"
+          "Erik Y. Wang",
+          "Sumeet R. Motwani",
+          "James V. Roggeveen",
+          "Eliot Hodges",
+          "Dulhan Jayalath",
+          "Charles London",
+          "Kalyan Ramakrishnan",
+          "Jakob Foerster",
+          "Cheng Zhang",
+          "Flaviu Cipcigan",
+          "Philip Torr",
+          "Alessandro Abate"
         ],
-        "year": 2024,
+        "year": 2026,
         "venue": "arXiv preprint",
-        "arxiv_id": "2407.19026",
-        "doi": "10.48550/arXiv.2407.19026",
-        "url": "https://arxiv.org/abs/2407.19026"
+        "arxiv_id": "2603.15617",
+        "doi": null,
+        "theorem_reference": "v2, Appendix A",
+        "url": "https://arxiv.org/abs/2603.15617v2"
       },
       "result_type": "proven",
-      "notes": "The paper 'Optimizing the CGMS upper bound on Ramsey numbers' provides an improved upper bound for diagonal Ramsey numbers, matching the current baseline. The true asymptotic behavior remains an open problem, so the best known result is the tightest upper bound."
+      "notes": "Superseded by the HorizonMath v2 paper (arXiv:2603.15617v2, Appendix A.3, 2026-09-10), whose table lists Baseline 3.7992027396 and Solution 3.6960839126 for this quantity. To beat the baseline requires c < 3.6960839126. Previous pinned value 3.7992 (see secondary_bounds, type previous_baseline)."
     },
     "secondary_bounds": [
       {
@@ -559,6 +588,25 @@
           "doi": "10.48550/arXiv.2303.09521",
           "url": "https://arxiv.org/abs/2303.09521"
         }
+      },
+      {
+        "type": "previous_baseline",
+        "value": "3.7992",
+        "source": {
+          "title": "Optimizing the CGMS Upper Bound on Ramsey Numbers",
+          "authors": [
+            "Parth Gupta",
+            "Ndiame Ndiaye",
+            "Sergey Norin",
+            "Louis Wei"
+          ],
+          "year": 2024,
+          "venue": "arXiv",
+          "arxiv_id": "2407.19026",
+          "doi": "10.48550/arXiv.2407.19026",
+          "url": "https://arxiv.org/abs/2407.19026"
+        },
+        "superseded_by": "Measuring Progress in Reasoning Toward Mathematical Discovery with Automatic Verification"
       }
     ],
     "verification_status": "verified",
@@ -856,27 +904,47 @@
   {
     "problem_id": "elliptic_curve_rank_30",
     "baseline": {
-      "value": 29,
+      "value": 31,
       "direction": "maximize",
       "metric": "rank of an elliptic curve over Q",
       "metric_key": "rank",
       "source": {
-        "title": "Z29 in E(Q)",
+        "title": "History of elliptic curves rank records",
         "authors": [
-          "Noam D. Elkies",
-          "Zev Klagsbrun"
+          "Andrej Dujella (table maintainer)",
+          "Levent Alpoge",
+          "Ari Howell"
         ],
-        "year": 2024,
-        "venue": "Number Theory Listserver",
+        "year": 2026,
+        "venue": "Online rank-record table (web.math.pmf.unizg.hr/~duje/tors)",
         "arxiv_id": null,
         "doi": null,
-        "theorem_reference": "y2 + xy = x3 - 27006183241630922218434652145297453784768054621836357954737385x + 55258058551342376475736699591118191821521067032535079608372404779149413277716173425636721497",
-        "url": "https://arxiv.org/abs/2403.04324"
+        "theorem_reference": "Table row: rank >= 31, Alpoge-Howell, 2026",
+        "url": "https://web.math.pmf.unizg.hr/~duje/tors/rankhist.html"
       },
       "result_type": "computational",
-      "notes": "Elkies and Klagsbrun announced the discovery of an elliptic curve with rank at least 29 in August 2024. The rank is exactly 29 under the Generalized Riemann Hypothesis (GRH)."
+      "notes": "Superseded. The record table states: 'The current record is an example of elliptic curve with rank >= 31, found by Alpoge and Howell in 2026 (the previous record were rank >= 30, found by Alpoge and Howell in 2026, rank >= 29, found by Elkies and Klagsbrun in 2024 ...)'. To beat the baseline requires rank >= 32. The listed ranks are lower bounds. Previous pinned value 29 (see secondary_bounds, type previous_baseline)."
     },
-    "secondary_bounds": [],
+    "secondary_bounds": [
+      {
+        "type": "previous_baseline",
+        "value": 29,
+        "source": {
+          "title": "Z29 in E(Q)",
+          "authors": [
+            "Noam D. Elkies",
+            "Zev Klagsbrun"
+          ],
+          "year": 2024,
+          "venue": "Number Theory Listserver",
+          "arxiv_id": null,
+          "doi": null,
+          "theorem_reference": "y2 + xy = x3 - 27006183241630922218434652145297453784768054621836357954737385x + 55258058551342376475736699591118191821521067032535079608372404779149413277716173425636721497",
+          "url": "https://arxiv.org/abs/2403.04324"
+        },
+        "superseded_by": "History of elliptic curves rank records"
+      }
+    ],
     "verification_status": "confirmed",
     "search_notes": "The current record for the rank of an elliptic curve over Q is 29, found by Noam Elkies and Zev Klagsbrun in August 2024. This result is widely cited in online sources, including Quanta Magazine, MathOverflow, and Andrej Dujella's website, which is a well-known resource for elliptic curve rank records. The curve's equation and the 29 independent points are publicly available. The original announcement was made on the Number Theory Listserver. No superseding results have been found."
   },
@@ -1145,24 +1213,22 @@
   {
     "problem_id": "autocorr_signed_upper",
     "baseline": {
-      "value": "1.4545548626983325",
+      "value": "1.4491219518523413",
       "direction": "minimize",
       "metric": "Signed Autocorrelation Constant C' Upper Bound",
       "metric_key": "autoconvolution_ratio",
       "source": {
-        "title": "New State-of-the-Art on the Third Autocorrelation Inequality",
-        "authors": [
-          "Together AI"
-        ],
+        "title": "Public third-autocorrelation certificate, solution 2609 (re-scored with this repository's validator)",
+        "authors": [],
         "year": 2026,
-        "venue": "GitHub",
+        "venue": "EinsteinArena public leaderboard",
         "arxiv_id": null,
         "doi": null,
-        "theorem_reference": "third-autocorrelation/solutions/ours_2026.py; local frozen copy: reports/gpt56_pro_final_solutions/certificates/autocorr_signed_upper.json",
-        "url": "https://github.com/togethercomputer/EinsteinArena-new-SOTA/blob/main/third-autocorrelation/solutions/ours_2026.py"
+        "theorem_reference": "Solution 2609, retrieved 2026-10-09; validator verdict beats_baseline",
+        "url": "https://einsteinarena.com/problems/third-autocorrelation-inequality"
       },
       "result_type": "computational",
-      "notes": "A fixed 400-step certificate achieves the one-sided signed-autoconvolution ratio 1.4545548626983325. It predates the evaluated model response and is excluded from model-originated discovery credit."
+      "notes": "Superseded. A public leaderboard construction (solution 2609, posted 2026-10-06) was re-scored with this repository's own validator on 2026-10-09 and returns beats_baseline with ratio 1.4491219518523413, below the pinned 1.4545548626983325. This is a construction check, not a literature quote. Previous pinned value 1.4545548626983325 (see secondary_bounds, type previous_baseline)."
     },
     "secondary_bounds": [
       {
@@ -1181,6 +1247,23 @@
           "theorem_reference": "[104, page 75] as cited in AlphaEvolve paper",
           "url": "https://arxiv.org/abs/0907.1379"
         }
+      },
+      {
+        "type": "previous_baseline",
+        "value": "1.4545548626983325",
+        "source": {
+          "title": "New State-of-the-Art on the Third Autocorrelation Inequality",
+          "authors": [
+            "Together AI"
+          ],
+          "year": 2026,
+          "venue": "GitHub",
+          "arxiv_id": null,
+          "doi": null,
+          "theorem_reference": "Public leaderboard solution 2609",
+          "url": "https://github.com/togethercomputer/EinsteinArena-new-SOTA/blob/main/third-autocorrelation/solutions/ours_2026.py"
+        },
+        "superseded_by": "Public third-autocorrelation certificate, solution 2609 (re-scored with this repository's validator)"
       }
     ],
     "verification_status": "confirmed",
@@ -1208,7 +1291,7 @@
         "url": "https://doi.org/10.1109/TIT.2004.838341"
       },
       "result_type": "proven",
-      "notes": "Best known merit factor for a binary polynomial of length >= 100. Achieved by L=191, E=1903 construction from Borwein et al. (2004).",
+      "notes": "Best known merit factor for a binary polynomial of length >= 100. Achieved by L=191, E=1903 construction from Borwein et al. (2004). AUDIT NOTE: 9.5851 is the strict upper end of a range quoted for a finite length, the cited abstract concerns the asymptotic merit factor 6.3421 (and a length), and the notes name L=191 without pinning a length; as written there is no single (length, merit factor) record to beat. Suggested fix: pin a specific length and its best known merit factor from a table.",
       "metric_key": "merit_factor"
     },
     "secondary_bounds": [],
@@ -1277,7 +1360,7 @@
         "url": "https://arxiv.org/abs/0902.1105"
       },
       "result_type": "proven",
-      "notes": "The lower bound of 306 is from an older paper, but is still the best known. The upper bound of 363 is from the cited paper and is the best known upper bound. The exact value is still unknown."
+      "notes": "The lower bound of 306 is from an older paper, but is still the best known. The upper bound of 363 is from the cited paper and is the best known upper bound. The exact value is still unknown. AUDIT NOTE: the value '306 <= k <= 363' is a range string, not a number, so no submission can be scored against it. Suggested fix: pin the lower bound 306 (the quantity maximised) and keep 363 as a secondary upper bound (secondary_bounds also lists 380)."
     },
     "secondary_bounds": [
       {
@@ -1457,22 +1540,22 @@
   {
     "problem_id": "autocorr_upper",
     "baseline": {
-      "value": "1.5028503020710076",
+      "value": "1.5027435319539597",
       "direction": "minimize",
       "metric": "Autoconvolution Ratio Upper Bound",
       "metric_key": "autoconvolution_ratio",
       "source": {
-        "title": "EinsteinArena First Autocorrelation Inequality certificate",
+        "title": "Public first-autocorrelation certificate, solution 2603 (re-scored with this repository's validator)",
         "authors": [],
         "year": 2026,
-        "venue": "EinsteinArena",
+        "venue": "EinsteinArena public leaderboard",
         "arxiv_id": null,
         "doi": null,
-        "theorem_reference": "Submission 2363 (Hyra); local frozen copy: reports/gpt56_pro_final_solutions/certificates/autocorr_upper.json",
+        "theorem_reference": "Solution 2603, retrieved 2026-10-09; validator verdict beats_baseline",
         "url": "https://einsteinarena.com/problems/first-autocorrelation-inequality"
       },
       "result_type": "computational",
-      "notes": "A fixed 90,000-step nonnegative certificate achieves autoconvolution ratio 1.5028503020710076. It predates the evaluated model response and is excluded from model-originated discovery credit."
+      "notes": "Superseded. A public leaderboard construction (solution 2603, posted 2026-10-03) was re-scored with this repository's own validator on 2026-10-09 and returns beats_baseline with ratio 1.5027435319539597, below the pinned 1.5028503020710076. This is a construction check, not a literature quote. Previous pinned value 1.5028503020710076 (see secondary_bounds, type previous_baseline)."
     },
     "secondary_bounds": [
       {
@@ -1508,6 +1591,21 @@
           "theorem_reference": "Lower bound result",
           "url": "https://arxiv.org/abs/0907.1379"
         }
+      },
+      {
+        "type": "previous_baseline",
+        "value": "1.5028503020710076",
+        "source": {
+          "title": "EinsteinArena First Autocorrelation Inequality certificate",
+          "authors": [],
+          "year": 2026,
+          "venue": "EinsteinArena",
+          "arxiv_id": null,
+          "doi": null,
+          "theorem_reference": "Public leaderboard submission 2363",
+          "url": "https://einsteinarena.com/problems/first-autocorrelation-inequality"
+        },
+        "superseded_by": "Public first-autocorrelation certificate, solution 2603 (re-scored with this repository's validator)"
       }
     ],
     "verification_status": "confirmed",
@@ -1579,26 +1677,47 @@
   {
     "problem_id": "keich_thin_triangles_128",
     "baseline": {
-      "value": "0.1148103258186177",
+      "value": "0.107067",
       "direction": "minimize",
       "metric": "Area of union of 128 thin triangles (Kakeya-type construction)",
       "metric_key": "area",
       "source": {
-        "title": "AlphaEvolve: A coding agent for scientific and algorithmic discovery",
+        "title": "Autonomous Mathematical Discovery in an Open-World Multi-Agent Environment",
         "authors": [
-          "Google DeepMind"
+          "Stephen Chung",
+          "Wenyu Du",
+          "William J. Wesley"
         ],
-        "year": 2025,
+        "year": 2026,
         "venue": "arXiv preprint",
-        "arxiv_id": "2506.13131",
+        "arxiv_id": "2608.23691",
         "doi": null,
-        "url": "https://arxiv.org/abs/2506.13131"
+        "theorem_reference": "Introduction; Section 4.4",
+        "url": "https://arxiv.org/abs/2608.23691"
       },
       "result_type": "computational",
-      "notes": "The AlphaEvolve triangles conv{(x_i, 0), (x_i + 1/128, 0), (x_i + (i+1)/128, 1)} map exactly to our triangles conv{(0, b_i - 1/128), (0, b_i), (1, b_i + i/128)} by swapping coordinates (x, y) ↦ (y, x) and setting b_i = x_i + 1/128, an area-preserving transformation."
+      "notes": "Superseded. arXiv:2608.23691 (2026-08-24) reports union area 0.107067 for n=128 and states this establishes a new literature upper bound; the HorizonMath v2 paper (arXiv:2603.15617v2, 2026-09-10) itself lists 0.1091479892 for the same quantity. To beat the baseline requires area < 0.107067. Previous pinned value 0.1148103258186177 (see secondary_bounds, type previous_baseline)."
     },
     "verification_status": "verified",
-    "search_notes": "Baseline from AlphaEvolve (Google DeepMind, 2025, arXiv:2506.13131). Improves on Keich (1999) Theorem 1 construction (area ≈ 0.11921)."
+    "search_notes": "Baseline from AlphaEvolve (Google DeepMind, 2025, arXiv:2506.13131). Improves on Keich (1999) Theorem 1 construction (area ≈ 0.11921).",
+    "secondary_bounds": [
+      {
+        "type": "previous_baseline",
+        "value": "0.1148103258186177",
+        "source": {
+          "title": "AlphaEvolve: A coding agent for scientific and algorithmic discovery",
+          "authors": [
+            "Google DeepMind"
+          ],
+          "year": 2025,
+          "venue": "arXiv",
+          "arxiv_id": "2506.13131",
+          "doi": null,
+          "url": "https://arxiv.org/abs/2506.13131"
+        },
+        "superseded_by": "Autonomous Mathematical Discovery in an Open-World Multi-Agent Environment"
+      }
+    ]
   },
   {
     "problem_id": "lattice_packing_dim10",
