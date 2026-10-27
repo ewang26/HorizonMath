@@ -62,6 +62,9 @@ def validate(solution: Any) -> ValidationResult:
     except (ValueError, TypeError) as e:
         return failure(f"Failed to parse points: {e}")
 
+    if not np.isfinite(points).all():
+        return failure("Points must be finite")
+
     if points.ndim != 2:
         return failure(f"Points must be 2D array, got {points.ndim}D")
 
