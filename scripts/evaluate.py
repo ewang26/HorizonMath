@@ -29,6 +29,7 @@ from pathlib import Path
 from typing import Optional
 
 from evaluator import extract_proposed_solution, execute_sandboxed, evaluate_single
+from evaluator.sandbox import load_json_result
 
 # Default precision settings
 DEFAULT_PRECISION_DIGITS = 20  # Number of digits that must match
@@ -365,7 +366,12 @@ def evaluate_construction_problem(
             error_message=extraction.error_message or 'Could not extract proposed_solution() function from LLM output'
         )
 
-    execution = execute_sandboxed(extraction.code, timeout=EXECUTION_TIMEOUT, return_json=True)
+    validator = get_validator(problem_id)
+    exact_witness = getattr(validator, "exact_witness_transport", False)
+    execution = execute_sandboxed(
+        extraction.code, timeout=EXECUTION_TIMEOUT, return_json=True,
+        exact_witness=exact_witness,
+    )
     if not execution:
         return ConstructionEvaluationResult(
             problem_id=problem_id,
@@ -378,8 +384,9 @@ def evaluate_construction_problem(
         )
 
     try:
-        solution = json.loads(execution.output)
-    except json.JSONDecodeError as e:
+        decoder = load_json_result if exact_witness else json.loads
+        solution = decoder(execution.output)
+    except ValueError as e:
         return ConstructionEvaluationResult(
             problem_id=problem_id,
             problem_index=problem_index,
@@ -390,7 +397,6 @@ def evaluate_construction_problem(
             error_message=f'proposed_solution() did not return valid JSON: {e}'
         )
 
-    validator = get_validator(problem_id)
     try:
         validation_result = run_validator_with_timeout(validator, solution)
     except Exception as e:
